@@ -279,6 +279,17 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
 /* ---------- print ---------- */
 #print-area{display:none;}
 @page{size:A4; margin:6mm;}
+
+/* mobile: no sideways page scroll — topbar must shrink, never overflow */
+html,body{overflow-x:hidden; overflow-x:clip; max-width:100%;}
+canvas{max-width:100%;}
+.topbar{min-width:0;}
+.topbar>div{min-width:0;}
+.topbar .ptitle{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.topbar .iconbtn,.topbar .btn{flex:none;}
+.searchbox{min-width:0;}
+.searchbox input[type=text]{min-width:0;}
+@media (max-width:860px){ .topbar{gap:.45rem;} .topbar .ptitle{font-size:1.12rem;} }
 @media print{
   html,body{height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; background:#fff !important;}
   body>*{display:none !important;}
@@ -682,7 +693,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.09-14";
+const APP_VER = "2026.11.09-15";
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -1327,7 +1338,7 @@ function readLines(kind) {
 function totalsHtml(kind, items) {
   const sub = items.reduce((a, i) => a + i.amount, 0);
   return '<div class="kv"><span>Subtotal</span><b>' + fmtRs(sub) + "</b></div>" +
-    (kind === "sale" ? '<div class="kv"><span>Discount</span><input type="number" id="' + kind + '-discount" step="any" min="0" value="0"></div>' : "") +
+    (kind === "sale" ? '<div class="kv"><span>Discount</span><input type="number" id="' + kind + '-discount" step="any" min="0" value="0"></div><div class="kv"><span>Labour Cost</span><input type="number" id="' + kind + '-labour" step="any" min="0" value="0"></div>' : "") +
     '<div class="kv grand"><span>Grand Total</span><span id="' + kind + '-grand">' + fmtRs(sub) + "</span></div>" +
     '<div class="kv"><span>Paid Amount</span><input type="number" id="' + kind + '-paid" step="any" min="0" value="0"></div>' +
     '<div class="kv"><span>Remaining</span><b id="' + kind + '-remain">' + fmtRs(sub) + "</b></div>";
@@ -1342,7 +1353,8 @@ function recalc(kind) {
   if (!box.dataset.ready) { box.innerHTML = totalsHtml(kind, items); box.dataset.ready = "1"; wireTotals(kind); }
   const sub = items.reduce((a, i) => a + i.amount, 0);
   const disc = kind === "sale" ? (Number(($("#sale-discount") || {}).value) || 0) : 0;
-  const grand = Math.max(0, sub - disc);
+  const lab = kind === "sale" ? (Number(($("#sale-labour") || {}).value) || 0) : 0;
+  const grand = Math.max(0, sub - disc + lab);
   const paid = Number((document.getElementById(kind + "-paid") || {}).value) || 0;
   const g = document.getElementById(kind + "-grand"), rm = document.getElementById(kind + "-remain");
   if (g) g.textContent = fmtRs(grand);
@@ -1350,7 +1362,7 @@ function recalc(kind) {
   const subEl = box.querySelector(".kv b"); if (subEl) subEl.textContent = fmtRs(sub);
 }
 function wireTotals(kind) {
-  ["discount", "paid"].forEach((k) => {
+  ["discount", "paid", "labour"].forEach((k) => {
     const el = document.getElementById(kind + "-" + k);
     if (el) el.addEventListener("input", () => recalc(kind));
   });
@@ -1442,7 +1454,8 @@ function saveSale() {
   if (!items.length) { toast("Add at least one product with quantity."); return; }
   const sub = items.reduce((a, i) => a + i.amount, 0);
   const disc = Number(($("#sale-discount") || {}).value) || 0;
-  const total = Math.max(0, Math.round((sub - disc) * 100) / 100);
+  const lab = Number(($("#sale-labour") || {}).value) || 0;
+  const total = Math.max(0, Math.round((sub - disc + lab) * 100) / 100);
   const paid = Number(($("#sale-paid") || {}).value) || 0;
   if (paid > total) { toast("Paid amount cannot exceed the grand total."); return; }
   const err = validateStock(items, isAdmin() && $("#sale-oversell").checked);
@@ -1450,7 +1463,7 @@ function saveSale() {
   if (editingSaleId) {
     const old = S.sales.find((s) => s.id === editingSaleId);
     removeMovements("sale", old.id);
-    Object.assign(old, { customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim() });
+    Object.assign(old, { customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, labour: lab, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim() });
     applyMovements("sale", old);
     editingSaleId = null; $("#btn-save-sale").querySelector("span").textContent = t("saveInvoice");
     save(); toast("Invoice updated: " + old.no); resetSaleForm(); renderAll();
@@ -1458,7 +1471,7 @@ function saveSale() {
     return;
   }
   S.counters.sale += 1;
-  const inv = { id: uid(), no: "S-" + String(S.counters.sale).padStart(4, "0"), customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim(), status: "active", createdBy: me() ? me().username : "" };
+  const inv = { id: uid(), no: "S-" + String(S.counters.sale).padStart(4, "0"), customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, labour: lab, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim(), status: "active", createdBy: me() ? me().username : "" };
   S.sales.push(inv);
   applyMovements("sale", inv);
   save(); toast("Invoice saved: " + inv.no); resetSaleForm(); renderAll();
@@ -1479,9 +1492,9 @@ function loadSaleForEdit(id) {
   $("#sale-customer").value = inv.customerId || ""; $("#sale-date").value = inv.date; $("#sale-method").value = inv.method || "Cash"; $("#sale-note").value = inv.note || "";
   saleLinesApi = setupLines("#sale-lines", "sale");
   inv.items.forEach((it, i) => { if (i > 0) saleLinesApi.addRow(it); else { const tr = $("#sale-lines .lrow"); tr.querySelector(".li-prod").value = it.productId; tr.querySelector(".li-qty").value = it.qty; tr.querySelector(".li-unit").value = it.unit; tr.querySelector(".li-rate").value = it.rate; } });
-  $("#sale-totals").dataset.ready = ""; $("#sale-totals").innerHTML = totalsHtml("sale", inv.items);
+  $("#sale-totals").dataset.ready = "1"; $("#sale-totals").innerHTML = totalsHtml("sale", inv.items);
   wireTotals("sale");
-  $("#sale-discount").value = inv.discount || 0; $("#sale-paid").value = inv.paid || 0;
+  $("#sale-discount").value = inv.discount || 0; $("#sale-paid").value = inv.paid || 0; const _sl = $("#sale-labour"); if (_sl) _sl.value = inv.labour || 0;
   recalc("sale");
   $("#sale-inv-no").textContent = "Editing " + inv.no;
   $("#btn-save-sale").querySelector("span").textContent = "Update Invoice";
@@ -1525,7 +1538,7 @@ function loadPurchaseForEdit(id) {
   $("#pur-supplier").value = inv.supplierId || ""; $("#pur-date").value = inv.date; $("#pur-billno").value = inv.billNo || ""; $("#pur-note").value = inv.note || "";
   purLinesApi = setupLines("#pur-lines", "purchase");
   inv.items.forEach((it, i) => { if (i > 0) purLinesApi.addRow(it); else { const tr = $("#pur-lines .lrow"); tr.querySelector(".li-prod").value = it.productId; tr.querySelector(".li-qty").value = it.qty; tr.querySelector(".li-unit").value = it.unit; tr.querySelector(".li-rate").value = it.rate; } });
-  $("#pur-totals").dataset.ready = ""; $("#pur-totals").innerHTML = totalsHtml("purchase", inv.items);
+  $("#pur-totals").dataset.ready = "1"; $("#pur-totals").innerHTML = totalsHtml("purchase", inv.items);
   wireTotals("purchase");
   $("#purchase-paid").value = inv.paid || 0;
   recalc("purchase");
@@ -1592,6 +1605,7 @@ function invoiceHtml(kind, inv, format) {
     '<div class="itot">' +
     '<div class="kv"><span>Subtotal</span><span>' + fmtRs(inv.subtotal != null ? inv.subtotal : inv.total) + "</span></div>" +
     (isSale && inv.discount ? '<div class="kv"><span>Discount</span><span>− ' + fmtRs(inv.discount) + "</span></div>" : "") +
+    (isSale && inv.labour ? '<div class="kv"><span>Labour Cost</span><span>+ ' + fmtRs(inv.labour) + "</span></div>" : "") +
     '<div class="kv grand"><span>Grand Total</span><span>' + fmtRs(inv.total) + "</span></div>" +
     '<div class="kv"><span>Paid</span><span>' + fmtRs(received) + "</span></div>" +
     '<div class="kv"><span>Remaining Balance</span><span>' + fmtRs(bal) + "</span></div></div>" +
