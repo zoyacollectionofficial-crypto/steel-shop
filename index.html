@@ -226,6 +226,12 @@ html[dir="rtl"] .main{margin-left:0; margin-right:var(--sidebar-w);}
 html[dir="rtl"] .nav a:hover{transform:translateX(-2px);}
 @media (max-width:860px){ html[dir="rtl"] .main{margin-right:0;} html[dir="rtl"] .sidebar{transform:translateX(105%);} html[dir="rtl"] .sidebar.open{transform:none;} }
 
+/* inline daily-rate editing (Products list) */
+.rate-inp{width:98px; text-align:right; padding:.34rem .45rem; font-size:.88rem; font-weight:700;
+  border:1px dashed var(--stroke2); background:rgba(255,255,255,.045); border-radius:9px;}
+.rate-inp:focus{border-style:solid; border-color:rgba(96,165,250,.75);}
+.rate-when{min-height:.8rem;}
+
 /* ---------- glassier login ---------- */
 #login .login-card{
   background:linear-gradient(155deg, rgba(255,255,255,.13), rgba(255,255,255,.045) 55%, rgba(34,211,238,.07));
@@ -411,6 +417,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
             <button class="btn sm ghost" id="btn-cats"><i data-lucide="folder-cog"></i>Categories</button>
             <button class="btn sm" id="btn-add-product"><i data-lucide="plus"></i><span data-i18n="add">Add</span></button>
           </span></h3>
+        <p class="small muted" style="margin:.1rem 0 .55rem">Daily rates: tap any Purchase / Sale rate in the list, type the new rate, then tap outside — it saves right there.</p>
         <div class="tblwrap"><table class="tbl" id="prod-table"></table></div>
       </div>
     </section>
@@ -1034,7 +1041,10 @@ function productForm(p) {
     if (newCat && !S.categories.includes(newCat)) S.categories.push(newCat);
     const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: $("#pf-dia", back).value.trim(), length: $("#pf-length", back).value.trim(), unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: $("#pf-desc", back).value.trim(), image: imgData };
     if (p.id) {
-      Object.assign(prodById(p.id), data);
+      const before = prodById(p.id);
+      const rateChanged = (Number(before.purchaseRate) || 0) !== data.purchaseRate || (Number(before.saleRate) || 0) !== data.saleRate;
+      Object.assign(before, data);
+      if (rateChanged) before.rateUpdated = todayStr();
       const wantOpen = Number($("#pf-open", back).value) || 0;
       if (Math.abs(wantOpen - openingOf(p.id)) > 1e-9) {
         S.movements = S.movements.filter((m) => !(m.productId === p.id && m.type === "opening" && m.refType === "product"));
@@ -1043,7 +1053,7 @@ function productForm(p) {
       toast("Product updated.");
     }
     else {
-      const np = Object.assign({ id: uid(), createdAt: todayStr() }, data);
+      const np = Object.assign({ id: uid(), createdAt: todayStr(), rateUpdated: todayStr() }, data);
       S.products.push(np);
       const open = Number($("#pf-open", back).value) || 0;
       if (open) addMovement(np.id, open, "opening", "product", np.id, todayStr(), "Opening stock");
@@ -1108,10 +1118,25 @@ function renderProducts() {
   $("#prod-table").innerHTML = "<thead><tr><th>Product</th><th>Category</th><th>Brand</th><th>Size</th><th class='num'>Purchase Rate</th><th class='num'>Sale Rate</th><th class='num'>Stock</th><th></th></tr></thead><tbody>" +
     (rows.length ? rows.map((p) => {
       const st = stockOf(p.id), low = st <= (Number(p.minStock) || 0);
-      return "<tr><td><b>" + esc(p.name) + "</b>" + (p.desc ? '<div class="small muted">' + esc(p.desc) + "</div>" : "") + "</td><td>" + esc(p.category) + "</td><td>" + esc(p.brand || "—") + "</td><td>" + esc(p.size || "—") + "</td><td class='num'>" + fmtRs(p.purchaseRate) + "</td><td class='num'>" + fmtRs(p.saleRate) + "</td><td class='num'><span class='pill " + (low ? "warn" : "ok") + "'>" + fmtNum(st) + " " + esc(p.unit) + "</span></td>" +
+      return "<tr><td><b>" + esc(p.name) + "</b>" + (p.desc ? '<div class="small muted">' + esc(p.desc) + "</div>" : "") + "</td><td>" + esc(p.category) + "</td><td>" + esc(p.brand || "—") + "</td><td>" + esc(p.size || "—") + "</td><td class='num'>" + '<input class="rate-inp" type="number" step="any" min="0" title="Change purchase rate" data-rate-pid="' + p.id + '" data-rate-kind="purchase" value="' + (Number(p.purchaseRate) || 0) + '">' + "</td><td class='num'>" + '<input class="rate-inp" type="number" step="any" min="0" title="Change sale rate" data-rate-pid="' + p.id + '" data-rate-kind="sale" value="' + (Number(p.saleRate) || 0) + '"><div class="small muted rate-when" style="font-size:.68rem">' + (p.rateUpdated ? fmtDate(p.rateUpdated) : "") + '</div>' + "</td><td class='num'><span class='pill " + (low ? "warn" : "ok") + "'>" + fmtNum(st) + " " + esc(p.unit) + "</span></td>" +
         '<td class="num"><button class="btn sm ghost" data-edit-prod="' + p.id + '"><i data-lucide="pencil"></i>Edit</button> <button class="iconbtn" data-del-prod="' + p.id + '"><i data-lucide="trash-2"></i></button></td></tr>';
     }).join("") : '<tr><td colspan="8"><div class="empty"><i data-lucide="package-open"></i><div class="et">No products yet</div><div class="small">Click Add to create your first product — e.g. Sariya 12mm, Mughal Steel.</div></div></td></tr>') + "</tbody>";
   $$("#prod-table [data-edit-prod]").forEach((b) => b.onclick = () => productForm(prodById(b.getAttribute("data-edit-prod"))));
+  $$("#prod-table .rate-inp").forEach((inp) => {
+    const commit = () => {
+      const p = prodById(inp.getAttribute("data-rate-pid")); if (!p) return;
+      const key = inp.getAttribute("data-rate-kind") === "purchase" ? "purchaseRate" : "saleRate";
+      const raw = inp.value.trim(), v = Number(raw);
+      if (raw === "" || isNaN(v) || v < 0) { inp.value = Number(p[key]) || 0; toast("Please enter a valid rate."); return; }
+      if (v === (Number(p[key]) || 0)) return;
+      p[key] = v; p.rateUpdated = todayStr(); save();
+      const note = inp.closest("tr") ? inp.closest("tr").querySelector(".rate-when") : null;
+      if (note) note.textContent = fmtDate(todayStr());
+      toast("Rate updated: " + prodLabel(p) + " -> " + fmtRs(v));
+    };
+    inp.onchange = commit;
+    inp.onkeydown = (e) => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } };
+  });
   $$("#prod-table [data-del-prod]").forEach((b) => b.onclick = async () => {
     const p = prodById(b.getAttribute("data-del-prod")); if (!p) return;
     if (S.movements.some((m) => m.productId === p.id && m.type !== "opening")) { toast("This product has stock history — it cannot be deleted."); return; }
