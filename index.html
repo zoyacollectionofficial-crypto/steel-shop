@@ -275,13 +275,19 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
 
 /* ---------- print ---------- */
 #print-area{display:none;}
+@page{size:A4; margin:6mm;}
 @media print{
-  body{background:#fff !important;}
+  html,body{height:auto !important; min-height:0 !important; margin:0 !important; padding:0 !important; background:#fff !important;}
   body>*{display:none !important;}
-  #print-area{display:block !important; color:#000; font-family:Arial,Helvetica,sans-serif;}
+  #print-area{display:block !important; margin:0 !important; padding:0 !important; color:#000; font-family:Arial,Helvetica,sans-serif;}
+  .inv{page-break-inside:auto;}
 }
 .inv{color:#000; background:#fff; margin:0 auto;}
-.inv.a4{width:100%; max-width:780px; padding:8mm 6mm; font-size:13px;}
+.inv.a4{width:100%; max-width:780px; padding:4mm 5mm; font-size:12.5px;}
+.inv.a4 th,.inv.a4 td{padding:3px 5px;}
+.inv.a4 .ihead{padding-bottom:6px;}
+.inv.a4 .ititle{margin:6px 0 2px;}
+.inv.a4 .ifoot{margin-top:8px;}
 .inv.t80{width:80mm; padding:3mm; font-size:11.5px;}
 .inv.t58{width:58mm; padding:2mm; font-size:10.5px;}
 .inv .ihead{display:flex; gap:10px; align-items:center; border-bottom:2px solid #000; padding-bottom:8px;}
@@ -445,7 +451,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
         <h3><i data-lucide="shopping-cart"></i><span data-i18n="newSale">New Sale</span>
           <span class="sp pill info" id="sale-inv-no"></span></h3>
         <div class="grid g3" style="gap:0 .8rem">
-          <div><label class="f" data-i18n="customer">Customer</label><select id="sale-customer"></select></div>
+          <div><label class="f" data-i18n="customer">Customer</label><div class="row" style="gap:.45rem"><select id="sale-customer" style="flex:1"></select><button class="btn sm ghost" id="sale-add-cust" type="button"><i data-lucide="user-plus"></i>New</button></div></div>
           <div><label class="f" data-i18n="date">Date</label><input type="date" id="sale-date"></div>
           <div><label class="f" data-i18n="paymentMethod">Payment method</label>
             <select id="sale-method"><option>Cash</option><option>Bank Transfer</option><option>Online Transfer</option><option>Other</option></select></div>
@@ -472,7 +478,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
         <h3><i data-lucide="truck"></i><span data-i18n="newPurchase">New Purchase</span>
           <span class="sp pill info" id="pur-inv-no"></span></h3>
         <div class="grid g3" style="gap:0 .8rem">
-          <div><label class="f" data-i18n="supplier">Supplier</label><select id="pur-supplier"></select></div>
+          <div><label class="f" data-i18n="supplier">Supplier</label><div class="row" style="gap:.45rem"><select id="pur-supplier" style="flex:1"></select><button class="btn sm ghost" id="pur-add-supp" type="button"><i data-lucide="user-plus"></i>New</button></div></div>
           <div><label class="f" data-i18n="date">Date</label><input type="date" id="pur-date"></div>
           <div><label class="f" data-i18n="supplierBill">Supplier bill / invoice no.</label><input type="text" id="pur-billno" placeholder="—"></div>
         </div>
@@ -1195,6 +1201,27 @@ function adjustForm(presetPid) {
   };
 }
 
+/* -------- quick-add a customer/supplier without leaving the invoice -------- */
+function quickParty(kind, selectSelector) {
+  const isCust = kind === "customer";
+  const back = openModal(modalHead(isCust ? "Add Customer" : "Add Supplier", "user-plus") +
+    '<label class="f">Name *</label><input type="text" id="qp-name" placeholder="Full name">' +
+    '<div class="mgrid"><div><label class="f">Phone</label><input type="text" id="qp-phone" placeholder="03xx-xxxxxxx"></div>' +
+    '<div><label class="f">Opening Balance (Rs)</label><input type="number" id="qp-open" step="any" value="0"></div></div>' +
+    '<label class="f">Address</label><input type="text" id="qp-addr">' +
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="qp-save">Save &amp; Select</button></div>');
+  $("#qp-save", back).onclick = () => {
+    const name = $("#qp-name", back).value.trim();
+    if (!name) { toast("Please enter a name."); return; }
+    const np = { id: uid(), name, phone: $("#qp-phone", back).value.trim(), address: $("#qp-addr", back).value.trim(), opening: Number($("#qp-open", back).value) || 0 };
+    (isCust ? S.customers : S.suppliers).push(np);
+    save(); closeModal();
+    const sel = $(selectSelector);
+    if (sel) { sel.innerHTML = (isCust ? S.customers : S.suppliers).map((x) => '<option value="' + x.id + '">' + esc(x.name) + "</option>").join(""); sel.value = np.id; }
+    toast((isCust ? "Customer" : "Supplier") + " added: " + name);
+  };
+}
+
 /* ---------------- sales & purchases ---------------- */
 function lineRow(kind, item) {
   item = item || {};
@@ -1507,13 +1534,20 @@ function invoiceHtml(kind, inv, format) {
     (inv.note ? '<div style="margin-top:8px; font-size:.88em"><b>Note:</b> ' + esc(inv.note) + "</div>" : "") +
     '<div class="ifoot">' + esc(st.footerMsg || "Thank you for your business!") + "<br><span style='color:#555'>Generated by SteelDesk • " + esc(st.shopName || "") + "</span></div></div>";
 }
+function setPageSize(format) {
+  let el = document.getElementById("dyn-page");
+  if (!el) { el = document.createElement("style"); el.id = "dyn-page"; document.head.appendChild(el); }
+  el.textContent = format === "t80" ? "@page{size:80mm 200mm; margin:2mm;}" : format === "t58" ? "@page{size:58mm 200mm; margin:2mm;}" : "@page{size:A4; margin:6mm;}";
+}
 function printInvoice(kind, id, format) {
   const inv = (kind === "sale" ? S.sales : S.purchases).find((x) => x.id === id);
   if (!inv) return;
-  $("#print-area").innerHTML = invoiceHtml(kind, inv, format || S.settings.invoiceFormat || "a4");
+  const fmt = format || S.settings.invoiceFormat || "a4";
+  $("#print-area").innerHTML = invoiceHtml(kind, inv, fmt);
+  setPageSize(fmt);
   setTimeout(() => window.print(), 60);
 }
-function printHtml(html) { $("#print-area").innerHTML = html; setTimeout(() => window.print(), 60); }
+function printHtml(html) { $("#print-area").innerHTML = html; setPageSize("a4"); setTimeout(() => window.print(), 60); }
 
 /* ---------------- parties: customers & suppliers ---------------- */
 function partyForm(kind, party) {
@@ -1870,6 +1904,8 @@ function wire() {
   $("#prod-cat-filter").addEventListener("change", renderProducts);
   // inventory
   $("#btn-adjust").onclick = adjustForm;
+  $("#sale-add-cust").onclick = () => quickParty("customer", "#sale-customer");
+  $("#pur-add-supp").onclick = () => quickParty("supplier", "#pur-supplier");
   $("#inv-search").addEventListener("input", renderInventory);
   $("#hist-product").addEventListener("change", renderInventory);
   // sales
