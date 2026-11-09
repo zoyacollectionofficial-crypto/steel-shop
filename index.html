@@ -680,7 +680,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.09-12";
+const APP_VER = "2026.11.09-13";
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -1063,6 +1063,7 @@ function productForm(p) {
     '<div><label class="f">Sale Rate (per unit)</label><input type="number" id="pf-srate" step="any" min="0" value="' + (p.saleRate || "") + '"></div>' +
     '<div><label class="f">Opening Stock' + (p.id ? " (starting stock only)" : "") + '</label><input type="number" id="pf-open" step="any" value="' + (p.id ? openingOf(p.id) : (p.opening || 0)) + '"></div>' +
     '<div><label class="f">Minimum Stock Level</label><input type="number" id="pf-min" step="any" min="0" value="' + (p.minStock || 0) + '"></div>' +
+    '<label class="f" style="display:flex; align-items:center; gap:.5rem; margin-top:.7rem; cursor:pointer"><input type="checkbox" id="pf-service" style="width:auto"' + (p.service ? " checked" : "") + '> Service item — no stock tracking (e.g. Labour Cost)</label>' +
     "</div>" +
     '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="pf-save">' + (p.id ? "Save Changes" : "Add Product") + "</button></div>", true);
   $("#pf-save", back).onclick = () => {
@@ -1070,7 +1071,7 @@ function productForm(p) {
     if (!name) { toast("Product name is required."); return; }
     const newCat = $("#pf-newcat", back).value.trim();
     if (newCat && !S.categories.includes(newCat)) S.categories.push(newCat);
-    const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: p.dia || "", length: p.length || "", unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: p.desc || "", image: p.image || "" };
+    const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: p.dia || "", length: p.length || "", unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: p.desc || "", image: p.image || "", service: $("#pf-service", back).checked };
     if (p.id) {
       const before = prodById(p.id);
       const rateChanged = (Number(before.purchaseRate) || 0) !== data.purchaseRate || (Number(before.saleRate) || 0) !== data.saleRate;
@@ -1418,6 +1419,7 @@ function wireTxButtons(root) {
 function validateStock(items, allowOver) {
   for (const it of items) {
     const p = prodById(it.productId); if (!p) continue;
+    if (p.service) continue;
     const q = convertQty(it.qty, it.unit, p.unit, p);
     if (q == null) return "Unit conversion is not possible for " + prodLabel(p) + " (set its weight per piece).";
     if (!allowOver && q > stockOf(p.id) + 1e-9) return "Insufficient stock for " + prodLabel(p) + ": available " + fmtNum(stockOf(p.id)) + " " + p.unit + ".";
@@ -1427,6 +1429,7 @@ function validateStock(items, allowOver) {
 function applyMovements(kind, inv) {
   for (const it of inv.items) {
     const p = prodById(it.productId); if (!p) continue;
+    if (p.service) continue;
     const q = convertQty(it.qty, it.unit, p.unit, p);
     if (q == null) continue;
     addMovement(it.productId, kind === "sale" ? -q : q, kind, kind, inv.id, inv.date, (kind === "sale" ? "Sale " : "Purchase ") + inv.no);
