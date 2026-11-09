@@ -73,10 +73,12 @@ svg.lucide{width:19px; height:19px; stroke-width:1.9; flex:none;}
 .topbar .ptitle{font-size:1.3rem; font-weight:800; margin:0;}
 .topbar .psub{color:var(--muted); font-size:.8rem; margin-top:-2px;}
 .searchbox{flex:1; max-width:430px; margin-left:auto; position:relative;}
-.searchbox input{width:100%; padding:.62rem .9rem .62rem 2.5rem; border-radius:13px;
+.searchbox input[type=text]{width:100%; padding:.62rem .9rem .62rem 2.5rem; border-radius:13px;
   background:var(--glass); border:1px solid var(--stroke); color:var(--text); font-size:.9rem;}
 .searchbox input:focus{outline:none; border-color:rgba(251,146,60,.55); box-shadow:0 0 0 3px rgba(249,115,22,.18);}
-.searchbox>svg{position:absolute; left:.75rem; top:50%; transform:translateY(-50%); color:var(--muted); width:17px; height:17px;}
+.searchbox>svg,.searchbox>i{position:absolute; left:.75rem; top:50%; transform:translateY(-50%); color:var(--muted); width:17px; height:17px; pointer-events:none;}
+[dir="rtl"] .searchbox input[type=text]{padding:.62rem 2.5rem .62rem .9rem;}
+[dir="rtl"] .searchbox>svg,[dir="rtl"] .searchbox>i{left:auto; right:.75rem;}
 #search-results{position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:80; display:none;
   background:rgba(28,21,14,.92); border:1px solid var(--stroke2); border-radius:14px; box-shadow:var(--shadow);
   -webkit-backdrop-filter:blur(24px); backdrop-filter:blur(24px); max-height:340px; overflow:auto; padding:.35rem;}
@@ -680,7 +682,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.09-13";
+const APP_VER = "2026.11.09-14";
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
