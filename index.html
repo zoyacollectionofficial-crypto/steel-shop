@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>SteelDesk — Iron & Steel Shop Management</title>
+<meta name="description" content="Premium iron & steel shop management: inventory, sales, purchases, ledgers, profit and professional invoices.">
+<style>
+:root{
+  --bg0:#060b18; --bg1:#0a1122; --bg2:#0d1830;
+  --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.09); --glass3:rgba(255,255,255,.14);
+  --stroke:rgba(255,255,255,.10); --stroke2:rgba(255,255,255,.18);
+  --text:#e8eefb; --muted:#93a4c4; --muted2:#6b7c9e;
+  --blue:#3b82f6; --cyan:#22d3ee; --blue-soft:rgba(59,130,246,.16);
+  --ok:#34d399; --ok-soft:rgba(52,211,153,.14);
+  --warn:#fbbf24; --warn-soft:rgba(251,191,36,.14);
+  --danger:#fb7185; --danger-soft:rgba(251,113,133,.13);
+  --shadow:0 12px 40px rgba(2,6,18,.45);
+  --shadow-sm:0 4px 18px rgba(2,6,18,.35);
+  --r:18px; --r-sm:12px;
+  --sidebar-w:248px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+html,body{height:100%;}
+body{margin:0; color:var(--text); font-size:15px; line-height:1.5;
+  font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",Arial,sans-serif;
+  background:
+    radial-gradient(900px 600px at 85% -10%, rgba(34,211,238,.13), rgba(34,211,238,0) 60%),
+    radial-gradient(1000px 700px at -10% 110%, rgba(59,130,246,.14), rgba(59,130,246,0) 60%),
+    radial-gradient(700px 500px at 55% 45%, rgba(99,102,241,.07), rgba(99,102,241,0) 65%),
+    linear-gradient(155deg,var(--bg2) 0%,var(--bg1) 45%,var(--bg0) 100%);
+  background-attachment:fixed; min-height:100vh;}
+::selection{background:rgba(59,130,246,.4);}
+h1,h2,h3{font-weight:700; letter-spacing:.2px;}
+button{font-family:inherit;}
+input,select,textarea{font-family:inherit;}
+svg.lucide{width:19px; height:19px; stroke-width:1.9; flex:none;}
+
+/* ---------- layout ---------- */
+#app{display:none;}
+#app.on{display:block;}
+.sidebar{position:fixed; inset:0 auto 0 0; width:var(--sidebar-w); z-index:60;
+  display:flex; flex-direction:column; padding:1rem .8rem;
+  background:rgba(10,17,34,.55); border-right:1px solid var(--stroke);
+  -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5);}
+.brand{display:flex; align-items:center; gap:.65rem; padding:.35rem .5rem .9rem;}
+.brand .logo{width:42px; height:42px; border-radius:13px; overflow:hidden; flex:none;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,var(--blue),var(--cyan)); box-shadow:0 6px 18px rgba(59,130,246,.4);}
+.brand .logo img{width:100%; height:100%; object-fit:cover;}
+.brand .logo svg{width:23px; height:23px; color:#fff;}
+.brand .bname{font-size:1.02rem; font-weight:800; line-height:1.15;}
+.brand .bsub{font-size:.68rem; color:var(--muted); letter-spacing:.14em; text-transform:uppercase;}
+.nav{flex:1; overflow-y:auto; padding-right:.1rem;}
+.nav::-webkit-scrollbar{width:4px;} .nav::-webkit-scrollbar-thumb{background:var(--glass3); border-radius:9px;}
+.nav .nlabel{font-size:.64rem; letter-spacing:.16em; text-transform:uppercase; color:var(--muted2); margin:.85rem .55rem .3rem;}
+.nav a{display:flex; align-items:center; gap:.7rem; padding:.58rem .65rem; margin:.12rem 0;
+  color:var(--muted); text-decoration:none; border-radius:12px; font-size:.9rem; font-weight:600;
+  border:1px solid transparent; transition:all .18s ease; cursor:pointer;}
+.nav a:hover{color:var(--text); background:var(--glass2); transform:translateX(2px);}
+.nav a.active{color:#fff; background:linear-gradient(120deg,rgba(59,130,246,.30),rgba(34,211,238,.16));
+  border-color:rgba(96,165,250,.35); box-shadow:0 0 0 1px rgba(96,165,250,.12), 0 6px 20px rgba(59,130,246,.25);}
+.nav a.active svg{color:var(--cyan);}
+.side-user{display:flex; align-items:center; gap:.6rem; padding:.6rem; border-radius:14px;
+  background:var(--glass); border:1px solid var(--stroke);}
+.side-user .avatar{width:36px; height:36px; border-radius:50%; flex:none; display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#6366f1,var(--blue)); font-weight:800; color:#fff; font-size:.85rem;}
+.side-user .un{font-size:.84rem; font-weight:700; line-height:1.1;}
+.side-user .ur{font-size:.68rem; color:var(--muted); text-transform:capitalize;}
+.side-user button{margin-left:auto;}
+.main{margin-left:var(--sidebar-w); padding:1.1rem 1.3rem 2.2rem; max-width:1460px;}
+.topbar{display:flex; align-items:center; gap:.7rem; margin-bottom:1.05rem;}
+.topbar .ptitle{font-size:1.3rem; font-weight:800; margin:0;}
+.topbar .psub{color:var(--muted); font-size:.8rem; margin-top:-2px;}
+.searchbox{flex:1; max-width:430px; margin-left:auto; position:relative;}
+.searchbox input{width:100%; padding:.62rem .9rem .62rem 2.5rem; border-radius:13px;
+  background:var(--glass); border:1px solid var(--stroke); color:var(--text); font-size:.9rem;}
+.searchbox input:focus{outline:none; border-color:rgba(96,165,250,.55); box-shadow:0 0 0 3px rgba(59,130,246,.18);}
+.searchbox>svg{position:absolute; left:.75rem; top:50%; transform:translateY(-50%); color:var(--muted); width:17px; height:17px;}
+#search-results{position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:80; display:none;
+  background:rgba(13,22,44,.92); border:1px solid var(--stroke2); border-radius:14px; box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(24px); backdrop-filter:blur(24px); max-height:340px; overflow:auto; padding:.35rem;}
+#search-results .sr{display:flex; gap:.55rem; align-items:center; padding:.5rem .55rem; border-radius:9px; cursor:pointer; font-size:.86rem;}
+#search-results .sr:hover{background:var(--glass2);}
+#search-results .sr .tag{font-size:.62rem; font-weight:800; letter-spacing:.06em; padding:.12rem .45rem; border-radius:99px; background:var(--blue-soft); color:#93c5fd; text-transform:uppercase;}
+.iconbtn{width:40px; height:40px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center;
+  background:var(--glass); border:1px solid var(--stroke); color:var(--text); cursor:pointer; transition:all .15s;}
+.iconbtn:hover{background:var(--glass2); transform:translateY(-1px);}
+#btn-burger{display:none;}
+.scrim{display:none;}
+
+/* ---------- common ---------- */
+.glass{background:var(--glass); border:1px solid var(--stroke); border-radius:var(--r);
+  -webkit-backdrop-filter:blur(18px) saturate(1.4); backdrop-filter:blur(18px) saturate(1.4);
+  box-shadow:var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.06);}
+.card{padding:1.05rem 1.1rem; margin-bottom:1rem;}
+.card h3{margin:0 0 .7rem; font-size:.98rem; display:flex; align-items:center; gap:.5rem;}
+.card h3 svg{color:var(--cyan);}
+.card h3 .sp{margin-left:auto;}
+.btn{display:inline-flex; align-items:center; gap:.45rem; border:0; cursor:pointer; font-weight:700;
+  padding:.6rem 1rem; border-radius:12px; font-size:.88rem; color:#fff; transition:all .15s;
+  background:linear-gradient(135deg,var(--blue),#2563eb); box-shadow:0 6px 18px rgba(59,130,246,.32);}
+.btn:hover{transform:translateY(-1px); box-shadow:0 9px 22px rgba(59,130,246,.4);}
+.btn:active{transform:translateY(0);}
+.btn svg{width:16px; height:16px;}
+.btn.ghost{background:var(--glass2); color:var(--text); border:1px solid var(--stroke); box-shadow:none;}
+.btn.ghost:hover{background:var(--glass3);}
+.btn.ok{background:linear-gradient(135deg,#10b981,#059669); box-shadow:0 6px 18px rgba(16,185,129,.3);}
+.btn.danger{background:linear-gradient(135deg,#f43f5e,#e11d48); box-shadow:0 6px 18px rgba(244,63,94,.28);}
+.btn.sm{padding:.4rem .7rem; font-size:.8rem; border-radius:10px;}
+.btn:disabled{opacity:.5; cursor:not-allowed; transform:none;}
+.row{display:flex; gap:.55rem; flex-wrap:wrap; align-items:center;}
+.grid{display:grid; gap:1rem;}
+.g2{grid-template-columns:repeat(2,1fr);} .g3{grid-template-columns:repeat(3,1fr);} .g4{grid-template-columns:repeat(4,1fr);}
+label.f{display:block; font-size:.74rem; font-weight:700; color:var(--muted); letter-spacing:.03em; margin:.55rem 0 .28rem; text-transform:uppercase;}
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],input[type=tel],select,textarea{
+  width:100%; padding:.58rem .7rem; border-radius:11px; font-size:.92rem; color:var(--text);
+  background:rgba(255,255,255,.05); border:1px solid var(--stroke); transition:border-color .15s, box-shadow .15s;}
+input:focus,select:focus,textarea:focus{outline:none; border-color:rgba(96,165,250,.6); box-shadow:0 0 0 3px rgba(59,130,246,.16);}
+select option{background:#0d1830; color:var(--text);}
+.muted{color:var(--muted);} .small{font-size:.8rem;} .b{font-weight:700;}
+.num{font-variant-numeric:tabular-nums; text-align:right;}
+.pos{color:var(--ok);} .neg{color:var(--danger);} .warn-t{color:var(--warn);}
+.page{display:none; animation:pageIn .28s ease both;}
+.page.on{display:block;}
+@keyframes pageIn{from{opacity:0; transform:translateY(7px);} to{opacity:1; transform:none;}}
+table.tbl{width:100%; border-collapse:collapse; font-size:.87rem;}
+table.tbl th{text-align:left; font-size:.68rem; letter-spacing:.09em; text-transform:uppercase; color:var(--muted);
+  padding:.55rem .6rem; border-bottom:1px solid var(--stroke2); white-space:nowrap;}
+table.tbl td{padding:.55rem .6rem; border-bottom:1px solid var(--stroke); vertical-align:middle;}
+table.tbl tr:last-child td{border-bottom:0;}
+table.tbl tbody tr{transition:background .12s;}
+table.tbl tbody tr:hover{background:rgba(255,255,255,.035);}
+.tblwrap{overflow-x:auto; margin:0 -.4rem; padding:0 .4rem;}
+.pill{display:inline-flex; align-items:center; gap:.3rem; padding:.16rem .6rem; border-radius:99px; font-size:.7rem; font-weight:800; letter-spacing:.02em;}
+.pill.ok{background:var(--ok-soft); color:var(--ok);} .pill.warn{background:var(--warn-soft); color:var(--warn);}
+.pill.bad{background:var(--danger-soft); color:var(--danger);} .pill.info{background:var(--blue-soft); color:#93c5fd;}
+.pill.grey{background:var(--glass3); color:var(--muted);}
+.empty{padding:2.2rem 1rem; text-align:center; color:var(--muted);}
+.empty svg{width:40px; height:40px; opacity:.45; margin-bottom:.4rem;}
+.empty .et{font-weight:700; color:var(--text); font-size:.95rem;}
+
+/* ---------- dashboard ---------- */
+.stats{display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1rem;}
+.stat{padding:1rem 1.05rem; position:relative; overflow:hidden;}
+.stat::after{content:""; position:absolute; inset:auto -30% -60% auto; width:150px; height:150px; border-radius:50%;
+  background:radial-gradient(circle,rgba(59,130,246,.20),transparent 70%);}
+.stat .sl{font-size:.7rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:flex; gap:.45rem; align-items:center;}
+.stat .sl svg{width:15px; height:15px; color:var(--cyan);}
+.stat .sv{font-size:1.42rem; font-weight:800; margin-top:.3rem; font-variant-numeric:tabular-nums;}
+.stat .ss{font-size:.74rem; color:var(--muted); margin-top:.1rem;}
+.chartbox{position:relative; height:260px;}
+.quick{display:flex; gap:.6rem; flex-wrap:wrap;}
+.lowitem{display:flex; align-items:center; gap:.6rem; padding:.5rem 0; border-bottom:1px solid var(--stroke); font-size:.87rem;}
+.lowitem:last-child{border-bottom:0;}
+
+/* ---------- forms / invoice builder ---------- */
+.lines{width:100%;}
+.lines th,.lines td{padding:.35rem .3rem;}
+.lines input,.lines select{padding:.45rem .5rem; font-size:.86rem; border-radius:9px;}
+.totals{margin-left:auto; width:min(340px,100%);}
+.totals .kv{display:flex; justify-content:space-between; padding:.3rem 0; font-size:.9rem;}
+.totals .kv.grand{border-top:1px solid var(--stroke2); margin-top:.3rem; padding-top:.55rem; font-size:1.06rem; font-weight:800;}
+.totals input{width:110px; text-align:right; padding:.35rem .5rem;}
+
+/* ---------- modal / toast ---------- */
+.mback{position:fixed; inset:0; z-index:100; display:none; align-items:flex-start; justify-content:center;
+  background:rgba(3,7,17,.6); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); overflow-y:auto; padding:4vh .8rem 2rem;}
+.mback.on{display:flex;}
+.modal{width:100%; max-width:560px; border-radius:20px; padding:1.2rem 1.25rem; animation:pageIn .22s ease both;
+  background:rgba(15,25,50,.82); border:1px solid var(--stroke2); box-shadow:var(--shadow);
+  -webkit-backdrop-filter:blur(26px) saturate(1.5); backdrop-filter:blur(26px) saturate(1.5);}
+.modal.wide{max-width:760px;}
+.modal h3{margin:0 0 .4rem; font-size:1.05rem; display:flex; align-items:center; gap:.5rem;}
+.modal h3 .x{margin-left:auto;}
+.mgrid{display:grid; grid-template-columns:1fr 1fr; gap:0 .8rem;}
+.mfoot{display:flex; gap:.55rem; justify-content:flex-end; margin-top:1.05rem;}
+#toast{position:fixed; left:50%; bottom:1.3rem; transform:translateX(-50%) translateY(20px); z-index:200;
+  background:rgba(13,22,44,.9); border:1px solid var(--stroke2); color:var(--text); padding:.65rem 1.05rem;
+  border-radius:13px; font-size:.87rem; font-weight:600; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:all .25s;
+  -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); max-width:92vw; text-align:center;}
+#toast.on{opacity:1; transform:translateX(-50%) translateY(0);}
+
+/* ---------- login ---------- */
+#login{min-height:100vh; display:flex; align-items:center; justify-content:center; padding:1rem;}
+#login.off{display:none;}
+.login-card{width:100%; max-width:400px; padding:2rem 1.8rem; border-radius:24px; text-align:center;}
+.login-card .logo{width:64px; height:64px; margin:0 auto .8rem; border-radius:19px; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--blue),var(--cyan));
+  box-shadow:0 12px 30px rgba(59,130,246,.45);}
+.login-card .logo img{width:100%; height:100%; object-fit:cover;}
+.login-card .logo svg{width:32px; height:32px; color:#fff;}
+.login-card h1{font-size:1.35rem; margin:.1rem 0 .15rem;}
+.login-card .sub{color:var(--muted); font-size:.83rem; margin-bottom:1.1rem;}
+.login-card label.f{text-align:left;}
+.login-err{display:none; background:var(--danger-soft); color:var(--danger); border:1px solid rgba(251,113,133,.35);
+  border-radius:11px; padding:.5rem .7rem; font-size:.83rem; margin-top:.7rem;}
+
+/* ---------- bottom nav (mobile) ---------- */
+.bottomnav{display:none;}
+@media (max-width:1080px){ .stats{grid-template-columns:repeat(2,1fr);} .g4{grid-template-columns:repeat(2,1fr);} .g3{grid-template-columns:repeat(2,1fr);} }
+@media (max-width:860px){
+  .sidebar{transform:translateX(-105%); transition:transform .25s ease; width:262px;}
+  .sidebar.open{transform:none; box-shadow:var(--shadow);}
+  .scrim{display:block; position:fixed; inset:0; z-index:55; background:rgba(3,7,17,.55); opacity:0; pointer-events:none; transition:opacity .25s;}
+  .scrim.on{opacity:1; pointer-events:auto;}
+  .main{margin-left:0; padding:.85rem .8rem 5.6rem;}
+  #btn-burger{display:inline-flex;}
+  .topbar .psub{display:none;}
+  .searchbox{max-width:none;}
+  .bottomnav{display:flex; position:fixed; left:.6rem; right:.6rem; bottom:.55rem; z-index:65;
+    padding:.4rem; border-radius:20px; justify-content:space-around;
+    background:rgba(10,17,34,.72); border:1px solid var(--stroke2);
+    -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5); box-shadow:var(--shadow);}
+  .bottomnav a{display:flex; flex-direction:column; align-items:center; gap:1px; padding:.35rem .5rem; border-radius:13px;
+    color:var(--muted); text-decoration:none; font-size:.6rem; font-weight:700; cursor:pointer;}
+  .bottomnav a svg{width:20px; height:20px;}
+  .bottomnav a.active{color:#fff; background:linear-gradient(120deg,rgba(59,130,246,.35),rgba(34,211,238,.18));}
+  .mgrid{grid-template-columns:1fr;}
+  .g2,.g3,.g4{grid-template-columns:1fr;}
+  .stat .sv{font-size:1.2rem;}
+}
+/* RTL (Urdu) */
+html[dir="rtl"] .sidebar{inset:0 0 0 auto; border-right:0; border-left:1px solid var(--stroke);}
+html[dir="rtl"] .main{margin-left:0; margin-right:var(--sidebar-w);}
+html[dir="rtl"] .nav a:hover{transform:translateX(-2px);}
+@media (max-width:860px){ html[dir="rtl"] .main{margin-right:0;} html[dir="rtl"] .sidebar{transform:translateX(105%);} html[dir="rtl"] .sidebar.open{transform:none;} }
+
+/* ---------- print ---------- */
+#print-area{display:none;}
+@media print{
+  body{background:#fff !important;}
+  body>*{display:none !important;}
+  #print-area{display:block !important; color:#000; font-family:Arial,Helvetica,sans-serif;}
+}
+.inv{color:#000; background:#fff; margin:0 auto;}
+.inv.a4{width:100%; max-width:780px; padding:8mm 6mm; font-size:13px;}
+.inv.t80{width:80mm; padding:3mm; font-size:11.5px;}
+.inv.t58{width:58mm; padding:2mm; font-size:10.5px;}
+.inv .ihead{display:flex; gap:10px; align-items:center; border-bottom:2px solid #000; padding-bottom:8px;}
+.inv.t80 .ihead,.inv.t58 .ihead{flex-direction:column; text-align:center;}
+.inv .ilogobox img{max-height:64px; max-width:150px;}
+.inv.t80 .ilogobox img,.inv.t58 .ilogobox img{max-height:46px;}
+.inv .iname{font-weight:800; line-height:1.1;}
+.inv .imeta{font-size:.82em; color:#222;}
+.inv .ititle{text-align:center; font-weight:800; letter-spacing:.25em; margin:9px 0 4px; font-size:.95em;}
+.inv table{width:100%; border-collapse:collapse; margin-top:6px;}
+.inv th,.inv td{border:1px solid #444; padding:4px 5px; font-size:.92em;}
+.inv th{background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; text-align:left;}
+.inv .r{text-align:right;} .inv .c{text-align:center;}
+.inv .itot{margin-top:8px; margin-left:auto; width:250px; max-width:70%;}
+.inv.t80 .itot,.inv.t58 .itot{width:100%; max-width:100%;}
+.inv .itot .kv{display:flex; justify-content:space-between; padding:2px 0;}
+.inv .itot .grand{border-top:2px solid #000; font-weight:800; font-size:1.12em; padding-top:5px; margin-top:4px;}
+.inv .ifoot{border-top:1px solid #000; margin-top:12px; padding-top:6px; text-align:center; font-size:.85em;}
+.inv .irow{display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-top:5px; font-size:.92em;}
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN ================= -->
+<div id="login">
+  <div class="login-card glass">
+    <div class="logo" id="login-logo"><i data-lucide="layers"></i></div>
+    <h1 id="login-shop">SteelDesk</h1>
+    <div class="sub" data-i18n="loginSub">Iron &amp; Steel Shop Management</div>
+    <label class="f" data-i18n="username">Username</label>
+    <input type="text" id="li-user" autocomplete="username" placeholder="admin">
+    <label class="f" data-i18n="password">Password</label>
+    <input type="password" id="li-pass" autocomplete="current-password" placeholder="••••••••">
+    <div style="height:.9rem"></div>
+    <button class="btn" id="btn-login" style="width:100%; justify-content:center"><i data-lucide="log-in"></i><span data-i18n="login">Login</span></button>
+    <div class="login-err" id="login-err"></div>
+    <div class="small muted" style="margin-top:1rem" id="login-hint"></div>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="logo" id="side-logo"><i data-lucide="layers"></i></div>
+      <div><div class="bname" id="side-shop">SteelDesk</div><div class="bsub">Iron &amp; Steel</div></div>
+    </div>
+    <nav class="nav" id="main-nav">
+      <div class="nlabel" data-i18n="mainMenu">Main Menu</div>
+      <a data-page="dashboard" class="active"><i data-lucide="layout-dashboard"></i><span data-i18n="dashboard">Dashboard</span></a>
+      <a data-page="products"><i data-lucide="package"></i><span data-i18n="products">Products</span></a>
+      <a data-page="inventory"><i data-lucide="warehouse"></i><span data-i18n="inventory">Inventory / Stock</span></a>
+      <a data-page="sales"><i data-lucide="shopping-cart"></i><span data-i18n="sales">Sales</span></a>
+      <a data-page="purchases"><i data-lucide="truck"></i><span data-i18n="purchases">Purchase</span></a>
+      <div class="nlabel" data-i18n="parties">Parties</div>
+      <a data-page="customers"><i data-lucide="users"></i><span data-i18n="customers">Customers</span></a>
+      <a data-page="suppliers"><i data-lucide="factory"></i><span data-i18n="suppliers">Suppliers</span></a>
+      <a data-page="payments"><i data-lucide="wallet"></i><span data-i18n="payments">Payments</span></a>
+      <a data-page="expenses"><i data-lucide="receipt-text"></i><span data-i18n="expenses">Expenses</span></a>
+      <div class="nlabel" data-i18n="manage">Manage</div>
+      <a data-page="reports"><i data-lucide="bar-chart-3"></i><span data-i18n="reports">Reports</span></a>
+      <a data-page="invoices"><i data-lucide="file-text"></i><span data-i18n="invoices">Invoices</span></a>
+      <a data-page="settings"><i data-lucide="settings"></i><span data-i18n="settings">Shop Settings</span></a>
+    </nav>
+    <div class="side-user">
+      <div class="avatar" id="su-avatar">A</div>
+      <div><div class="un" id="su-name">Admin</div><div class="ur" id="su-role">admin</div></div>
+      <button class="iconbtn" id="btn-logout" title="Logout"><i data-lucide="log-out"></i></button>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="main">
+    <div class="topbar">
+      <button class="iconbtn" id="btn-burger"><i data-lucide="menu"></i></button>
+      <div><h1 class="ptitle" id="page-title">Dashboard</h1><div class="psub" id="page-date"></div></div>
+      <div class="searchbox">
+        <i data-lucide="search"></i>
+        <input type="text" id="global-search" data-i18n-ph="searchPh" placeholder="Search products, customers, invoices…">
+        <div id="search-results"></div>
+      </div>
+      <button class="iconbtn" id="btn-lang" title="Language / زبان" style="width:auto; padding:0 .7rem; font-weight:800; font-size:.8rem">اردو</button>
+      <button class="iconbtn" id="btn-quick-sale" title="New Sale"><i data-lucide="plus"></i></button>
+    </div>
+
+    <!-- DASHBOARD -->
+    <section class="page on" id="page-dashboard">
+      <div class="stats" id="dash-stats"></div>
+      <div class="grid g2">
+        <div class="glass card"><h3><i data-lucide="trending-up"></i><span data-i18n="salesChart">Sales — last 14 days</span></h3><div class="chartbox"><canvas id="ch-sales"></canvas></div></div>
+        <div class="glass card"><h3><i data-lucide="line-chart"></i><span data-i18n="profitChart">Profit — last 6 months</span></h3><div class="chartbox"><canvas id="ch-profit"></canvas></div></div>
+      </div>
+      <div class="grid g3">
+        <div class="glass card"><h3><i data-lucide="flame"></i><span data-i18n="topProducts">Top-selling products</span></h3><div id="dash-top"></div></div>
+        <div class="glass card"><h3><i data-lucide="alert-triangle"></i><span data-i18n="lowStock">Low-stock alerts</span><span class="sp pill bad" id="dash-low-count" style="display:none"></span></h3><div id="dash-low"></div></div>
+        <div class="glass card"><h3><i data-lucide="history"></i><span data-i18n="recentTx">Recent transactions</span></h3><div id="dash-recent"></div></div>
+      </div>
+      <div class="glass card"><h3><i data-lucide="zap"></i><span data-i18n="quickActions">Quick actions</span></h3>
+        <div class="quick">
+          <button class="btn" data-goto="sales"><i data-lucide="shopping-cart"></i><span data-i18n="newSale">New Sale</span></button>
+          <button class="btn ghost" data-goto="purchases"><i data-lucide="truck"></i><span data-i18n="newPurchase">New Purchase</span></button>
+          <button class="btn ghost" id="qa-product"><i data-lucide="package-plus"></i><span data-i18n="addProduct">Add Product</span></button>
+          <button class="btn ghost" id="qa-payment"><i data-lucide="wallet"></i><span data-i18n="addPayment">Add Payment</span></button>
+          <button class="btn ghost" id="qa-expense"><i data-lucide="receipt-text"></i><span data-i18n="addExpense">Add Expense</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="page" id="page-products">
+      <div class="glass card">
+        <h3><i data-lucide="package"></i><span data-i18n="products">Products</span>
+          <span class="sp row">
+            <input type="text" id="prod-search" placeholder="Search…" style="width:170px; padding:.45rem .6rem">
+            <select id="prod-cat-filter" style="width:150px; padding:.45rem .6rem"></select>
+            <button class="btn sm" id="btn-add-product"><i data-lucide="plus"></i><span data-i18n="add">Add</span></button>
+          </span></h3>
+        <div class="tblwrap"><table class="tbl" id="prod-table"></table></div>
+      </div>
+    </section>
+
+    <!-- INVENTORY -->
+    <section class="page" id="page-inventory">
+      <div class="stats" id="inv-stats" style="grid-template-columns:repeat(3,1fr)"></div>
+      <div class="glass card">
+        <h3><i data-lucide="warehouse"></i><span data-i18n="stockBalances">Stock balances</span>
+          <span class="sp row">
+            <input type="text" id="inv-search" placeholder="Search…" style="width:170px; padding:.45rem .6rem">
+            <button class="btn sm ghost" id="btn-adjust"><i data-lucide="sliders-horizontal"></i><span data-i18n="adjustStock">Adjust / Damage</span></button>
+          </span></h3>
+        <div class="tblwrap"><table class="tbl" id="inv-table"></table></div>
+      </div>
+      <div class="glass card"><h3><i data-lucide="history"></i><span data-i18n="stockHistory">Stock movement history</span>
+        <span class="sp"><select id="hist-product" style="width:200px; padding:.45rem .6rem"></select></span></h3>
+        <div class="tblwrap"><table class="tbl" id="hist-table"></table></div>
+      </div>
+    </section>
+
+    <!-- SALES -->
+    <section class="page" id="page-sales">
+      <div class="glass card">
+        <h3><i data-lucide="shopping-cart"></i><span data-i18n="newSale">New Sale</span>
+          <span class="sp pill info" id="sale-inv-no"></span></h3>
+        <div class="grid g3" style="gap:0 .8rem">
+          <div><label class="f" data-i18n="customer">Customer</label><select id="sale-customer"></select></div>
+          <div><label class="f" data-i18n="date">Date</label><input type="date" id="sale-date"></div>
+          <div><label class="f" data-i18n="paymentMethod">Payment method</label>
+            <select id="sale-method"><option>Cash</option><option>Bank Transfer</option><option>Online Transfer</option><option>Other</option></select></div>
+        </div>
+        <div class="tblwrap" style="margin-top:.6rem"><table class="tbl lines" id="sale-lines"></table></div>
+        <button class="btn sm ghost" id="sale-add-line" style="margin-top:.5rem"><i data-lucide="plus"></i><span data-i18n="addItem">Add item</span></button>
+        <div class="row" style="align-items:flex-start; margin-top:.6rem">
+          <div style="flex:1; min-width:200px"><label class="f" data-i18n="note">Note</label><input type="text" id="sale-note" placeholder="—"></div>
+          <div class="totals" id="sale-totals"></div>
+        </div>
+        <div class="mfoot">
+          <label class="row small" id="sale-oversell-wrap" style="margin-right:auto; display:none"><input type="checkbox" id="sale-oversell" style="width:auto"> <span data-i18n="allowOversell">Allow sale despite low stock (Admin)</span></label>
+          <button class="btn ok" id="btn-save-sale"><i data-lucide="check"></i><span data-i18n="saveInvoice">Save Invoice</span></button>
+        </div>
+      </div>
+      <div class="glass card"><h3><i data-lucide="history"></i><span data-i18n="recentSales">Recent sales</span></h3>
+        <div class="tblwrap"><table class="tbl" id="sales-recent"></table></div>
+      </div>
+    </section>
+
+    <!-- PURCHASES -->
+    <section class="page" id="page-purchases">
+      <div class="glass card">
+        <h3><i data-lucide="truck"></i><span data-i18n="newPurchase">New Purchase</span>
+          <span class="sp pill info" id="pur-inv-no"></span></h3>
+        <div class="grid g3" style="gap:0 .8rem">
+          <div><label class="f" data-i18n="supplier">Supplier</label><select id="pur-supplier"></select></div>
+          <div><label class="f" data-i18n="date">Date</label><input type="date" id="pur-date"></div>
+          <div><label class="f" data-i18n="supplierBill">Supplier bill / invoice no.</label><input type="text" id="pur-billno" placeholder="—"></div>
+        </div>
+        <div class="tblwrap" style="margin-top:.6rem"><table class="tbl lines" id="pur-lines"></table></div>
+        <button class="btn sm ghost" id="pur-add-line" style="margin-top:.5rem"><i data-lucide="plus"></i><span data-i18n="addItem">Add item</span></button>
+        <div class="row" style="align-items:flex-start; margin-top:.6rem">
+          <div style="flex:1; min-width:200px"><label class="f" data-i18n="note">Note</label><input type="text" id="pur-note" placeholder="—"></div>
+          <div class="totals" id="pur-totals"></div>
+        </div>
+        <div class="mfoot"><button class="btn ok" id="btn-save-purchase"><i data-lucide="check"></i><span data-i18n="savePurchase">Save Purchase</span></button></div>
+      </div>
+      <div class="glass card"><h3><i data-lucide="history"></i><span data-i18n="recentPurchases">Recent purchases</span></h3>
+        <div class="tblwrap"><table class="tbl" id="pur-recent"></table></div>
+      </div>
+    </section>
+
+    <!-- CUSTOMERS -->
+    <section class="page" id="page-customers">
+      <div class="glass card">
+        <h3><i data-lucide="users"></i><span data-i18n="customers">Customers</span>
+          <span class="sp row"><input type="text" id="cust-search" placeholder="Search…" style="width:170px; padding:.45rem .6rem">
+          <button class="btn sm" id="btn-add-customer"><i data-lucide="plus"></i><span data-i18n="add">Add</span></button></span></h3>
+        <div class="tblwrap"><table class="tbl" id="cust-table"></table></div>
+      </div>
+      <div class="glass card" id="cust-ledger-card" style="display:none">
+        <h3><i data-lucide="book-open"></i><span id="cust-ledger-title">Ledger</span>
+          <span class="sp row"><button class="btn sm ghost" id="cust-ledger-print"><i data-lucide="printer"></i><span data-i18n="print">Print</span></button>
+          <button class="btn sm ghost" id="cust-ledger-close"><i data-lucide="x"></i></button></span></h3>
+        <div class="tblwrap"><table class="tbl" id="cust-ledger"></table></div>
+      </div>
+    </section>
+
+    <!-- SUPPLIERS -->
+    <section class="page" id="page-suppliers">
+      <div class="glass card">
+        <h3><i data-lucide="factory"></i><span data-i18n="suppliers">Suppliers</span>
+          <span class="sp row"><input type="text" id="sup-search" placeholder="Search…" style="width:170px; padding:.45rem .6rem">
+          <button class="btn sm" id="btn-add-supplier"><i data-lucide="plus"></i><span data-i18n="add">Add</span></button></span></h3>
+        <div class="tblwrap"><table class="tbl" id="sup-table"></table></div>
+      </div>
+      <div class="glass card" id="sup-ledger-card" style="display:none">
+        <h3><i data-lucide="book-open"></i><span id="sup-ledger-title">Ledger</span>
+          <span class="sp row"><button class="btn sm ghost" id="sup-ledger-print"><i data-lucide="printer"></i><span data-i18n="print">Print</span></button>
+          <button class="btn sm ghost" id="sup-ledger-close"><i data-lucide="x"></i></button></span></h3>
+        <div class="tblwrap"><table class="tbl" id="sup-ledger"></table></div>
+      </div>
+    </section>
+
+    <!-- PAYMENTS -->
+    <section class="page" id="page-payments">
+      <div class="glass card">
+        <h3><i data-lucide="wallet"></i><span data-i18n="payments">Payments</span>
+          <span class="sp row">
+            <button class="btn sm ok" id="btn-pay-in"><i data-lucide="arrow-down-circle"></i><span data-i18n="receiveFromCustomer">Receive from Customer</span></button>
+            <button class="btn sm" id="btn-pay-out"><i data-lucide="arrow-up-circle"></i><span data-i18n="payToSupplier">Pay to Supplier</span></button>
+          </span></h3>
+        <div class="tblwrap"><table class="tbl" id="pay-table"></table></div>
+      </div>
+    </section>
+
+    <!-- EXPENSES -->
+    <section class="page" id="page-expenses">
+      <div class="stats" id="exp-stats" style="grid-template-columns:repeat(3,1fr)"></div>
+      <div class="glass card">
+        <h3><i data-lucide="receipt-text"></i><span data-i18n="expenses">Expenses</span>
+          <span class="sp"><button class="btn sm" id="btn-add-expense"><i data-lucide="plus"></i><span data-i18n="add">Add</span></button></span></h3>
+        <div class="tblwrap"><table class="tbl" id="exp-table"></table></div>
+      </div>
+    </section>
+
+    <!-- REPORTS -->
+    <section class="page" id="page-reports">
+      <div class="glass card">
+        <h3><i data-lucide="bar-chart-3"></i><span data-i18n="reports">Reports</span></h3>
+        <div class="grid g3" style="gap:0 .8rem">
+          <div><label class="f" data-i18n="reportType">Report type</label>
+            <select id="rep-type">
+              <option value="sales" data-i18n="repSales">Sales Report</option>
+              <option value="purchases" data-i18n="repPurchases">Purchase Report</option>
+              <option value="profit" data-i18n="repProfit">Profit &amp; Loss</option>
+              <option value="stock" data-i18n="repStock">Stock Report</option>
+              <option value="expenses" data-i18n="repExpenses">Expense Report</option>
+              <option value="custOut" data-i18n="repCustOut">Customer Outstanding</option>
+              <option value="supOut" data-i18n="repSupOut">Supplier Outstanding</option>
+              <option value="cashflow" data-i18n="repCash">Cash Flow</option>
+            </select></div>
+          <div><label class="f" data-i18n="from">From</label><input type="date" id="rep-from"></div>
+          <div><label class="f" data-i18n="to">To</label><input type="date" id="rep-to"></div>
+        </div>
+        <div class="row" style="margin-top:.7rem">
+          <button class="btn" id="btn-run-report"><i data-lucide="play"></i><span data-i18n="run">Run Report</span></button>
+          <button class="btn ghost" id="btn-rep-csv"><i data-lucide="file-spreadsheet"></i>CSV / Excel</button>
+          <button class="btn ghost" id="btn-rep-print"><i data-lucide="printer"></i><span data-i18n="printPdf">Print / PDF</span></button>
+        </div>
+      </div>
+      <div class="glass card" id="rep-out-card" style="display:none"><h3 id="rep-title">Report</h3>
+        <div id="rep-summary" class="row" style="margin-bottom:.6rem"></div>
+        <div class="tblwrap"><table class="tbl" id="rep-table"></table></div>
+      </div>
+    </section>
+
+    <!-- INVOICES -->
+    <section class="page" id="page-invoices">
+      <div class="glass card">
+        <h3><i data-lucide="file-text"></i><span data-i18n="salesInvoices">Sales Invoices</span>
+          <span class="sp"><input type="text" id="inv-search" placeholder="Search invoice / customer…" style="width:210px; padding:.45rem .6rem"></span></h3>
+        <div class="tblwrap"><table class="tbl" id="inv-table"></table></div>
+      </div>
+      <div class="glass card"><h3><i data-lucide="truck"></i><span data-i18n="purchaseRecords">Purchase Records</span></h3>
+        <div class="tblwrap"><table class="tbl" id="pinv-table"></table></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="page" id="page-settings">
+      <div class="grid g2" style="align-items:start">
+        <div class="glass card">
+          <h3><i data-lucide="store"></i><span data-i18n="shopBranding">Shop Branding</span></h3>
+          <label class="f" data-i18n="shopName">Shop Name</label><input type="text" id="set-shopname">
+          <label class="f" data-i18n="shopLogo">Shop Logo</label>
+          <div class="row">
+            <div id="set-logo-preview" style="width:74px; height:74px; border-radius:14px; overflow:hidden; background:var(--glass2); border:1px solid var(--stroke); display:flex; align-items:center; justify-content:center"></div>
+            <div class="row">
+              <label class="btn sm ghost" style="cursor:pointer"><i data-lucide="upload"></i><span data-i18n="upload">Upload</span><input type="file" id="set-logo-file" accept="image/*" hidden></label>
+              <button class="btn sm ghost" id="set-logo-remove"><i data-lucide="trash-2"></i><span data-i18n="remove">Remove</span></button>
+            </div>
+          </div>
+          <div class="mgrid">
+            <div><label class="f" data-i18n="logoPosition">Logo position (invoice)</label>
+              <select id="set-logopos"><option value="left">Left</option><option value="center">Center</option><option value="right">Right</option></select></div>
+            <div><label class="f" data-i18n="shopNameSize">Shop name size</label>
+              <select id="set-namesize"><option value="20">20px</option><option value="24">24px</option><option value="28">28px</option><option value="32">32px</option></select></div>
+          </div>
+          <label class="f" data-i18n="address">Address</label><input type="text" id="set-address">
+          <div class="mgrid">
+            <div><label class="f" data-i18n="phone">Phone</label><input type="text" id="set-phone"></div>
+            <div><label class="f" data-i18n="email">Email</label><input type="email" id="set-email"></div>
+          </div>
+          <div class="mgrid">
+            <div><label class="f">NTN (optional)</label><input type="text" id="set-ntn"></div>
+            <div><label class="f" data-i18n="currency">Currency</label><input type="text" id="set-currency"></div>
+          </div>
+          <label class="f" data-i18n="footerMsg">Invoice footer message</label><input type="text" id="set-footer">
+          <div class="mgrid">
+            <div><label class="f" data-i18n="defaultInvoice">Default invoice format</label>
+              <select id="set-invformat"><option value="a4">A4</option><option value="t80">80mm Thermal</option><option value="t58">58mm Thermal</option></select></div>
+            <div><label class="f" data-i18n="defaultUnit">Default measurement unit</label>
+              <select id="set-defunit"><option>KG</option><option>Ton</option><option>Piece</option><option>Bundle</option><option>Meter</option><option>Foot</option></select></div>
+          </div>
+          <div class="mfoot"><button class="btn" id="btn-save-settings"><i data-lucide="save"></i><span data-i18n="saveSettings">Save Settings</span></button></div>
+        </div>
+        <div>
+          <div class="glass card">
+            <h3><i data-lucide="shield"></i><span data-i18n="usersRoles">Users &amp; Roles</span>
+              <span class="sp"><button class="btn sm" id="btn-add-user"><i data-lucide="plus"></i><span data-i18n="add">Add</span></button></span></h3>
+            <div class="tblwrap"><table class="tbl" id="user-table"></table></div>
+            <p class="small muted" data-i18n="rolesNote">Admin: full access. Staff: cannot delete/cancel invoices, change settings or manage users.</p>
+          </div>
+          <div class="glass card">
+            <h3><i data-lucide="database"></i><span data-i18n="backupRestore">Backup &amp; Restore</span></h3>
+            <p class="small muted" data-i18n="backupNote">Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.</p>
+            <div class="row">
+              <button class="btn ghost" id="btn-backup"><i data-lucide="download"></i><span data-i18n="downloadBackup">Download Backup</span></button>
+              <label class="btn ghost" style="cursor:pointer"><i data-lucide="upload"></i><span data-i18n="restore">Restore</span><input type="file" id="file-restore" accept=".json" hidden></label>
+            </div>
+            <label class="f" data-i18n="language">Language / زبان</label>
+            <div class="row">
+              <button class="btn sm ghost" id="lang-en">English</button>
+              <button class="btn sm ghost" id="lang-ur">اردو (Urdu)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <nav class="bottomnav">
+    <a data-page="dashboard"><i data-lucide="layout-dashboard"></i><span data-i18n="dashboard">Dashboard</span></a>
+    <a data-page="sales"><i data-lucide="shopping-cart"></i><span data-i18n="sales">Sales</span></a>
+    <a data-page="purchases"><i data-lucide="truck"></i><span data-i18n="purchases">Purchase</span></a>
+    <a data-page="inventory"><i data-lucide="warehouse"></i><span data-i18n="inventoryShort">Stock</span></a>
+    <a id="bn-more"><i data-lucide="menu"></i><span data-i18n="more">More</span></a>
+  </nav>
+</div>
+
+<div id="modal-root"></div>
+<div id="print-area"></div>
+<div id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@0.454.0/dist/umd/lucide.min.js"></script>
+<script>
+"use strict";
+
+/* ================================================================
+   SteelDesk — Iron & Steel Shop Management
+   Single-file app. Data persists in localStorage (this device).
+   ================================================================ */
+const LS_KEY = "steeldesk_state_v1";
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const todayStr = (d) => { d = d || new Date(); const p = (n) => String(n).padStart(2, "0"); return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); };
+const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function fmtDate(iso) { if (!iso) return "—"; const p = String(iso).slice(0, 10).split("-"); if (p.length < 3) return iso; return p[2] + "-" + MONTHS[Number(p[1]) - 1] + "-" + p[0]; }
+function fmtRs(n) { n = Math.round((Number(n) || 0) * 100) / 100; const neg = n < 0; n = Math.abs(n); const s = n.toLocaleString("en-PK", { maximumFractionDigits: n % 1 ? 2 : 0 }); return (neg ? "-Rs " : "Rs ") + s; }
+function fmtNum(n) { n = Math.round((Number(n) || 0) * 1000) / 1000; return n.toLocaleString("en-PK", { maximumFractionDigits: 3 }); }
+function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+function icons() { if (window.lucide) lucide.createIcons(); }
+let toastTimer = null;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("on"), 2600); }
+
+/* ---------------- i18n ---------------- */
+const I18N = {
+  en: { loginSub: "Iron & Steel Shop Management", username: "Username", password: "Password", login: "Login", mainMenu: "Main Menu", parties: "Parties", manage: "Manage", dashboard: "Dashboard", products: "Products", inventory: "Inventory / Stock", inventoryShort: "Stock", sales: "Sales", purchases: "Purchase", customers: "Customers", suppliers: "Suppliers", payments: "Payments", expenses: "Expenses", reports: "Reports", invoices: "Invoices", settings: "Shop Settings", salesChart: "Sales — last 14 days", profitChart: "Profit — last 6 months", topProducts: "Top-selling products", lowStock: "Low-stock alerts", recentTx: "Recent transactions", quickActions: "Quick actions", newSale: "New Sale", newPurchase: "New Purchase", addProduct: "Add Product", addPayment: "Add Payment", addExpense: "Add Expense", add: "Add", stockBalances: "Stock balances", adjustStock: "Adjust / Damage", stockHistory: "Stock movement history", customer: "Customer", supplier: "Supplier", date: "Date", paymentMethod: "Payment method", addItem: "Add item", note: "Note", allowOversell: "Allow sale despite low stock (Admin)", saveInvoice: "Save Invoice", savePurchase: "Save Purchase", recentSales: "Recent sales", recentPurchases: "Recent purchases", supplierBill: "Supplier bill / invoice no.", print: "Print", receiveFromCustomer: "Receive from Customer", payToSupplier: "Pay to Supplier", reportType: "Report type", repSales: "Sales Report", repPurchases: "Purchase Report", repProfit: "Profit & Loss", repStock: "Stock Report", repExpenses: "Expense Report", repCustOut: "Customer Outstanding", repSupOut: "Supplier Outstanding", repCash: "Cash Flow", from: "From", to: "To", run: "Run Report", printPdf: "Print / PDF", salesInvoices: "Sales Invoices", purchaseRecords: "Purchase Records", shopBranding: "Shop Branding", shopName: "Shop Name", shopLogo: "Shop Logo", upload: "Upload", remove: "Remove", logoPosition: "Logo position (invoice)", shopNameSize: "Shop name size", address: "Address", phone: "Phone", email: "Email", currency: "Currency", footerMsg: "Invoice footer message", defaultInvoice: "Default invoice format", defaultUnit: "Default measurement unit", saveSettings: "Save Settings", usersRoles: "Users & Roles", rolesNote: "Admin: full access. Staff: cannot delete/cancel invoices, change settings or manage users.", backupRestore: "Backup & Restore", backupNote: "Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.", downloadBackup: "Download Backup", restore: "Restore", language: "Language", searchPh: "Search products, customers, invoices…", more: "More" },
+  ur: { loginSub: "لوہے اور اسٹیل کی دکان کا نظام", username: "صارف نام", password: "پاس ورڈ", login: "لاگ ان", mainMenu: "مین مینو", parties: "پارٹیاں", manage: "انتظام", dashboard: "ڈیش بورڈ", products: "مصنوعات", inventory: "اسٹاک", inventoryShort: "اسٹاک", sales: "فروخت", purchases: "خریداری", customers: "گاہک", suppliers: "سپلائر", payments: "ادائیگیاں", expenses: "اخراجات", reports: "رپورٹس", invoices: "انوائسز", settings: "دکان کی ترتیبات", salesChart: "فروخت — پچھلے 14 دن", profitChart: "منافع — پچھلے 6 ماہ", topProducts: "زیادہ بکنے والی مصنوعات", lowStock: "کم اسٹاک الرٹ", recentTx: "حالیہ لین دین", quickActions: "فوری کام", newSale: "نئی فروخت", newPurchase: "نئی خریداری", addProduct: "مصنوعہ شامل کریں", addPayment: "ادائیگی شامل کریں", addExpense: "خرچ شامل کریں", add: "شامل کریں", stockBalances: "اسٹاک بیلنس", adjustStock: "ایڈجسٹ / خراب", stockHistory: "اسٹاک کی تاریخ", customer: "گاہک", supplier: "سپلائر", date: "تاریخ", paymentMethod: "ادائیگی کا طریقہ", addItem: "آئٹم شامل کریں", note: "نوٹ", allowOversell: "کم اسٹاک کے باوجود فروخت کی اجازت (ایڈمن)", saveInvoice: "انوائس محفوظ کریں", savePurchase: "خریداری محفوظ کریں", recentSales: "حالیہ فروخت", recentPurchases: "حالیہ خریداری", supplierBill: "سپلائر بل نمبر", print: "پرنٹ", receiveFromCustomer: "گاہک سے وصولی", payToSupplier: "سپلائر کو ادائیگی", reportType: "رپورٹ کی قسم", repSales: "فروخت رپورٹ", repPurchases: "خریداری رپورٹ", repProfit: "نفع و نقصان", repStock: "اسٹاک رپورٹ", repExpenses: "اخراجات رپورٹ", repCustOut: "گاہکوں کے بقایا", repSupOut: "سپلائر کے بقایا", repCash: "کیش فلو", from: "سے", to: "تک", run: "رپورٹ چلائیں", printPdf: "پرنٹ / PDF", salesInvoices: "فروخت انوائسز", purchaseRecords: "خریداری ریکارڈ", shopBranding: "دکان کی برانڈنگ", shopName: "دکان کا نام", shopLogo: "دکان کا لوگو", upload: "اپ لوڈ", remove: "ہٹائیں", logoPosition: "لوگو کی جگہ (انوائس)", shopNameSize: "دکان کے نام کا سائز", address: "پتہ", phone: "فون", email: "ای میل", currency: "کرنسی", footerMsg: "انوائس فوٹر پیغام", defaultInvoice: "طے شدہ انوائس فارمیٹ", defaultUnit: "طے شدہ پیمائش یونٹ", saveSettings: "ترتیبات محفوظ کریں", usersRoles: "صارفین اور کردار", rolesNote: "ایڈمن: مکمل رسائی۔ اسٹاف: انوائس حذف/منسوخ، ترتیبات اور صارفین تبدیل نہیں کر سکتا۔", backupRestore: "بیک اپ اور بحالی", backupNote: "تمام ڈیٹا کا بیک اپ ڈاؤن لوڈ کریں یا بیک اپ فائل سے بحال کریں۔ ڈیٹا اسی براؤزر میں محفوظ ہوتا ہے۔", downloadBackup: "بیک اپ ڈاؤن لوڈ کریں", restore: "بحال کریں", language: "زبان", searchPh: "مصنوعات، گاہک، انوائس تلاش کریں…", more: "مزید" }
+};
+let LANG = "en";
+function t(k) { return (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k; }
+function applyI18n() {
+  document.documentElement.lang = LANG === "ur" ? "ur" : "en";
+  document.documentElement.dir = LANG === "ur" ? "rtl" : "ltr";
+  $$("[data-i18n]").forEach((el) => { el.textContent = t(el.getAttribute("data-i18n")); });
+  $$("[data-i18n-ph]").forEach((el) => { el.placeholder = t(el.getAttribute("data-i18n-ph")); });
+  $("#btn-lang").textContent = LANG === "ur" ? "EN" : "اردو";
+  icons();
+}
+function setLang(l) { LANG = l; S.settings.lang = l; save(); applyI18n(); renderAll(); }
+
+/* ---------------- state ---------------- */
+const CATEGORIES = ["Sariya / Steel Rebar", "Girder", "I-Beam", "C-Channel", "Angle Iron", "Steel Pipes", "GI Sheets", "Steel Plates", "Flat Bars", "Other Steel Products"];
+const UNITS = ["KG", "Ton", "Piece", "Bundle", "Meter", "Foot"];
+const EXP_CATS = ["Shop Rent", "Electricity", "Transportation", "Labour", "Loading / Unloading", "Maintenance", "Other Expenses"];
+const METHODS = ["Cash", "Bank Transfer", "Online Transfer", "Other"];
+function defaultState() {
+  return {
+    settings: { shopName: "SteelDesk Traders", logo: null, address: "", phone: "", email: "", ntn: "", footerMsg: "Thank you for your business!", currency: "PKR", invoiceFormat: "a4", defaultUnit: "KG", logoPos: "left", nameSize: 26, lang: "en" },
+    users: [{ id: uid(), name: "Owner", username: "admin", pass: "admin123", role: "admin" }],
+    session: null,
+    products: [], customers: [], suppliers: [],
+    sales: [], purchases: [], payments: [], expenses: [], movements: [],
+    counters: { sale: 0, purchase: 0, payment: 0 }
+  };
+}
+let S = loadState();
+function loadState() {
+  try { const raw = localStorage.getItem(LS_KEY); if (raw) { const s = JSON.parse(raw); if (s && s.settings && s.users) return s; } } catch (e) { console.warn("state load failed", e); }
+  return defaultState();
+}
+function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { toast("Storage full — logo image may be too large."); } }
+LANG = (S.settings && S.settings.lang) || "en";
+
+/* ---------------- lookups ---------------- */
+const prodById = (id) => S.products.find((p) => p.id === id);
+const custById = (id) => S.customers.find((c) => c.id === id);
+const supById = (id) => S.suppliers.find((s) => s.id === id);
+const userById = (id) => S.users.find((u) => u.id === id);
+const me = () => (S.session ? userById(S.session.userId) : null);
+const isAdmin = () => { const u = me(); return !!u && u.role === "admin"; };
+function prodLabel(p) { return [p.name, p.brand, p.size].filter(Boolean).join(" — ") || "Product"; }
+
+/* ---------------- units & stock ----------------
+   Stock is tracked per product in the product's own unit.
+   Conversions: 1 Ton = 1000 KG. Piece<->KG/Ton via weightPerPiece (KG per piece). */
+function convertQty(qty, from, to, product) {
+  qty = Number(qty) || 0;
+  if (from === to) return qty;
+  const wpp = product && product.weightPerPiece ? Number(product.weightPerPiece) : null;
+  const toKg = (q, u) => {
+    if (u === "KG") return q;
+    if (u === "Ton") return q * 1000;
+    if (u === "Piece") return wpp ? q * wpp : null;
+    return null;
+  };
+  const fromKg = (kg, u) => {
+    if (u === "KG") return kg;
+    if (u === "Ton") return kg / 1000;
+    if (u === "Piece") return wpp ? kg / wpp : null;
+    return null;
+  };
+  const kg = toKg(qty, from);
+  if (kg == null) return null;
+  return fromKg(kg, to);
+}
+function rateInUnit(ratePerFrom, from, to, product) {
+  const one = convertQty(1, to, from, product); // how many 'from' units in 1 'to' unit
+  if (one == null) return null;
+  return ratePerFrom * one;
+}
+function stockOf(productId) {
+  let s = 0;
+  for (const m of S.movements) if (m.productId === productId) s += m.qty;
+  return Math.round(s * 1000) / 1000;
+}
+function stockValue() { return S.products.reduce((sum, p) => sum + stockOf(p.id) * (Number(p.purchaseRate) || 0), 0); }
+function addMovement(productId, qty, type, refType, refId, date, note) {
+  S.movements.push({ id: uid(), productId, qty, type, refType, refId, date: date || todayStr(), note: note || "" });
+}
+function removeMovements(refType, refId) { S.movements = S.movements.filter((m) => !(m.refType === refType && m.refId === refId)); }
+
+/* ---------------- money: ledgers & profit ---------------- */
+function saleCost(sale) {
+  let c = 0;
+  for (const it of sale.items) {
+    const p = prodById(it.productId);
+    if (!p) continue;
+    const cr = rateInUnit(Number(p.purchaseRate) || 0, p.unit, it.unit, p);
+    c += (cr == null ? 0 : cr) * (Number(it.qty) || 0);
+  }
+  return c;
+}
+function saleProfit(sale) { return (Number(sale.total) || 0) - saleCost(sale); }
+function customerReceived(custId) {
+  let r = 0;
+  for (const s of S.sales) if (s.customerId === custId && s.status === "active") r += Number(s.paid) || 0;
+  for (const p of S.payments) if (p.partyType === "customer" && p.partyId === custId) r += Number(p.amount) || 0;
+  return r;
+}
+function customerBalance(custId) {
+  const c = custById(custId); if (!c) return 0;
+  let b = Number(c.opening) || 0;
+  for (const s of S.sales) if (s.customerId === custId && s.status === "active") b += Number(s.total) || 0;
+  return b - customerReceived(custId);
+}
+function supplierPaid(supId) {
+  let r = 0;
+  for (const p of S.purchases) if (p.supplierId === supId && p.status === "active") r += Number(p.paid) || 0;
+  for (const p of S.payments) if (p.partyType === "supplier" && p.partyId === supId) r += Number(p.amount) || 0;
+  return r;
+}
+function supplierBalance(supId) {
+  const s = supById(supId); if (!s) return 0;
+  let b = Number(s.opening) || 0;
+  for (const p of S.purchases) if (p.supplierId === supId && p.status === "active") b += Number(p.total) || 0;
+  return b - supplierPaid(supId);
+}
+function totalReceivables() { return S.customers.reduce((a, c) => a + Math.max(0, customerBalance(c.id)), 0); }
+function totalPayables() { return S.suppliers.reduce((a, s) => a + Math.max(0, supplierBalance(s.id)), 0); }
+
+/* ---------------- modal & confirm ---------------- */
+function openModal(html, wide) {
+  const root = $("#modal-root");
+  root.innerHTML = '<div class="mback on"><div class="modal' + (wide ? " wide" : "") + '">' + html + "</div></div>";
+  const back = root.firstElementChild;
+  back.addEventListener("mousedown", (e) => { if (e.target === back) closeModal(); });
+  icons();
+  return back;
+}
+function closeModal() { $("#modal-root").innerHTML = ""; }
+function modalHead(title, icon) {
+  return '<h3><i data-lucide="' + icon + '"></i>' + esc(title) + '<button class="iconbtn x" onclick="closeModal()"><i data-lucide="x"></i></button></h3>';
+}
+function confirmDlg(title, msg, dangerBtn) {
+  return new Promise((resolve) => {
+    const back = openModal(modalHead(title, "alert-triangle") + '<p class="muted" style="margin:.4rem 0 0">' + esc(msg) + '</p>' +
+      '<div class="mfoot"><button class="btn ghost" id="cf-no">Cancel</button><button class="btn ' + (dangerBtn ? "danger" : "") + '" id="cf-yes">Confirm</button></div>');
+    $("#cf-no", back).onclick = () => { closeModal(); resolve(false); };
+    $("#cf-yes", back).onclick = () => { closeModal(); resolve(true); };
+  });
+}
+window.closeModal = closeModal;
+
+/* ---------------- auth ---------------- */
+function showLogin() {
+  $("#app").classList.remove("on"); $("#login").classList.remove("off");
+  $("#login-shop").textContent = S.settings.shopName || "SteelDesk";
+  const lg = $("#login-logo");
+  lg.innerHTML = S.settings.logo ? '<img src="' + S.settings.logo + '" alt="">' : '<i data-lucide="layers"></i>';
+  const anyCustom = S.users.some((u) => u.pass !== "admin123");
+  $("#login-hint").textContent = anyCustom ? "" : "Default login: admin / admin123 — change it in Shop Settings after login.";
+  icons();
+}
+function doLogin() {
+  const u = $("#li-user").value.trim().toLowerCase(), p = $("#li-pass").value;
+  const user = S.users.find((x) => x.username.toLowerCase() === u && x.pass === p);
+  const err = $("#login-err");
+  if (!user) { err.textContent = "Wrong username or password."; err.style.display = "block"; return; }
+  err.style.display = "none";
+  S.session = { userId: user.id }; save();
+  enterApp();
+}
+function enterApp() {
+  const u = me(); if (!u) { showLogin(); return; }
+  $("#login").classList.add("off"); $("#app").classList.add("on");
+  $("#su-name").textContent = u.name; $("#su-role").textContent = u.role;
+  $("#su-avatar").textContent = (u.name || "U").slice(0, 1).toUpperCase();
+  applyBranding(); applyI18n();
+  $("#page-date").textContent = fmtDate(todayStr()) + " • " + (S.settings.shopName || "");
+  go("dashboard");
+}
+function applyBranding() {
+  $("#side-shop").textContent = S.settings.shopName || "SteelDesk";
+  $("#login-shop").textContent = S.settings.shopName || "SteelDesk";
+  const sl = $("#side-logo");
+  sl.innerHTML = S.settings.logo ? '<img src="' + S.settings.logo + '" alt="">' : '<i data-lucide="layers"></i>';
+  icons();
+}
+
+/* ---------------- navigation ---------------- */
+const PAGE_TITLES = { dashboard: "Dashboard", products: "Products", inventory: "Inventory / Stock", sales: "Sales", purchases: "Purchase", customers: "Customers", suppliers: "Suppliers", payments: "Payments", expenses: "Expenses", reports: "Reports", invoices: "Invoices", settings: "Shop Settings" };
+function go(page) {
+  $$(".page").forEach((p) => p.classList.toggle("on", p.id === "page-" + page));
+  $$("#main-nav a, .bottomnav a[data-page]").forEach((a) => a.classList.toggle("active", a.getAttribute("data-page") === page));
+  $("#page-title").textContent = t(page);
+  $("#sidebar").classList.remove("open"); $("#scrim").classList.remove("on");
+  renderPage(page);
+  window.scrollTo({ top: 0 });
+}
+function renderPage(page) {
+  if (page === "dashboard") renderDashboard();
+  else if (page === "products") renderProducts();
+  else if (page === "inventory") renderInventory();
+  else if (page === "sales") renderSalesPage();
+  else if (page === "purchases") renderPurchasesPage();
+  else if (page === "customers") renderCustomers();
+  else if (page === "suppliers") renderSuppliers();
+  else if (page === "payments") renderPayments();
+  else if (page === "expenses") renderExpenses();
+  else if (page === "invoices") renderInvoices();
+  else if (page === "settings") renderSettings();
+  icons();
+}
+function renderAll() { const on = $(".page.on"); if (on) renderPage(on.id.replace("page-", "")); applyBranding(); }
+
+/* ---------------- dashboard ---------------- */
+let charts = {};
+function makeChart(id, cfg) {
+  const el = document.getElementById(id);
+  if (!el || !window.Chart) return;
+  if (charts[id]) charts[id].destroy();
+  charts[id] = new Chart(el, cfg);
+}
+function statCard(icon, label, value, sub) {
+  return '<div class="glass stat"><div class="sl"><i data-lucide="' + icon + '"></i>' + esc(label) + '</div><div class="sv">' + value + '</div><div class="ss">' + (sub || "") + "</div></div>";
+}
+function inRange(d, from, to) { return d >= from && d <= to; }
+function renderDashboard() {
+  const td = todayStr(), ym = td.slice(0, 7);
+  const aSales = S.sales.filter((s) => s.status === "active"), aPur = S.purchases.filter((p) => p.status === "active");
+  const sum = (arr, f) => arr.reduce((a, x) => a + f(x), 0);
+  const tSales = sum(aSales.filter((s) => s.date === td), (s) => s.total);
+  const tPur = sum(aPur.filter((p) => p.date === td), (p) => p.total);
+  const mSales = sum(aSales.filter((s) => s.date.slice(0, 7) === ym), (s) => s.total);
+  const mPur = sum(aPur.filter((p) => p.date.slice(0, 7) === ym), (p) => p.total);
+  const tProfit = sum(aSales.filter((s) => s.date === td), saleProfit);
+  const mProfitG = sum(aSales.filter((s) => s.date.slice(0, 7) === ym), saleProfit);
+  const mExp = sum(S.expenses.filter((e) => e.date.slice(0, 7) === ym), (e) => e.amount);
+  const low = S.products.filter((p) => stockOf(p.id) <= (Number(p.minStock) || 0));
+  $("#dash-stats").innerHTML =
+    statCard("shopping-cart", "Today's Sales", fmtRs(tSales), aSales.filter((s) => s.date === td).length + " invoices") +
+    statCard("truck", "Today's Purchases", fmtRs(tPur), aPur.filter((p) => p.date === td).length + " purchases") +
+    statCard("calendar-range", "Monthly Sales", fmtRs(mSales), "Purchases " + fmtRs(mPur)) +
+    statCard("gem", "Today's Profit", fmtRs(tProfit), "Gross profit on today's sales") +
+    statCard("line-chart", "Monthly Profit", fmtRs(mProfitG - mExp), "Gross " + fmtRs(mProfitG) + " − expenses " + fmtRs(mExp)) +
+    statCard("warehouse", "Total Stock Value", fmtRs(stockValue()), S.products.length + " products") +
+    statCard("hand-coins", "Total Receivables", fmtRs(totalReceivables()), S.customers.length + " customers") +
+    statCard("landmark", "Total Payables", fmtRs(totalPayables()), S.suppliers.length + " suppliers");
+  // top products
+  const qtyByProd = {};
+  for (const s of aSales) for (const it of s.items) qtyByProd[it.productId] = (qtyByProd[it.productId] || 0) + (Number(it.amount) || 0);
+  const top = Object.entries(qtyByProd).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  $("#dash-top").innerHTML = top.length ? top.map(([pid, amt], i) => {
+    const p = prodById(pid);
+    return '<div class="lowitem"><span class="pill info">' + (i + 1) + '</span><div style="flex:1">' + esc(p ? prodLabel(p) : "—") + '</div><b>' + fmtRs(amt) + "</b></div>";
+  }).join("") : '<div class="empty"><i data-lucide="package-open"></i><div class="et">No sales yet</div><div class="small">Top sellers will appear here.</div></div>';
+  $("#dash-low-count").style.display = low.length ? "" : "none";
+  $("#dash-low-count").textContent = low.length;
+  $("#dash-low").innerHTML = low.length ? low.slice(0, 6).map((p) =>
+    '<div class="lowitem"><i data-lucide="alert-triangle" style="color:var(--warn); width:16px; height:16px"></i><div style="flex:1">' + esc(prodLabel(p)) + '</div><span class="pill warn">' + fmtNum(stockOf(p.id)) + " " + esc(p.unit) + "</span></div>"
+  ).join("") : '<div class="empty"><i data-lucide="check-circle-2"></i><div class="et">Stock levels healthy</div><div class="small">No low-stock alerts.</div></div>';
+  const tx = [];
+  for (const s of aSales) tx.push({ date: s.date, label: "Sale " + s.no, party: (custById(s.customerId) || {}).name || "Walk-in", amt: s.total, cls: "ok" });
+  for (const p of aPur) tx.push({ date: p.date, label: "Purchase " + p.no, party: (supById(p.supplierId) || {}).name || "—", amt: -p.total, cls: "info" });
+  for (const e of S.expenses) tx.push({ date: e.date, label: "Expense — " + e.category, party: e.note || "", amt: -e.amount, cls: "bad" });
+  tx.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  $("#dash-recent").innerHTML = tx.length ? tx.slice(0, 6).map((x) =>
+    '<div class="lowitem"><span class="pill ' + x.cls + '">' + esc(x.label.split(" ")[0]) + '</span><div style="flex:1">' + esc(x.label) + '<div class="small muted">' + esc(x.party) + " • " + fmtDate(x.date) + '</div></div><b class="' + (x.amt >= 0 ? "pos" : "neg") + '">' + fmtRs(x.amt) + "</b></div>"
+  ).join("") : '<div class="empty"><i data-lucide="history"></i><div class="et">Nothing yet</div><div class="small">Transactions will appear here.</div></div>';
+  icons();
+  // charts
+  const days = [], dSales = [], dPur = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i); const ds = todayStr(d);
+    days.push(d.getDate() + " " + MONTHS[d.getMonth()]);
+    dSales.push(sum(aSales.filter((s) => s.date === ds), (s) => s.total));
+    dPur.push(sum(aPur.filter((p) => p.date === ds), (p) => p.total));
+  }
+  const grid = { color: "rgba(255,255,255,.06)" }, tick = { color: "#93a4c4", font: { size: 10 } };
+  makeChart("ch-sales", { type: "bar", data: { labels: days, datasets: [
+    { label: "Sales", data: dSales, backgroundColor: "rgba(59,130,246,.65)", borderRadius: 5 },
+    { label: "Purchases", data: dPur, backgroundColor: "rgba(34,211,238,.45)", borderRadius: 5 } ] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: "#c7d3ec", boxWidth: 10 } } }, scales: { x: { ticks: tick, grid: { display: false } }, y: { ticks: tick, grid } } } });
+  const mLabels = [], mProf = [];
+  for (let i = 5; i >= 0; i--) {
+    const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i);
+    const key = d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0");
+    mLabels.push(MONTHS[d.getMonth()] + " " + String(d.getFullYear()).slice(2));
+    const g = sum(aSales.filter((s) => s.date.slice(0, 7) === key), saleProfit);
+    const e = sum(S.expenses.filter((x) => x.date.slice(0, 7) === key), (x) => x.amount);
+    mProf.push(g - e);
+  }
+  makeChart("ch-profit", { type: "line", data: { labels: mLabels, datasets: [
+    { label: "Net Profit", data: mProf, borderColor: "#34d399", backgroundColor: "rgba(52,211,153,.15)", fill: true, tension: .4, pointBackgroundColor: "#34d399" } ] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: "#c7d3ec", boxWidth: 10 } } }, scales: { x: { ticks: tick, grid: { display: false } }, y: { ticks: tick, grid } } } });
+}
+
+/* ---------------- products ---------------- */
+function productForm(p) {
+  p = p || {};
+  const back = openModal(modalHead(p.id ? "Edit Product" : "Add Product", "package") +
+    '<div class="mgrid">' +
+    '<div><label class="f">Product Name *</label><input type="text" id="pf-name" value="' + esc(p.name || "") + '" placeholder="Sariya"></div>' +
+    '<div><label class="f">Category</label><select id="pf-cat">' + CATEGORIES.map((c) => '<option ' + (p.category === c ? "selected" : "") + ">" + esc(c) + "</option>").join("") + "</select></div>" +
+    '<div><label class="f">Brand / Company</label><input type="text" id="pf-brand" value="' + esc(p.brand || "") + '" placeholder="Mughal Steel"></div>' +
+    '<div><label class="f">Size</label><input type="text" id="pf-size" value="' + esc(p.size || "") + '" placeholder="12mm"></div>' +
+    '<div><label class="f">Diameter / Thickness</label><input type="text" id="pf-dia" value="' + esc(p.dia || "") + '" placeholder="—"></div>' +
+    '<div><label class="f">Length</label><input type="text" id="pf-length" value="' + esc(p.length || "") + '" placeholder="40 ft"></div>' +
+    '<div><label class="f">Unit of Measurement</label><select id="pf-unit">' + UNITS.map((u) => '<option ' + ((p.unit || S.settings.defaultUnit) === u ? "selected" : "") + ">" + u + "</option>").join("") + "</select></div>" +
+    '<div><label class="f">Weight per Piece (KG, optional)</label><input type="number" id="pf-wpp" step="any" min="0" value="' + (p.weightPerPiece || "") + '" placeholder="e.g. 10.67"></div>' +
+    '<div><label class="f">Purchase Rate (per unit)</label><input type="number" id="pf-prate" step="any" min="0" value="' + (p.purchaseRate || "") + '"></div>' +
+    '<div><label class="f">Sale Rate (per unit)</label><input type="number" id="pf-srate" step="any" min="0" value="' + (p.saleRate || "") + '"></div>' +
+    '<div><label class="f">' + (p.id ? "Opening Stock (edit via Adjust)" : "Opening Stock") + '</label><input type="number" id="pf-open" step="any" value="' + (p.id ? stockOf(p.id) : (p.opening || 0)) + '"' + (p.id ? " disabled" : "") + "></div>" +
+    '<div><label class="f">Minimum Stock Level</label><input type="number" id="pf-min" step="any" min="0" value="' + (p.minStock || 0) + '"></div>' +
+    "</div>" +
+    '<label class="f">Description</label><input type="text" id="pf-desc" value="' + esc(p.desc || "") + '">' +
+    '<label class="f">Product Image (optional)</label><div class="row"><img id="pf-img-preview" style="width:52px; height:52px; object-fit:cover; border-radius:10px; display:' + (p.image ? "block" : "none") + '" src="' + (p.image || "") + '"><label class="btn sm ghost" style="cursor:pointer">Upload<input type="file" id="pf-img" accept="image/*" hidden></label></div>' +
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="pf-save">' + (p.id ? "Save Changes" : "Add Product") + "</button></div>", true);
+  let imgData = p.image || null;
+  $("#pf-img", back).onchange = (e) => { const f = e.target.files[0]; if (!f) return; readImage(f, 300, (d) => { imgData = d; const im = $("#pf-img-preview", back); im.src = d; im.style.display = "block"; }); };
+  $("#pf-save", back).onclick = () => {
+    const name = $("#pf-name", back).value.trim();
+    if (!name) { toast("Product name is required."); return; }
+    const data = { name, category: $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: $("#pf-dia", back).value.trim(), length: $("#pf-length", back).value.trim(), unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: $("#pf-desc", back).value.trim(), image: imgData };
+    if (p.id) { Object.assign(prodById(p.id), data); toast("Product updated."); }
+    else {
+      const np = Object.assign({ id: uid(), createdAt: todayStr() }, data);
+      S.products.push(np);
+      const open = Number($("#pf-open", back).value) || 0;
+      if (open) addMovement(np.id, open, "opening", "product", np.id, todayStr(), "Opening stock");
+      toast("Product added.");
+    }
+    save(); closeModal(); renderAll();
+  };
+}
+function readImage(file, maxSize, cb) {
+  const r = new FileReader();
+  r.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      cb(c.toDataURL("image/jpeg", 0.82));
+    };
+    img.src = r.result;
+  };
+  r.readAsDataURL(file);
+}
+function renderProducts() {
+  const q = ($("#prod-search").value || "").toLowerCase();
+  const cf = $("#prod-cat-filter");
+  if (!cf.options.length) cf.innerHTML = '<option value="">All Categories</option>' + CATEGORIES.map((c) => "<option>" + esc(c) + "</option>").join("");
+  const cat = cf.value;
+  const rows = S.products.filter((p) => (!cat || p.category === cat) && (!q || (p.name + " " + p.brand + " " + p.size + " " + p.category).toLowerCase().includes(q)));
+  $("#prod-table").innerHTML = "<thead><tr><th>Product</th><th>Category</th><th>Brand</th><th>Size</th><th class='num'>Purchase Rate</th><th class='num'>Sale Rate</th><th class='num'>Stock</th><th></th></tr></thead><tbody>" +
+    (rows.length ? rows.map((p) => {
+      const st = stockOf(p.id), low = st <= (Number(p.minStock) || 0);
+      return "<tr><td><b>" + esc(p.name) + "</b>" + (p.desc ? '<div class="small muted">' + esc(p.desc) + "</div>" : "") + "</td><td>" + esc(p.category) + "</td><td>" + esc(p.brand || "—") + "</td><td>" + esc(p.size || "—") + "</td><td class='num'>" + fmtRs(p.purchaseRate) + "</td><td class='num'>" + fmtRs(p.saleRate) + "</td><td class='num'><span class='pill " + (low ? "warn" : "ok") + "'>" + fmtNum(st) + " " + esc(p.unit) + "</span></td>" +
+        '<td class="num"><button class="iconbtn" data-edit-prod="' + p.id + '"><i data-lucide="pencil"></i></button> <button class="iconbtn" data-del-prod="' + p.id + '"><i data-lucide="trash-2"></i></button></td></tr>';
+    }).join("") : '<tr><td colspan="8"><div class="empty"><i data-lucide="package-open"></i><div class="et">No products yet</div><div class="small">Click Add to create your first product — e.g. Sariya 12mm, Mughal Steel.</div></div></td></tr>') + "</tbody>";
+  $$("#prod-table [data-edit-prod]").forEach((b) => b.onclick = () => productForm(prodById(b.getAttribute("data-edit-prod"))));
+  $$("#prod-table [data-del-prod]").forEach((b) => b.onclick = async () => {
+    const p = prodById(b.getAttribute("data-del-prod")); if (!p) return;
+    if (S.movements.some((m) => m.productId === p.id && m.type !== "opening")) { toast("This product has stock history — it cannot be deleted."); return; }
+    if (await confirmDlg("Delete product?", '"' + prodLabel(p) + '" will be removed permanently.', true)) {
+      S.products = S.products.filter((x) => x.id !== p.id); removeMovements("product", p.id); save(); renderAll(); toast("Product deleted.");
+    }
+  });
+  icons();
+}
+
+/* ---------------- inventory ---------------- */
+function renderInventory() {
+  const totVal = stockValue();
+  const totQtyKg = S.products.reduce((a, p) => { const kg = convertQty(stockOf(p.id), p.unit, "KG", p); return a + (kg || 0); }, 0);
+  const low = S.products.filter((p) => stockOf(p.id) <= (Number(p.minStock) || 0)).length;
+  $("#inv-stats").innerHTML =
+    statCard("warehouse", "Stock Value (at cost)", fmtRs(totVal), S.products.length + " products") +
+    statCard("weight", "Total Weight in Stock", fmtNum(totQtyKg) + " KG", "≈ " + fmtNum(totQtyKg / 1000) + " Ton") +
+    statCard("alert-triangle", "Low-Stock Products", String(low), "At or below minimum level");
+  const q = ($("#inv-search").value || "").toLowerCase();
+  const rows = S.products.filter((p) => !q || (p.name + " " + p.brand + " " + p.size).toLowerCase().includes(q));
+  $("#inv-table").innerHTML = "<thead><tr><th>Product</th><th>Brand / Size</th><th class='num'>Stock</th><th class='num'>In KG</th><th class='num'>Min Level</th><th class='num'>Value (cost)</th><th>Status</th></tr></thead><tbody>" +
+    (rows.length ? rows.map((p) => {
+      const st = stockOf(p.id), kg = convertQty(st, p.unit, "KG", p), isLow = st <= (Number(p.minStock) || 0);
+      return "<tr><td><b>" + esc(p.name) + "</b></td><td>" + esc(p.brand || "—") + " / " + esc(p.size || "—") + "</td><td class='num'><b>" + fmtNum(st) + " " + esc(p.unit) + "</b></td><td class='num'>" + (kg == null ? "—" : fmtNum(kg)) + "</td><td class='num'>" + fmtNum(p.minStock || 0) + "</td><td class='num'>" + fmtRs(st * (Number(p.purchaseRate) || 0)) + "</td><td>" + (isLow ? '<span class="pill warn">Low Stock</span>' : '<span class="pill ok">In Stock</span>') + "</td></tr>";
+    }).join("") : '<tr><td colspan="7"><div class="empty"><i data-lucide="warehouse"></i><div class="et">No stock</div><div class="small">Add products and purchases to build stock.</div></div></td></tr>') + "</tbody>";
+  const hp = $("#hist-product");
+  const cur = hp.value;
+  hp.innerHTML = '<option value="">All Products</option>' + S.products.map((p) => '<option value="' + p.id + '">' + esc(prodLabel(p)) + "</option>").join("");
+  hp.value = cur;
+  const mv = S.movements.slice().sort((a, b) => (b.date || "").localeCompare(a.date || "") || (b.id || "").localeCompare(a.id || "")).filter((m) => !hp.value || m.productId === hp.value).slice(0, 60);
+  $("#hist-table").innerHTML = "<thead><tr><th>Date</th><th>Product</th><th>Type</th><th class='num'>Qty</th><th>Note</th></tr></thead><tbody>" +
+    (mv.length ? mv.map((m) => { const p = prodById(m.productId); return "<tr><td>" + fmtDate(m.date) + "</td><td>" + esc(p ? prodLabel(p) : "—") + "</td><td><span class='pill " + (m.qty >= 0 ? "ok" : "bad") + "'>" + esc(m.type) + "</span></td><td class='num'>" + (m.qty >= 0 ? "+" : "") + fmtNum(m.qty) + " " + esc(p ? p.unit : "") + "</td><td class='small muted'>" + esc(m.note || "") + "</td></tr>"; }).join("")
+    : '<tr><td colspan="5"><div class="empty"><div class="et">No movements yet</div></div></td></tr>') + "</tbody>";
+  icons();
+}
+function adjustForm() {
+  if (!S.products.length) { toast("Add a product first."); return; }
+  const back = openModal(modalHead("Stock Adjustment / Damage", "sliders-horizontal") +
+    '<label class="f">Product</label><select id="af-prod">' + S.products.map((p) => '<option value="' + p.id + '">' + esc(prodLabel(p)) + " — stock " + fmtNum(stockOf(p.id)) + " " + esc(p.unit) + "</option>").join("") + "</select>" +
+    '<div class="mgrid"><div><label class="f">Type</label><select id="af-type"><option value="adjust-in">Adjustment (+)</option><option value="adjust-out">Adjustment (−)</option><option value="damage">Damaged Stock (−)</option></select></div>' +
+    '<div><label class="f">Quantity</label><input type="number" id="af-qty" step="any" min="0" value="0"></div></div>' +
+    '<label class="f">Note</label><input type="text" id="af-note" placeholder="Reason…">' +
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="af-save">Save Adjustment</button></div>');
+  $("#af-save", back).onclick = () => {
+    const pid = $("#af-prod", back).value, p = prodById(pid);
+    const q = Math.abs(Number($("#af-qty", back).value) || 0);
+    if (!q) { toast("Enter a quantity."); return; }
+    const typ = $("#af-type", back).value;
+    const sign = typ === "adjust-in" ? 1 : -1;
+    if (sign < 0 && q > stockOf(pid)) { toast("Quantity is more than current stock."); return; }
+    addMovement(pid, sign * q, typ === "damage" ? "damage" : "adjust", "adjust", uid(), todayStr(), $("#af-note", back).value.trim() || (typ === "damage" ? "Damaged stock" : "Manual adjustment"));
+    save(); closeModal(); renderAll(); toast("Stock updated: " + prodLabel(p) + " → " + fmtNum(stockOf(pid)) + " " + p.unit);
+  };
+}
+
+/* ---------------- sales & purchases ---------------- */
+function lineRow(kind, item) {
+  item = item || {};
+  const prods = S.products.map((p) => '<option value="' + p.id + '"' + (item.productId === p.id ? " selected" : "") + ">" + esc(prodLabel(p)) + "</option>").join("");
+  return '<tr class="lrow">' +
+    '<td style="min-width:170px"><select class="li-prod"><option value="">— Select product —</option>' + prods + "</select></td>" +
+    '<td style="width:92px"><input type="number" class="li-qty" step="any" min="0" value="' + (item.qty || "") + '" placeholder="0"></td>' +
+    '<td style="width:96px"><select class="li-unit">' + UNITS.map((u) => "<option" + (item.unit === u ? " selected" : "") + ">" + u + "</option>").join("") + "</select></td>" +
+    '<td style="width:110px"><input type="number" class="li-rate" step="any" min="0" value="' + (item.rate || "") + '" placeholder="0"></td>' +
+    '<td class="num li-amt" style="width:110px">Rs 0</td>' +
+    '<td style="width:40px"><button class="iconbtn li-del" type="button"><i data-lucide="x"></i></button></td></tr>';
+}
+function linesHead() { return "<thead><tr><th>Product</th><th>Qty</th><th>Unit</th><th>Rate</th><th class='num'>Amount</th><th></th></tr></thead><tbody></tbody>"; }
+function setupLines(tableSel, kind) {
+  const tbl = $(tableSel);
+  tbl.innerHTML = linesHead();
+  const tbody = tbl.querySelector("tbody");
+  const addRow = (item) => { tbody.insertAdjacentHTML("beforeend", lineRow(kind, item)); wireRow(tbody.lastElementChild, kind); icons(); recalc(kind); };
+  const wireRow = (tr, kind) => {
+    const prodSel = tr.querySelector(".li-prod"), unitSel = tr.querySelector(".li-unit"), rateIn = tr.querySelector(".li-rate");
+    prodSel.onchange = () => {
+      const p = prodById(prodSel.value);
+      if (p) {
+        unitSel.value = p.unit;
+        rateIn.value = kind === "sale" ? (p.saleRate || "") : (p.purchaseRate || "");
+      }
+      recalc(kind);
+    };
+    unitSel.onchange = () => {
+      const p = prodById(prodSel.value);
+      if (p) {
+        const base = kind === "sale" ? p.saleRate : p.purchaseRate;
+        const r = rateInUnit(Number(base) || 0, p.unit, unitSel.value, p);
+        if (r != null) rateIn.value = Math.round(r * 100) / 100;
+        else toast("Conversion needs the product's weight per piece.");
+      }
+      recalc(kind);
+    };
+    tr.querySelectorAll("input,select").forEach((el) => el.addEventListener("input", () => recalc(kind)));
+    tr.querySelector(".li-del").onclick = () => { tr.remove(); recalc(kind); };
+  };
+  addRow();
+  return { addRow, tbody };
+}
+function readLines(kind) {
+  const tbl = kind === "sale" ? $("#sale-lines") : $("#pur-lines");
+  const items = [];
+  $$(".lrow", tbl).forEach((tr) => {
+    const pid = tr.querySelector(".li-prod").value;
+    const qty = Number(tr.querySelector(".li-qty").value) || 0;
+    const unit = tr.querySelector(".li-unit").value;
+    const rate = Number(tr.querySelector(".li-rate").value) || 0;
+    if (pid && qty > 0) items.push({ productId: pid, qty, unit, rate, amount: Math.round(qty * rate * 100) / 100 });
+  });
+  return items;
+}
+function totalsHtml(kind, items) {
+  const sub = items.reduce((a, i) => a + i.amount, 0);
+  return '<div class="kv"><span>Subtotal</span><b>' + fmtRs(sub) + "</b></div>" +
+    (kind === "sale" ? '<div class="kv"><span>Discount</span><input type="number" id="' + kind + '-discount" step="any" min="0" value="0"></div>' : "") +
+    '<div class="kv grand"><span>Grand Total</span><span id="' + kind + '-grand">' + fmtRs(sub) + "</span></div>" +
+    '<div class="kv"><span>Paid Amount</span><input type="number" id="' + kind + '-paid" step="any" min="0" value="0"></div>' +
+    '<div class="kv"><span>Remaining</span><b id="' + kind + '-remain">' + fmtRs(sub) + "</b></div>";
+}
+function recalc(kind) {
+  const items = readLines(kind);
+  $$(kind === "sale" ? "#sale-lines .lrow" : "#pur-lines .lrow").forEach((tr) => {
+    const q = Number(tr.querySelector(".li-qty").value) || 0, r = Number(tr.querySelector(".li-rate").value) || 0;
+    tr.querySelector(".li-amt").textContent = fmtRs(q * r);
+  });
+  const box = kind === "sale" ? $("#sale-totals") : $("#pur-totals");
+  if (!box.dataset.ready) { box.innerHTML = totalsHtml(kind, items); box.dataset.ready = "1"; wireTotals(kind); }
+  const sub = items.reduce((a, i) => a + i.amount, 0);
+  const disc = kind === "sale" ? (Number(($("#sale-discount") || {}).value) || 0) : 0;
+  const grand = Math.max(0, sub - disc);
+  const paid = Number((document.getElementById(kind + "-paid") || {}).value) || 0;
+  const g = document.getElementById(kind + "-grand"), rm = document.getElementById(kind + "-remain");
+  if (g) g.textContent = fmtRs(grand);
+  if (rm) rm.textContent = fmtRs(grand - paid);
+  const subEl = box.querySelector(".kv b"); if (subEl) subEl.textContent = fmtRs(sub);
+}
+function wireTotals(kind) {
+  ["discount", "paid"].forEach((k) => {
+    const el = document.getElementById(kind + "-" + k);
+    if (el) el.addEventListener("input", () => recalc(kind));
+  });
+}
+let saleLinesApi = null, purLinesApi = null, editingSaleId = null, editingPurId = null;
+function fillPartySelects() {
+  const sc = $("#sale-customer");
+  sc.innerHTML = '<option value="">Walk-in Customer (Cash)</option>' + S.customers.map((c) => '<option value="' + c.id + '">' + esc(c.name) + "</option>").join("");
+  const ps = $("#pur-supplier");
+  ps.innerHTML = '<option value="">— Select supplier —</option>' + S.suppliers.map((s) => '<option value="' + s.id + '">' + esc(s.name) + "</option>").join("");
+}
+function renderSalesPage() {
+  fillPartySelects();
+  if (!saleLinesApi) { saleLinesApi = setupLines("#sale-lines", "sale"); $("#sale-date").value = todayStr(); recalc("sale"); }
+  $("#sale-inv-no").textContent = editingSaleId ? "Editing " + (S.sales.find((s) => s.id === editingSaleId) || {}).no : "Next: S-" + String(S.counters.sale + 1).padStart(4, "0");
+  $("#sale-oversell-wrap").style.display = isAdmin() ? "" : "none";
+  $("#sales-recent").innerHTML = recentTxTable("sale");
+  icons();
+}
+function renderPurchasesPage() {
+  fillPartySelects();
+  if (!purLinesApi) { purLinesApi = setupLines("#pur-lines", "purchase"); $("#pur-date").value = todayStr(); recalc("purchase"); }
+  $("#pur-inv-no").textContent = editingPurId ? "Editing " + (S.purchases.find((p) => p.id === editingPurId) || {}).no : "Next: P-" + String(S.counters.purchase + 1).padStart(4, "0");
+  $("#pur-recent").innerHTML = recentTxTable("purchase");
+  icons();
+}
+function recentTxTable(kind) {
+  const list = (kind === "sale" ? S.sales : S.purchases).slice().sort((a, b) => (b.date || "").localeCompare(a.date || "")).slice(0, 8);
+  const head = "<thead><tr><th>No.</th><th>Date</th><th>" + (kind === "sale" ? "Customer" : "Supplier") + "</th><th class='num'>Total</th><th class='num'>Balance</th><th>Status</th><th></th></tr></thead><tbody>";
+  if (!list.length) return head + '<tr><td colspan="7"><div class="empty"><div class="et">No records yet</div></div></td></tr></tbody>';
+  return head + list.map((x) => {
+    const party = kind === "sale" ? (custById(x.customerId) || {}).name || "Walk-in" : (supById(x.supplierId) || {}).name || "—";
+    const bal = x.status === "active" ? (kind === "sale" ? invoiceBalance("sale", x) : invoiceBalance("purchase", x)) : 0;
+    return "<tr" + (x.status !== "active" ? ' style="opacity:.5"' : "") + "><td><b>" + esc(x.no) + "</b></td><td>" + fmtDate(x.date) + "</td><td>" + esc(party) + "</td><td class='num'>" + fmtRs(x.total) + "</td><td class='num'>" + (x.status === "active" ? fmtRs(bal) : "—") + '</td><td>' + (x.status === "active" ? (bal > 0 ? '<span class="pill warn">Partial</span>' : '<span class="pill ok">Paid</span>') : '<span class="pill bad">Cancelled</span>') + '</td><td class="num">' + txButtons(kind, x) + "</td></tr>";
+  }).join("") + "</tbody>";
+}
+function invoiceBalance(kind, inv) {
+  let extra = 0;
+  for (const p of S.payments) if (p.refType === kind && p.refId === inv.id) extra += Number(p.amount) || 0;
+  return Math.round(((Number(inv.total) || 0) - (Number(inv.paid) || 0) - extra) * 100) / 100;
+}
+function txButtons(kind, x) {
+  if (x.status !== "active") return "";
+  return '<button class="iconbtn" title="Print" data-print-' + kind + '="' + x.id + '"><i data-lucide="printer"></i></button> ' +
+    '<button class="iconbtn" title="Edit" data-edit-' + kind + '="' + x.id + '"><i data-lucide="pencil"></i></button>' +
+    (isAdmin() ? ' <button class="iconbtn" title="Cancel" data-cancel-' + kind + '="' + x.id + '"><i data-lucide="ban"></i></button>' : "");
+}
+function wireTxButtons(root) {
+  $$("[data-print-sale]", root).forEach((b) => b.onclick = () => printInvoice("sale", b.getAttribute("data-print-sale")));
+  $$("[data-print-purchase]", root).forEach((b) => b.onclick = () => printInvoice("purchase", b.getAttribute("data-print-purchase")));
+  $$("[data-edit-sale]", root).forEach((b) => b.onclick = () => loadSaleForEdit(b.getAttribute("data-edit-sale")));
+  $$("[data-edit-purchase]", root).forEach((b) => b.onclick = () => loadPurchaseForEdit(b.getAttribute("data-edit-purchase")));
+  $$("[data-cancel-sale]", root).forEach((b) => b.onclick = () => cancelTx("sale", b.getAttribute("data-cancel-sale")));
+  $$("[data-cancel-purchase]", root).forEach((b) => b.onclick = () => cancelTx("purchase", b.getAttribute("data-cancel-purchase")));
+}
+function validateStock(items, allowOver) {
+  for (const it of items) {
+    const p = prodById(it.productId); if (!p) continue;
+    const q = convertQty(it.qty, it.unit, p.unit, p);
+    if (q == null) return "Unit conversion is not possible for " + prodLabel(p) + " (set its weight per piece).";
+    if (!allowOver && q > stockOf(p.id) + 1e-9) return "Insufficient stock for " + prodLabel(p) + ": available " + fmtNum(stockOf(p.id)) + " " + p.unit + ".";
+  }
+  return null;
+}
+function applyMovements(kind, inv) {
+  for (const it of inv.items) {
+    const p = prodById(it.productId); if (!p) continue;
+    const q = convertQty(it.qty, it.unit, p.unit, p);
+    if (q == null) continue;
+    addMovement(it.productId, kind === "sale" ? -q : q, kind, kind, inv.id, inv.date, (kind === "sale" ? "Sale " : "Purchase ") + inv.no);
+  }
+}
+function saveSale() {
+  const items = readLines("sale");
+  if (!items.length) { toast("Add at least one product with quantity."); return; }
+  const sub = items.reduce((a, i) => a + i.amount, 0);
+  const disc = Number(($("#sale-discount") || {}).value) || 0;
+  const total = Math.max(0, Math.round((sub - disc) * 100) / 100);
+  const paid = Number(($("#sale-paid") || {}).value) || 0;
+  if (paid > total) { toast("Paid amount cannot exceed the grand total."); return; }
+  const err = validateStock(items, isAdmin() && $("#sale-oversell").checked);
+  if (err) { toast(err); return; }
+  if (editingSaleId) {
+    const old = S.sales.find((s) => s.id === editingSaleId);
+    removeMovements("sale", old.id);
+    Object.assign(old, { customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim() });
+    applyMovements("sale", old);
+    editingSaleId = null; $("#btn-save-sale").querySelector("span").textContent = t("saveInvoice");
+    save(); toast("Invoice updated: " + old.no); resetSaleForm(); renderAll();
+    printInvoice("sale", old.id);
+    return;
+  }
+  S.counters.sale += 1;
+  const inv = { id: uid(), no: "S-" + String(S.counters.sale).padStart(4, "0"), customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim(), status: "active", createdBy: me() ? me().username : "" };
+  S.sales.push(inv);
+  applyMovements("sale", inv);
+  save(); toast("Invoice saved: " + inv.no); resetSaleForm(); renderAll();
+  printInvoice("sale", inv.id);
+}
+function resetSaleForm() {
+  saleLinesApi = setupLines("#sale-lines", "sale");
+  $("#sale-totals").dataset.ready = ""; $("#sale-totals").innerHTML = ""; recalc("sale");
+  $("#sale-date").value = todayStr(); $("#sale-note").value = "";
+  $("#sale-inv-no").textContent = "Next: S-" + String(S.counters.sale + 1).padStart(4, "0");
+}
+function loadSaleForEdit(id) {
+  const inv = S.sales.find((s) => s.id === id); if (!inv || inv.status !== "active") return;
+  go("sales");
+  editingSaleId = id;
+  $("#sale-customer").value = inv.customerId || ""; $("#sale-date").value = inv.date; $("#sale-method").value = inv.method || "Cash"; $("#sale-note").value = inv.note || "";
+  saleLinesApi = setupLines("#sale-lines", "sale");
+  inv.items.forEach((it, i) => { if (i > 0) saleLinesApi.addRow(it); else { const tr = $("#sale-lines .lrow"); tr.querySelector(".li-prod").value = it.productId; tr.querySelector(".li-qty").value = it.qty; tr.querySelector(".li-unit").value = it.unit; tr.querySelector(".li-rate").value = it.rate; } });
+  $("#sale-totals").dataset.ready = ""; $("#sale-totals").innerHTML = totalsHtml("sale", inv.items);
+  wireTotals("sale");
+  $("#sale-discount").value = inv.discount || 0; $("#sale-paid").value = inv.paid || 0;
+  recalc("sale");
+  $("#sale-inv-no").textContent = "Editing " + inv.no;
+  $("#btn-save-sale").querySelector("span").textContent = "Update Invoice";
+  window.scrollTo({ top: 0 });
+}
+function savePurchase() {
+  const items = readLines("purchase");
+  if (!items.length) { toast("Add at least one product with quantity."); return; }
+  const supId = $("#pur-supplier").value;
+  if (!supId) { toast("Select a supplier first (add one in Suppliers if needed)."); return; }
+  const sub = items.reduce((a, i) => a + i.amount, 0);
+  const paid = Number(($("#purchase-paid") || {}).value) || 0;
+  if (paid > sub) { toast("Paid amount cannot exceed the total."); return; }
+  if (editingPurId) {
+    const old = S.purchases.find((p) => p.id === editingPurId);
+    removeMovements("purchase", old.id);
+    Object.assign(old, { supplierId: supId, date: $("#pur-date").value || todayStr(), billNo: $("#pur-billno").value.trim(), items, total: sub, paid, note: $("#pur-note").value.trim() });
+    applyMovements("purchase", old);
+    editingPurId = null; $("#btn-save-purchase").querySelector("span").textContent = t("savePurchase");
+    save(); toast("Purchase updated: " + old.no); resetPurForm(); renderAll();
+    return;
+  }
+  S.counters.purchase += 1;
+  const inv = { id: uid(), no: "P-" + String(S.counters.purchase).padStart(4, "0"), supplierId: supId, date: $("#pur-date").value || todayStr(), billNo: $("#pur-billno").value.trim(), items, total: sub, paid, method: "Cash", note: $("#pur-note").value.trim(), status: "active", createdBy: me() ? me().username : "" };
+  S.purchases.push(inv);
+  applyMovements("purchase", inv);
+  save(); toast("Purchase saved: " + inv.no); resetPurForm(); renderAll();
+}
+function resetPurForm() {
+  purLinesApi = setupLines("#pur-lines", "purchase");
+  $("#pur-totals").dataset.ready = ""; $("#pur-totals").innerHTML = ""; recalc("purchase");
+  $("#pur-date").value = todayStr(); $("#pur-note").value = ""; $("#pur-billno").value = "";
+  $("#pur-inv-no").textContent = "Next: P-" + String(S.counters.purchase + 1).padStart(4, "0");
+}
+function loadPurchaseForEdit(id) {
+  const inv = S.purchases.find((p) => p.id === id); if (!inv || inv.status !== "active") return;
+  go("purchases");
+  editingPurId = id;
+  $("#pur-supplier").value = inv.supplierId || ""; $("#pur-date").value = inv.date; $("#pur-billno").value = inv.billNo || ""; $("#pur-note").value = inv.note || "";
+  purLinesApi = setupLines("#pur-lines", "purchase");
+  inv.items.forEach((it, i) => { if (i > 0) purLinesApi.addRow(it); else { const tr = $("#pur-lines .lrow"); tr.querySelector(".li-prod").value = it.productId; tr.querySelector(".li-qty").value = it.qty; tr.querySelector(".li-unit").value = it.unit; tr.querySelector(".li-rate").value = it.rate; } });
+  $("#pur-totals").dataset.ready = ""; $("#pur-totals").innerHTML = totalsHtml("purchase", inv.items);
+  wireTotals("purchase");
+  $("#purchase-paid").value = inv.paid || 0;
+  recalc("purchase");
+  $("#pur-inv-no").textContent = "Editing " + inv.no;
+  $("#btn-save-purchase").querySelector("span").textContent = "Update Purchase";
+  window.scrollTo({ top: 0 });
+}
+async function cancelTx(kind, id) {
+  if (!isAdmin()) { toast("Only Admin can cancel."); return; }
+  const list = kind === "sale" ? S.sales : S.purchases;
+  const inv = list.find((x) => x.id === id); if (!inv) return;
+  if (!(await confirmDlg("Cancel " + inv.no + "?", "The invoice will be cancelled and its stock effect reversed. Party balances will update automatically.", true))) return;
+  inv.status = "cancelled";
+  removeMovements(kind, inv.id);
+  if (editingSaleId === id) editingSaleId = null;
+  if (editingPurId === id) editingPurId = null;
+  save(); renderAll(); toast(inv.no + " cancelled — stock restored.");
+}
+
+/* ---------------- invoices page & printing ---------------- */
+function renderInvoices() {
+  const q = ($("#inv-search").value || "").toLowerCase();
+  const list = S.sales.slice().sort((a, b) => (b.date || "").localeCompare(a.date || "")).filter((s) => !q || (s.no + " " + ((custById(s.customerId) || {}).name || "")).toLowerCase().includes(q));
+  $("#inv-table").innerHTML = "<thead><tr><th>Invoice</th><th>Date</th><th>Customer</th><th>Items</th><th class='num'>Total</th><th class='num'>Paid</th><th class='num'>Balance</th><th>Status</th><th></th></tr></thead><tbody>" +
+    (list.length ? list.map((s) => {
+      const bal = s.status === "active" ? invoiceBalance("sale", s) : 0;
+      return "<tr" + (s.status !== "active" ? ' style="opacity:.5"' : "") + "><td><b>" + esc(s.no) + "</b></td><td>" + fmtDate(s.date) + "</td><td>" + esc((custById(s.customerId) || {}).name || "Walk-in") + "</td><td>" + s.items.length + "</td><td class='num'>" + fmtRs(s.total) + "</td><td class='num'>" + fmtRs(s.paid) + "</td><td class='num'>" + fmtRs(bal) + "</td><td>" + (s.status === "active" ? (bal > 0 ? '<span class="pill warn">Partial</span>' : '<span class="pill ok">Paid</span>') : '<span class="pill bad">Cancelled</span>') + '</td><td class="num">' + txButtons("sale", s) + "</td></tr>";
+    }).join("") : '<tr><td colspan="9"><div class="empty"><i data-lucide="file-text"></i><div class="et">No invoices yet</div></div></td></tr>') + "</tbody>";
+  const plist = S.purchases.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  $("#pinv-table").innerHTML = "<thead><tr><th>No.</th><th>Date</th><th>Supplier</th><th>Bill No.</th><th class='num'>Total</th><th class='num'>Balance</th><th>Status</th><th></th></tr></thead><tbody>" +
+    (plist.length ? plist.map((p) => {
+      const bal = p.status === "active" ? invoiceBalance("purchase", p) : 0;
+      return "<tr" + (p.status !== "active" ? ' style="opacity:.5"' : "") + "><td><b>" + esc(p.no) + "</b></td><td>" + fmtDate(p.date) + "</td><td>" + esc((supById(p.supplierId) || {}).name || "—") + "</td><td>" + esc(p.billNo || "—") + "</td><td class='num'>" + fmtRs(p.total) + "</td><td class='num'>" + fmtRs(bal) + "</td><td>" + (p.status === "active" ? (bal > 0 ? '<span class="pill warn">Partial</span>' : '<span class="pill ok">Paid</span>') : '<span class="pill bad">Cancelled</span>') + '</td><td class="num">' + txButtons("purchase", p) + "</td></tr>";
+    }).join("") : '<tr><td colspan="8"><div class="empty"><div class="et">No purchases yet</div></div></td></tr>') + "</tbody>";
+  wireTxButtons($("#page-invoices"));
+  icons();
+}
+function invoiceHtml(kind, inv, format) {
+  const st = S.settings;
+  const isSale = kind === "sale";
+  const party = isSale ? (custById(inv.customerId) || { name: "Walk-in Customer", phone: "" }) : (supById(inv.supplierId) || { name: "—", phone: "" });
+  const received = (Number(inv.paid) || 0) + S.payments.filter((p) => p.refType === kind && p.refId === inv.id).reduce((a, p) => a + (Number(p.amount) || 0), 0);
+  const bal = Math.round(((Number(inv.total) || 0) - received) * 100) / 100;
+  const logoImg = st.logo ? '<div class="ilogobox"><img src="' + st.logo + '" alt=""></div>' : "";
+  const shopBlock = '<div style="flex:1"><div class="iname" style="font-size:' + (st.nameSize || 26) + 'px">' + esc(st.shopName || "SteelDesk Traders") + "</div>" +
+    '<div class="imeta">' + esc(st.address || "") + (st.phone ? " • " + esc(st.phone) : "") + (st.email ? " • " + esc(st.email) : "") + (st.ntn ? "<br>NTN: " + esc(st.ntn) : "") + "</div></div>";
+  let head;
+  if (st.logoPos === "center") head = '<div class="ihead" style="flex-direction:column; text-align:center">' + logoImg + shopBlock + "</div>";
+  else if (st.logoPos === "right") head = '<div class="ihead">' + shopBlock + logoImg + "</div>";
+  else head = '<div class="ihead">' + logoImg + shopBlock + "</div>";
+  const rows = inv.items.map((it, i) => {
+    const p = prodById(it.productId) || {};
+    return "<tr><td class='c'>" + (i + 1) + "</td><td>" + esc(p.name || "—") + "</td><td>" + esc(p.brand || "") + "</td><td>" + esc(p.size || "") + "</td><td class='r'>" + fmtNum(it.qty) + "</td><td>" + esc(it.unit) + "</td><td class='r'>" + fmtRs(it.rate) + "</td><td class='r'>" + fmtRs(it.amount) + "</td></tr>";
+  }).join("");
+  const narrow = format !== "a4";
+  const itemTable = narrow
+    ? "<table><tr><th>Item</th><th class='r'>Qty</th><th class='r'>Rate</th><th class='r'>Total</th></tr>" + inv.items.map((it) => { const p = prodById(it.productId) || {}; return "<tr><td>" + esc(p.name || "") + " " + esc(p.brand || "") + " " + esc(p.size || "") + "</td><td class='r'>" + fmtNum(it.qty) + " " + esc(it.unit) + "</td><td class='r'>" + fmtRs(it.rate) + "</td><td class='r'>" + fmtRs(it.amount) + "</td></tr>"; }).join("") + "</table>"
+    : "<table><tr><th class='c'>#</th><th>Product</th><th>Brand</th><th>Size</th><th class='r'>Qty</th><th>Unit</th><th class='r'>Rate</th><th class='r'>Amount</th></tr>" + rows + "</table>";
+  return '<div class="inv ' + format + '">' + head +
+    '<div class="ititle">' + (isSale ? "SALES INVOICE" : "PURCHASE RECORD") + "</div>" +
+    '<div class="irow"><span><b>Invoice No:</b> ' + esc(inv.no) + "</span><span><b>Date:</b> " + fmtDate(inv.date) + "</span></div>" +
+    '<div class="irow"><span><b>' + (isSale ? "Customer" : "Supplier") + ":</b> " + esc(party.name || "—") + (party.phone ? " (" + esc(party.phone) + ")" : "") + "</span><span><b>Method:</b> " + esc(inv.method || "Cash") + "</span></div>" +
+    itemTable +
+    '<div class="itot">' +
+    '<div class="kv"><span>Subtotal</span><span>' + fmtRs(inv.subtotal != null ? inv.subtotal : inv.total) + "</span></div>" +
+    (isSale && inv.discount ? '<div class="kv"><span>Discount</span><span>− ' + fmtRs(inv.discount) + "</span></div>" : "") +
+    '<div class="kv grand"><span>Grand Total</span><span>' + fmtRs(inv.total) + "</span></div>" +
+    '<div class="kv"><span>Paid</span><span>' + fmtRs(received) + "</span></div>" +
+    '<div class="kv"><span>Remaining Balance</span><span>' + fmtRs(bal) + "</span></div></div>" +
+    (inv.note ? '<div style="margin-top:8px; font-size:.88em"><b>Note:</b> ' + esc(inv.note) + "</div>" : "") +
+    '<div class="ifoot">' + esc(st.footerMsg || "Thank you for your business!") + "<br><span style='color:#555'>Generated by SteelDesk • " + esc(st.shopName || "") + "</span></div></div>";
+}
+function printInvoice(kind, id, format) {
+  const inv = (kind === "sale" ? S.sales : S.purchases).find((x) => x.id === id);
+  if (!inv) return;
+  $("#print-area").innerHTML = invoiceHtml(kind, inv, format || S.settings.invoiceFormat || "a4");
+  setTimeout(() => window.print(), 60);
+}
+function printHtml(html) { $("#print-area").innerHTML = html; setTimeout(() => window.print(), 60); }
+
+/* ---------------- parties: customers & suppliers ---------------- */
+function partyForm(kind, party) {
+  party = party || {};
+  const isCust = kind === "customer";
+  const back = openModal(modalHead((party.id ? "Edit " : "Add ") + (isCust ? "Customer" : "Supplier"), isCust ? "user-plus" : "factory") +
+    '<label class="f">Name *</label><input type="text" id="pt-name" value="' + esc(party.name || "") + '">' +
+    '<div class="mgrid"><div><label class="f">Phone</label><input type="tel" id="pt-phone" value="' + esc(party.phone || "") + '"></div>' +
+    '<div><label class="f">Opening Balance (Rs)</label><input type="number" id="pt-open" step="any" value="' + (party.opening || 0) + '"></div></div>' +
+    '<label class="f">Address</label><input type="text" id="pt-address" value="' + esc(party.address || "") + '">' +
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="pt-save">Save</button></div>');
+  $("#pt-save", back).onclick = () => {
+    const name = $("#pt-name", back).value.trim();
+    if (!name) { toast("Name is required."); return; }
+    const data = { name, phone: $("#pt-phone", back).value.trim(), address: $("#pt-address", back).value.trim(), opening: Number($("#pt-open", back).value) || 0 };
+    if (party.id) { Object.assign(isCust ? custById(party.id) : supById(party.id), data); toast("Saved."); }
+    else { (isCust ? S.customers : S.suppliers).push(Object.assign({ id: uid() }, data)); toast((isCust ? "Customer" : "Supplier") + " added."); }
+    save(); closeModal(); renderAll();
+  };
+}
+function partyLedger(kind, id) {
+  const isCust = kind === "customer";
+  const party = isCust ? custById(id) : supById(id); if (!party) return [];
+  const rows = [];
+  if (Number(party.opening)) rows.push({ date: "", label: "Opening Balance", debit: isCust ? party.opening : 0, credit: isCust ? 0 : party.opening });
+  const txs = isCust ? S.sales.filter((s) => s.customerId === id && s.status === "active") : S.purchases.filter((p) => p.supplierId === id && p.status === "active");
+  for (const x of txs) {
+    rows.push({ date: x.date, label: (isCust ? "Sale " : "Purchase ") + x.no, debit: isCust ? x.total : 0, credit: isCust ? 0 : x.total });
+    if (Number(x.paid)) rows.push({ date: x.date, label: "Paid at invoice " + x.no, debit: isCust ? 0 : x.paid, credit: isCust ? x.paid : 0 });
+  }
+  for (const p of S.payments.filter((p) => p.partyType === kind && p.partyId === id)) {
+    rows.push({ date: p.date, label: "Payment — " + (p.method || "Cash") + (p.note ? " (" + p.note + ")" : ""), debit: isCust ? 0 : p.amount, credit: isCust ? p.amount : 0 });
+  }
+  rows.sort((a, b) => (a.date || "").localeCompare(b.date || ""));
+  let bal = 0;
+  for (const r of rows) { bal += (isCust ? r.debit - r.credit : r.credit - r.debit); r.balance = bal; }
+  return rows;
+}
+function showLedger(kind, id) {
+  const isCust = kind === "customer";
+  const party = isCust ? custById(id) : supById(id); if (!party) return;
+  const card = $(isCust ? "#cust-ledger-card" : "#sup-ledger-card");
+  card.style.display = "";
+  $(isCust ? "#cust-ledger-title" : "#sup-ledger-title").textContent = "Ledger — " + party.name + "  •  Balance: " + fmtRs(isCust ? customerBalance(id) : supplierBalance(id));
+  const rows = partyLedger(kind, id);
+  $(isCust ? "#cust-ledger" : "#sup-ledger").innerHTML = "<thead><tr><th>Date</th><th>Detail</th><th class='num'>Debit</th><th class='num'>Credit</th><th class='num'>Balance</th></tr></thead><tbody>" +
+    (rows.length ? rows.map((r) => "<tr><td>" + (r.date ? fmtDate(r.date) : "—") + "</td><td>" + esc(r.label) + "</td><td class='num'>" + (r.debit ? fmtRs(r.debit) : "—") + "</td><td class='num'>" + (r.credit ? fmtRs(r.credit) : "—") + "</td><td class='num'><b>" + fmtRs(r.balance) + "</b></td></tr>").join("") : '<tr><td colspan="5"><div class="empty"><div class="et">No transactions</div></div></td></tr>') + "</tbody>";
+  card.scrollIntoView({ behavior: "smooth", block: "start" });
+  icons();
+}
+function printLedger(kind, id) {
+  const isCust = kind === "customer";
+  const party = isCust ? custById(id) : supById(id); if (!party) return;
+  const rows = partyLedger(kind, id);
+  const body = rows.map((r) => "<tr><td>" + (r.date ? fmtDate(r.date) : "—") + "</td><td>" + esc(r.label) + "</td><td class='r'>" + (r.debit ? fmtRs(r.debit) : "") + "</td><td class='r'>" + (r.credit ? fmtRs(r.credit) : "") + "</td><td class='r'><b>" + fmtRs(r.balance) + "</b></td></tr>").join("");
+  printHtml('<div class="inv a4"><div class="ihead"><div style="flex:1"><div class="iname" style="font-size:' + (S.settings.nameSize || 26) + 'px">' + esc(S.settings.shopName || "") + '</div><div class="imeta">' + esc(S.settings.address || "") + (S.settings.phone ? " • " + esc(S.settings.phone) : "") + "</div></div></div>" +
+    '<div class="ititle">' + (isCust ? "CUSTOMER" : "SUPPLIER") + " LEDGER</div>" +
+    '<div class="irow"><span><b>' + esc(party.name) + "</b>" + (party.phone ? " (" + esc(party.phone) + ")" : "") + "</span><span><b>Balance:</b> " + fmtRs(isCust ? customerBalance(id) : supplierBalance(id)) + "</span></div>" +
+    "<table><tr><th>Date</th><th>Detail</th><th class='r'>Debit</th><th class='r'>Credit</th><th class='r'>Balance</th></tr>" + body + "</table>" +
+    '<div class="ifoot">' + esc(S.settings.footerMsg || "") + "</div></div>");
+}
+function renderParties(kind) {
+  const isCust = kind === "customer";
+  const list = isCust ? S.customers : S.suppliers;
+  const q = ($(isCust ? "#cust-search" : "#sup-search").value || "").toLowerCase();
+  const rows = list.filter((p) => !q || (p.name + " " + (p.phone || "")).toLowerCase().includes(q));
+  const balFn = isCust ? customerBalance : supplierBalance;
+  const totFn = (id) => (isCust ? S.sales : S.purchases).filter((x) => (isCust ? x.customerId : x.supplierId) === id && x.status === "active").reduce((a, x) => a + (Number(x.total) || 0), 0);
+  const recvFn = isCust ? customerReceived : supplierPaid;
+  $(isCust ? "#cust-table" : "#sup-table").innerHTML = "<thead><tr><th>Name</th><th>Phone</th><th class='num'>" + (isCust ? "Total Purchases" : "Total Purchased From") + "</th><th class='num'>" + (isCust ? "Received" : "Paid") + "</th><th class='num'>Balance Due</th><th></th></tr></thead><tbody>" +
+    (rows.length ? rows.map((p) => {
+      const bal = balFn(p.id);
+      return "<tr><td><b>" + esc(p.name) + "</b>" + (p.address ? '<div class="small muted">' + esc(p.address) + "</div>" : "") + "</td><td>" + esc(p.phone || "—") + "</td><td class='num'>" + fmtRs(totFn(p.id)) + "</td><td class='num'>" + fmtRs(recvFn(p.id)) + "</td><td class='num'><span class='pill " + (bal > 0 ? "warn" : "ok") + "'>" + fmtRs(bal) + "</span></td>" +
+        '<td class="num"><button class="btn sm ghost" data-ledger="' + p.id + '">Ledger</button> <button class="btn sm ok" data-pay="' + p.id + '">' + (isCust ? "Receive" : "Pay") + '</button> <button class="iconbtn" data-edit-party="' + p.id + '"><i data-lucide="pencil"></i></button></td></tr>';
+    }).join("") : '<tr><td colspan="6"><div class="empty"><i data-lucide="users"></i><div class="et">No ' + (isCust ? "customers" : "suppliers") + ' yet</div><div class="small">Click Add to create one.</div></div></td></tr>') + "</tbody>";
+  const tbl = $(isCust ? "#cust-table" : "#sup-table");
+  $$("[data-ledger]", tbl).forEach((b) => b.onclick = () => showLedger(kind, b.getAttribute("data-ledger")));
+  $$("[data-pay]", tbl).forEach((b) => b.onclick = () => paymentForm(isCust ? "in" : "out", b.getAttribute("data-pay")));
+  $$("[data-edit-party]", tbl).forEach((b) => b.onclick = () => partyForm(kind, isCust ? custById(b.getAttribute("data-edit-party")) : supById(b.getAttribute("data-edit-party"))));
+  icons();
+}
+const renderCustomers = () => renderParties("customer");
+const renderSuppliers = () => renderParties("supplier");
+
+/* ---------------- payments ---------------- */
+function paymentForm(dir, presetPartyId, refType, refId) {
+  const isIn = dir === "in";
+  const parties = isIn ? S.customers : S.suppliers;
+  if (!parties.length) { toast("Add a " + (isIn ? "customer" : "supplier") + " first."); return; }
+  const back = openModal(modalHead(isIn ? "Receive Payment (Customer)" : "Pay Supplier", "wallet") +
+    '<label class="f">' + (isIn ? "Customer" : "Supplier") + '</label><select id="pm-party">' + parties.map((p) => '<option value="' + p.id + '"' + (presetPartyId === p.id ? " selected" : "") + ">" + esc(p.name) + "</option>").join("") + "</select>" +
+    '<div class="small muted" id="pm-bal" style="margin-top:.3rem"></div>' +
+    '<div class="mgrid"><div><label class="f">Amount (Rs) *</label><input type="number" id="pm-amount" step="any" min="0"></div>' +
+    '<div><label class="f">Date</label><input type="date" id="pm-date" value="' + todayStr() + '"></div></div>' +
+    '<div class="mgrid"><div><label class="f">Method</label><select id="pm-method">' + METHODS.map((m) => "<option>" + m + "</option>").join("") + "</select></div>" +
+    '<div><label class="f">Note</label><input type="text" id="pm-note" placeholder="—"></div></div>' +
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn ' + (isIn ? "ok" : "") + '" id="pm-save">Save Payment</button></div>');
+  const updBal = () => { const id = $("#pm-party", back).value; $("#pm-bal", back).textContent = "Current balance due: " + fmtRs(isIn ? customerBalance(id) : supplierBalance(id)); };
+  $("#pm-party", back).onchange = updBal; updBal();
+  $("#pm-save", back).onclick = () => {
+    const amt = Number($("#pm-amount", back).value) || 0;
+    if (amt <= 0) { toast("Enter a valid amount."); return; }
+    S.counters.payment += 1;
+    S.payments.push({ id: uid(), no: "PAY-" + String(S.counters.payment).padStart(4, "0"), date: $("#pm-date", back).value || todayStr(), dir, partyType: isIn ? "customer" : "supplier", partyId: $("#pm-party", back).value, amount: amt, method: $("#pm-method", back).value, note: $("#pm-note", back).value.trim(), refType: refType || "", refId: refId || "" });
+    save(); closeModal(); renderAll(); toast("Payment recorded.");
+  };
+}
+function renderPayments() {
+  const list = S.payments.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  $("#pay-table").innerHTML = "<thead><tr><th>No.</th><th>Date</th><th>Type</th><th>Party</th><th>Method</th><th class='num'>Amount</th><th></th></tr></thead><tbody>" +
+    (list.length ? list.map((p) => {
+      const party = p.partyType === "customer" ? custById(p.partyId) : supById(p.partyId);
+      return "<tr><td><b>" + esc(p.no || "") + "</b></td><td>" + fmtDate(p.date) + "</td><td>" + (p.dir === "in" ? '<span class="pill ok">Received</span>' : '<span class="pill info">Paid Out</span>') + "</td><td>" + esc(party ? party.name : "—") + (p.note ? '<div class="small muted">' + esc(p.note) + "</div>" : "") + "</td><td>" + esc(p.method || "Cash") + "</td><td class='num'><b>" + fmtRs(p.amount) + "</b></td>" +
+        '<td class="num"><button class="iconbtn" title="Receipt" data-receipt="' + p.id + '"><i data-lucide="printer"></i></button>' + (isAdmin() ? ' <button class="iconbtn" title="Delete" data-del-pay="' + p.id + '"><i data-lucide="trash-2"></i></button>' : "") + "</td></tr>";
+    }).join("") : '<tr><td colspan="7"><div class="empty"><i data-lucide="wallet"></i><div class="et">No payments yet</div><div class="small">Use the buttons above to record a payment.</div></div></td></tr>') + "</tbody>";
+  $$("#pay-table [data-del-pay]").forEach((b) => b.onclick = async () => {
+    if (await confirmDlg("Delete payment?", "Party balances will be recalculated without this payment.", true)) {
+      S.payments = S.payments.filter((x) => x.id !== b.getAttribute("data-del-pay")); save(); renderAll(); toast("Payment deleted.");
+    }
+  });
+  $$("#pay-table [data-receipt]").forEach((b) => b.onclick = () => printReceipt(b.getAttribute("data-receipt")));
+  icons();
+}
+function printReceipt(payId) {
+  const p = S.payments.find((x) => x.id === payId); if (!p) return;
+  const party = p.partyType === "customer" ? custById(p.partyId) : supById(p.partyId);
+  const bal = p.partyType === "customer" ? customerBalance(p.partyId) : supplierBalance(p.partyId);
+  printHtml('<div class="inv t80"><div class="ihead"><div style="flex:1; text-align:center"><div class="iname" style="font-size:19px">' + esc(S.settings.shopName || "") + '</div><div class="imeta">' + esc(S.settings.address || "") + (S.settings.phone ? " • " + esc(S.settings.phone) : "") + "</div></div></div>" +
+    '<div class="ititle">PAYMENT RECEIPT</div>' +
+    '<div class="irow"><span><b>No:</b> ' + esc(p.no || "") + "</span><span><b>Date:</b> " + fmtDate(p.date) + "</span></div>" +
+    '<div class="irow"><span><b>' + (p.dir === "in" ? "Received from" : "Paid to") + ":</b> " + esc(party ? party.name : "—") + "</span></div>" +
+    '<div class="irow"><span><b>Method:</b> ' + esc(p.method || "Cash") + "</span><span><b>Amount:</b> " + fmtRs(p.amount) + "</span></div>" +
+    '<div class="irow"><span><b>Remaining Balance:</b> ' + fmtRs(bal) + "</span></div>" +
+    (p.note ? '<div style="margin-top:5px"><b>Note:</b> ' + esc(p.note) + "</div>" : "") +
+    '<div class="ifoot">' + esc(S.settings.footerMsg || "Thank you!") + "</div></div>");
+}
+
+/* ---------------- expenses ---------------- */
+function expenseForm(e) {
+  e = e || {};
+  const back = openModal(modalHead(e.id ? "Edit Expense" : "Add Expense", "receipt-text") +
+    '<div class="mgrid"><div><label class="f">Category</label><select id="ef-cat">' + EXP_CATS.map((c) => '<option' + (e.category === c ? " selected" : "") + ">" + esc(c) + "</option>").join("") + "</select></div>" +
+    '<div><label class="f">Amount (Rs) *</label><input type="number" id="ef-amount" step="any" min="0" value="' + (e.amount || "") + '"></div></div>' +
+    '<div class="mgrid"><div><label class="f">Date</label><input type="date" id="ef-date" value="' + (e.date || todayStr()) + '"></div>' +
+    '<div><label class="f">Note</label><input type="text" id="ef-note" value="' + esc(e.note || "") + '"></div></div>' +
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="ef-save">Save</button></div>');
+  $("#ef-save", back).onclick = () => {
+    const amt = Number($("#ef-amount", back).value) || 0;
+    if (amt <= 0) { toast("Enter a valid amount."); return; }
+    const data = { category: $("#ef-cat", back).value, amount: amt, date: $("#ef-date", back).value || todayStr(), note: $("#ef-note", back).value.trim() };
+    if (e.id) Object.assign(S.expenses.find((x) => x.id === e.id), data); else S.expenses.push(Object.assign({ id: uid() }, data));
+    save(); closeModal(); renderAll(); toast("Expense saved.");
+  };
+}
+function renderExpenses() {
+  const td = todayStr(), ym = td.slice(0, 7);
+  const d = new Date(); const dow = (d.getDay() + 6) % 7; const wkStart = new Date(d); wkStart.setDate(d.getDate() - dow); const wk = todayStr(wkStart);
+  const sum = (f) => S.expenses.filter(f).reduce((a, e) => a + (Number(e.amount) || 0), 0);
+  $("#exp-stats").innerHTML =
+    statCard("calendar", "Today's Expenses", fmtRs(sum((e) => e.date === td)), fmtDate(td)) +
+    statCard("calendar-range", "This Week", fmtRs(sum((e) => e.date >= wk && e.date <= td)), "From " + fmtDate(wk)) +
+    statCard("receipt-text", "This Month", fmtRs(sum((e) => e.date.slice(0, 7) === ym)), ym);
+  const list = S.expenses.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  $("#exp-table").innerHTML = "<thead><tr><th>Date</th><th>Category</th><th>Note</th><th class='num'>Amount</th><th></th></tr></thead><tbody>" +
+    (list.length ? list.map((e) => "<tr><td>" + fmtDate(e.date) + "</td><td><span class='pill grey'>" + esc(e.category) + "</span></td><td>" + esc(e.note || "—") + "</td><td class='num'><b>" + fmtRs(e.amount) + "</b></td>" +
+      '<td class="num"><button class="iconbtn" data-edit-exp="' + e.id + '"><i data-lucide="pencil"></i></button> <button class="iconbtn" data-del-exp="' + e.id + '"><i data-lucide="trash-2"></i></button></td></tr>').join("")
+    : '<tr><td colspan="5"><div class="empty"><i data-lucide="receipt-text"></i><div class="et">No expenses yet</div></div></td></tr>') + "</tbody>";
+  $$("#exp-table [data-edit-exp]").forEach((b) => b.onclick = () => expenseForm(S.expenses.find((x) => x.id === b.getAttribute("data-edit-exp"))));
+  $$("#exp-table [data-del-exp]").forEach((b) => b.onclick = async () => { if (await confirmDlg("Delete expense?", "This record will be removed.", true)) { S.expenses = S.expenses.filter((x) => x.id !== b.getAttribute("data-del-exp")); save(); renderAll(); } });
+  icons();
+}
+
+/* ---------------- reports ---------------- */
+let lastReport = null;
+function runReport() {
+  const type = $("#rep-type").value;
+  const from = $("#rep-from").value || "0000-01-01", to = $("#rep-to").value || "9999-12-31";
+  const aSales = S.sales.filter((s) => s.status === "active"), aPur = S.purchases.filter((p) => p.status === "active");
+  let title = "", head = [], rows = [], summary = [];
+  const inR = (d) => d >= from && d <= to;
+  if (type === "sales") {
+    title = "Sales Report";
+    head = ["Invoice", "Date", "Customer", "Items", "Total", "Paid", "Balance"];
+    const list = aSales.filter((s) => inR(s.date));
+    rows = list.map((s) => [s.no, fmtDate(s.date), (custById(s.customerId) || {}).name || "Walk-in", s.items.length, fmtRs(s.total), fmtRs(s.paid), fmtRs(invoiceBalance("sale", s))]);
+    summary = [["Total Sales", fmtRs(list.reduce((a, s) => a + s.total, 0))], ["Gross Profit", fmtRs(list.reduce((a, s) => a + saleProfit(s), 0))], ["Invoices", list.length]];
+  } else if (type === "purchases") {
+    title = "Purchase Report";
+    head = ["No.", "Date", "Supplier", "Items", "Total", "Paid", "Balance"];
+    const list = aPur.filter((p) => inR(p.date));
+    rows = list.map((p) => [p.no, fmtDate(p.date), (supById(p.supplierId) || {}).name || "—", p.items.length, fmtRs(p.total), fmtRs(p.paid), fmtRs(invoiceBalance("purchase", p))]);
+    summary = [["Total Purchases", fmtRs(list.reduce((a, p) => a + p.total, 0))], ["Records", list.length]];
+  } else if (type === "profit") {
+    title = "Profit & Loss";
+    head = ["Date", "Invoice", "Revenue", "Cost", "Gross Profit"];
+    const list = aSales.filter((s) => inR(s.date));
+    rows = list.map((s) => [fmtDate(s.date), s.no, fmtRs(s.total), fmtRs(saleCost(s)), fmtRs(saleProfit(s))]);
+    const g = list.reduce((a, s) => a + saleProfit(s), 0);
+    const ex = S.expenses.filter((e) => inR(e.date)).reduce((a, e) => a + (Number(e.amount) || 0), 0);
+    summary = [["Gross Profit", fmtRs(g)], ["Expenses", fmtRs(ex)], ["Net Profit", fmtRs(g - ex)]];
+  } else if (type === "stock") {
+    title = "Stock Report";
+    head = ["Product", "Brand", "Size", "Stock", "Unit", "Cost Rate", "Value"];
+    rows = S.products.map((p) => [p.name, p.brand || "", p.size || "", fmtNum(stockOf(p.id)), p.unit, fmtRs(p.purchaseRate), fmtRs(stockOf(p.id) * (Number(p.purchaseRate) || 0))]);
+    summary = [["Total Stock Value", fmtRs(stockValue())], ["Products", S.products.length]];
+  } else if (type === "expenses") {
+    title = "Expense Report";
+    head = ["Date", "Category", "Note", "Amount"];
+    const list = S.expenses.filter((e) => inR(e.date));
+    rows = list.map((e) => [fmtDate(e.date), e.category, e.note || "", fmtRs(e.amount)]);
+    summary = [["Total Expenses", fmtRs(list.reduce((a, e) => a + (Number(e.amount) || 0), 0))]];
+  } else if (type === "custOut") {
+    title = "Customer Outstanding";
+    head = ["Customer", "Phone", "Balance Due"];
+    rows = S.customers.map((c) => [c.name, c.phone || "", customerBalance(c.id)]).filter((r) => r[2] > 0).map((r) => [r[0], r[1], fmtRs(r[2])]);
+    summary = [["Total Receivables", fmtRs(totalReceivables())]];
+  } else if (type === "supOut") {
+    title = "Supplier Outstanding";
+    head = ["Supplier", "Phone", "Balance Due"];
+    rows = S.suppliers.map((s) => [s.name, s.phone || "", supplierBalance(s.id)]).filter((r) => r[2] > 0).map((r) => [r[0], r[1], fmtRs(r[2])]);
+    summary = [["Total Payables", fmtRs(totalPayables())]];
+  } else if (type === "cashflow") {
+    title = "Cash Flow";
+    head = ["Date", "Detail", "In", "Out", "Net"];
+    const evs = [];
+    for (const s of aSales) if (Number(s.paid)) evs.push({ d: s.date, label: "Sale " + s.no + " (paid at invoice)", inn: s.paid, out: 0 });
+    for (const p of aPur) if (Number(p.paid)) evs.push({ d: p.date, label: "Purchase " + p.no + " (paid at invoice)", inn: 0, out: p.paid });
+    for (const p of S.payments) evs.push({ d: p.date, label: "Payment " + (p.no || "") + " — " + ((p.partyType === "customer" ? custById(p.partyId) : supById(p.partyId)) || {}).name, inn: p.dir === "in" ? p.amount : 0, out: p.dir === "out" ? p.amount : 0 });
+    for (const e of S.expenses) evs.push({ d: e.date, label: "Expense — " + e.category, inn: 0, out: e.amount });
+    const list = evs.filter((e) => inR(e.d)).sort((a, b) => a.d.localeCompare(b.d));
+    rows = list.map((e) => [fmtDate(e.d), e.label, e.inn ? fmtRs(e.inn) : "—", e.out ? fmtRs(e.out) : "—", fmtRs(e.inn - e.out)]);
+    const tin = list.reduce((a, e) => a + e.inn, 0), tout = list.reduce((a, e) => a + e.out, 0);
+    summary = [["Cash In", fmtRs(tin)], ["Cash Out", fmtRs(tout)], ["Net", fmtRs(tin - tout)]];
+  }
+  lastReport = { title, head, rows, summary };
+  $("#rep-out-card").style.display = "";
+  $("#rep-title").textContent = title + "  •  " + fmtDate(from === "0000-01-01" ? todayStr() : from) + " → " + fmtDate(to === "9999-12-31" ? todayStr() : to);
+  $("#rep-summary").innerHTML = summary.map(([k, v]) => '<span class="pill info" style="font-size:.82rem; padding:.4rem .8rem">' + esc(k) + ": <b>" + v + "</b></span>").join("");
+  $("#rep-table").innerHTML = "<thead><tr>" + head.map((h) => "<th>" + esc(h) + "</th>").join("") + "</tr></thead><tbody>" +
+    (rows.length ? rows.map((r) => "<tr>" + r.map((c) => "<td>" + esc(c) + "</td>").join("") + "</tr>").join("") : '<tr><td colspan="' + head.length + '"><div class="empty"><div class="et">No data in this range</div></div></td></tr>') + "</tbody>";
+  icons();
+}
+function reportCsv() {
+  if (!lastReport) { toast("Run a report first."); return; }
+  const q = (v) => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+  const csv = [lastReport.head.map(q).join(",")].concat(lastReport.rows.map((r) => r.map(q).join(","))).join("\n");
+  download("steeldesk-" + lastReport.title.replace(/\s+/g, "-").toLowerCase() + ".csv", csv, "text/csv");
+}
+function reportPrint() {
+  if (!lastReport) { toast("Run a report first."); return; }
+  const body = lastReport.rows.map((r) => "<tr>" + r.map((c) => "<td>" + esc(c) + "</td>").join("") + "</tr>").join("");
+  printHtml('<div class="inv a4"><div class="ihead"><div style="flex:1"><div class="iname" style="font-size:' + (S.settings.nameSize || 26) + 'px">' + esc(S.settings.shopName || "") + '</div><div class="imeta">' + esc(S.settings.address || "") + (S.settings.phone ? " • " + esc(S.settings.phone) : "") + "</div></div></div>" +
+    '<div class="ititle">' + esc(lastReport.title.toUpperCase()) + "</div>" +
+    '<div class="irow">' + lastReport.summary.map(([k, v]) => "<span><b>" + esc(k) + ":</b> " + v + "</span>").join("") + "</div>" +
+    "<table><tr>" + lastReport.head.map((h) => "<th>" + esc(h) + "</th>").join("") + "</tr>" + body + "</table>" +
+    '<div class="ifoot">' + esc(S.settings.footerMsg || "") + "</div></div>");
+}
+function download(name, content, type) {
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([content], { type: type || "application/octet-stream" }));
+  a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+/* ---------------- settings ---------------- */
+function renderSettings() {
+  const st = S.settings;
+  $("#set-shopname").value = st.shopName || "";
+  $("#set-address").value = st.address || ""; $("#set-phone").value = st.phone || "";
+  $("#set-email").value = st.email || ""; $("#set-ntn").value = st.ntn || "";
+  $("#set-currency").value = st.currency || "PKR"; $("#set-footer").value = st.footerMsg || "";
+  $("#set-invformat").value = st.invoiceFormat || "a4"; $("#set-defunit").value = st.defaultUnit || "KG";
+  $("#set-logopos").value = st.logoPos || "left"; $("#set-namesize").value = String(st.nameSize || 26);
+  $("#set-logo-preview").innerHTML = st.logo ? '<img src="' + st.logo + '" style="width:100%; height:100%; object-fit:cover">' : '<i data-lucide="image" style="color:var(--muted)"></i>';
+  $("#user-table").innerHTML = "<thead><tr><th>Name</th><th>Username</th><th>Role</th><th></th></tr></thead><tbody>" +
+    S.users.map((u) => "<tr><td><b>" + esc(u.name) + "</b></td><td>" + esc(u.username) + "</td><td><span class='pill " + (u.role === "admin" ? "info" : "grey") + "'>" + esc(u.role) + "</span></td>" +
+      '<td class="num"><button class="iconbtn" data-edit-user="' + u.id + '"><i data-lucide="pencil"></i></button>' + (S.users.length > 1 && (!me() || me().id !== u.id) ? ' <button class="iconbtn" data-del-user="' + u.id + '"><i data-lucide="trash-2"></i></button>' : "") + "</td></tr>").join("") + "</tbody>";
+  $$("#user-table [data-edit-user]").forEach((b) => b.onclick = () => userForm(userById(b.getAttribute("data-edit-user"))));
+  $$("#user-table [data-del-user]").forEach((b) => b.onclick = async () => { if (await confirmDlg("Delete user?", "This login will be removed.", true)) { S.users = S.users.filter((u) => u.id !== b.getAttribute("data-del-user")); save(); renderSettings(); } });
+  const adminOnly = !isAdmin();
+  ["btn-save-settings", "btn-add-user", "set-logo-remove"].forEach((id) => { const el = document.getElementById(id); if (el) el.disabled = adminOnly; });
+  icons();
+}
+function userForm(u) {
+  u = u || {};
+  const back = openModal(modalHead(u.id ? "Edit User" : "Add User", "user-cog") +
+    '<label class="f">Full Name *</label><input type="text" id="uf-name" value="' + esc(u.name || "") + '">' +
+    '<div class="mgrid"><div><label class="f">Username *</label><input type="text" id="uf-user" value="' + esc(u.username || "") + '"></div>' +
+    '<div><label class="f">Password *</label><input type="text" id="uf-pass" value="' + esc(u.pass || "") + '"></div></div>' +
+    '<label class="f">Role</label><select id="uf-role"><option value="admin"' + (u.role === "admin" ? " selected" : "") + '>Admin</option><option value="staff"' + (u.role === "staff" ? " selected" : "") + ">Staff</option></select>" +
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="uf-save">Save</button></div>');
+  $("#uf-save", back).onclick = () => {
+    const name = $("#uf-name", back).value.trim(), un = $("#uf-user", back).value.trim(), pw = $("#uf-pass", back).value;
+    if (!name || !un || !pw) { toast("All fields are required."); return; }
+    if (S.users.some((x) => x.username.toLowerCase() === un.toLowerCase() && x.id !== u.id)) { toast("That username already exists."); return; }
+    const data = { name, username: un, pass: pw, role: $("#uf-role", back).value };
+    if (u.id) Object.assign(userById(u.id), data); else S.users.push(Object.assign({ id: uid() }, data));
+    save(); closeModal(); renderSettings(); toast("User saved.");
+  };
+}
+function saveSettingsFromForm() {
+  if (!isAdmin()) { toast("Only Admin can change settings."); return; }
+  Object.assign(S.settings, {
+    shopName: $("#set-shopname").value.trim() || "SteelDesk Traders",
+    address: $("#set-address").value.trim(), phone: $("#set-phone").value.trim(),
+    email: $("#set-email").value.trim(), ntn: $("#set-ntn").value.trim(),
+    currency: $("#set-currency").value.trim() || "PKR", footerMsg: $("#set-footer").value.trim(),
+    invoiceFormat: $("#set-invformat").value, defaultUnit: $("#set-defunit").value,
+    logoPos: $("#set-logopos").value, nameSize: Number($("#set-namesize").value) || 26
+  });
+  save(); applyBranding(); toast("Settings saved — branding will appear on new invoices.");
+}
+
+/* ---------------- global search ---------------- */
+function globalSearch(q) {
+  const box = $("#search-results");
+  q = (q || "").trim().toLowerCase();
+  if (!q) { box.style.display = "none"; box.innerHTML = ""; return; }
+  const out = [];
+  for (const p of S.products) if ((p.name + " " + p.brand + " " + p.size + " " + p.category).toLowerCase().includes(q)) out.push({ tag: "Product", label: prodLabel(p), sub: fmtNum(stockOf(p.id)) + " " + p.unit + " in stock", go: "products" });
+  for (const c of S.customers) if ((c.name + " " + (c.phone || "")).toLowerCase().includes(q)) out.push({ tag: "Customer", label: c.name, sub: "Balance " + fmtRs(customerBalance(c.id)), go: "customers" });
+  for (const s of S.suppliers) if ((s.name + " " + (s.phone || "")).toLowerCase().includes(q)) out.push({ tag: "Supplier", label: s.name, sub: "Balance " + fmtRs(supplierBalance(s.id)), go: "suppliers" });
+  for (const s of S.sales) if (s.no.toLowerCase().includes(q)) out.push({ tag: "Invoice", label: s.no, sub: fmtDate(s.date) + " • " + fmtRs(s.total), go: "invoices" });
+  for (const p of S.purchases) if (p.no.toLowerCase().includes(q)) out.push({ tag: "Purchase", label: p.no, sub: fmtDate(p.date) + " • " + fmtRs(p.total), go: "invoices" });
+  box.innerHTML = out.length ? out.slice(0, 9).map((r) => '<div class="sr" data-go="' + r.go + '"><span class="tag">' + esc(r.tag) + "</span><div><div><b>" + esc(r.label) + '</b></div><div class="small muted">' + esc(r.sub) + "</div></div></div>").join("") : '<div class="sr">No matches</div>';
+  box.style.display = "block";
+  $$(".sr[data-go]", box).forEach((el) => el.onclick = () => { box.style.display = "none"; go(el.getAttribute("data-go")); });
+}
+
+/* ---------------- wiring & init ---------------- */
+function wire() {
+  $("#btn-login").onclick = doLogin;
+  $("#li-pass").addEventListener("keydown", (e) => { if (e.key === "Enter") doLogin(); });
+  $("#btn-logout").onclick = () => { S.session = null; save(); showLogin(); };
+  $$("#main-nav a").forEach((a) => a.onclick = () => go(a.getAttribute("data-page")));
+  $$(".bottomnav a[data-page]").forEach((a) => a.onclick = () => go(a.getAttribute("data-page")));
+  $$("[data-goto]").forEach((b) => b.onclick = () => go(b.getAttribute("data-goto")));
+  $("#bn-more").onclick = () => { $("#sidebar").classList.add("open"); $("#scrim").classList.add("on"); };
+  $("#btn-burger").onclick = () => { $("#sidebar").classList.add("open"); $("#scrim").classList.add("on"); };
+  $("#scrim").onclick = () => { $("#sidebar").classList.remove("open"); $("#scrim").classList.remove("on"); };
+  $("#btn-quick-sale").onclick = () => go("sales");
+  $("#btn-lang").onclick = () => setLang(LANG === "ur" ? "en" : "ur");
+  $("#lang-en").onclick = () => setLang("en");
+  $("#lang-ur").onclick = () => setLang("ur");
+  $("#global-search").addEventListener("input", (e) => globalSearch(e.target.value));
+  document.addEventListener("click", (e) => { if (!e.target.closest(".searchbox")) $("#search-results").style.display = "none"; });
+  // products
+  $("#btn-add-product").onclick = () => productForm();
+  $("#qa-product").onclick = () => productForm();
+  $("#prod-search").addEventListener("input", renderProducts);
+  $("#prod-cat-filter").addEventListener("change", renderProducts);
+  // inventory
+  $("#btn-adjust").onclick = adjustForm;
+  $("#inv-search").addEventListener("input", renderInventory);
+  $("#hist-product").addEventListener("change", renderInventory);
+  // sales
+  $("#sale-add-line").onclick = () => saleLinesApi && saleLinesApi.addRow();
+  $("#btn-save-sale").onclick = saveSale;
+  // purchases
+  $("#pur-add-line").onclick = () => purLinesApi && purLinesApi.addRow();
+  $("#btn-save-purchase").onclick = savePurchase;
+  // parties
+  $("#btn-add-customer").onclick = () => partyForm("customer");
+  $("#btn-add-supplier").onclick = () => partyForm("supplier");
+  $("#cust-search").addEventListener("input", renderCustomers);
+  $("#sup-search").addEventListener("input", renderSuppliers);
+  $("#cust-ledger-close").onclick = () => { $("#cust-ledger-card").style.display = "none"; };
+  $("#sup-ledger-close").onclick = () => { $("#sup-ledger-card").style.display = "none"; };
+  $("#cust-ledger-print").onclick = () => { const t = $("#cust-ledger-title").textContent; const id = S.customers.find((c) => t.includes(c.name)); if (id) printLedger("customer", id.id); };
+  $("#sup-ledger-print").onclick = () => { const t = $("#sup-ledger-title").textContent; const id = S.suppliers.find((s) => t.includes(s.name)); if (id) printLedger("supplier", id.id); };
+  // payments
+  $("#btn-pay-in").onclick = () => paymentForm("in");
+  $("#btn-pay-out").onclick = () => paymentForm("out");
+  $("#qa-payment").onclick = () => paymentForm("in");
+  // expenses
+  $("#btn-add-expense").onclick = () => expenseForm();
+  $("#qa-expense").onclick = () => expenseForm();
+  // invoices
+  $("#inv-search").addEventListener("input", renderInvoices);
+  // reports
+  const ym = todayStr().slice(0, 7);
+  $("#rep-from").value = ym + "-01"; $("#rep-to").value = todayStr();
+  $("#btn-run-report").onclick = runReport;
+  $("#btn-rep-csv").onclick = reportCsv;
+  $("#btn-rep-print").onclick = reportPrint;
+  // settings
+  $("#btn-save-settings").onclick = saveSettingsFromForm;
+  $("#btn-add-user").onclick = () => { if (!isAdmin()) { toast("Only Admin can manage users."); return; } userForm(); };
+  $("#set-logo-file").addEventListener("change", (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    readImage(f, 360, (d) => { S.settings.logo = d; save(); renderSettings(); applyBranding(); toast("Logo updated."); });
+  });
+  $("#set-logo-remove").onclick = () => { S.settings.logo = null; save(); renderSettings(); applyBranding(); };
+  $("#btn-backup").onclick = () => download("steeldesk-backup-" + todayStr() + ".json", JSON.stringify(S, null, 2), "application/json");
+  $("#file-restore").addEventListener("change", async (e) => {
+    const f = e.target.files[0]; if (!f) return;
+    if (!(await confirmDlg("Restore backup?", "ALL current data will be replaced by the backup file. This cannot be undone.", true))) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const data = JSON.parse(reader.result);
+        if (!data.settings || !data.products) throw new Error("bad file");
+        S = data; save(); toast("Backup restored."); enterApp();
+      } catch (err) { toast("That file is not a valid SteelDesk backup."); }
+    };
+    reader.readAsText(f);
+  });
+  // per-render table buttons (delegated re-wire after each render)
+  const obs = new MutationObserver(() => { wireTxButtons(document); });
+  obs.observe(document.body, { childList: true, subtree: true });
+}
+document.addEventListener("DOMContentLoaded", () => {
+  wire();
+  if (S.session && me()) enterApp(); else showLogin();
+  icons();
+});
+</script>
+</body>
+</html>
