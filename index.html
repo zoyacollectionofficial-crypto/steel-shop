@@ -326,6 +326,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
     <button class="btn" id="btn-login" style="width:100%; justify-content:center"><i data-lucide="log-in"></i><span data-i18n="login">Login</span></button>
     <div class="login-err" id="login-err"></div>
     <div class="small muted" style="margin-top:1rem" id="login-hint"></div>
+    <div class="small muted" id="login-ver" style="margin-top:.45rem; opacity:.75"></div>
     <div class="row" style="justify-content:center; margin-top:.9rem">
       <button class="btn sm ghost" id="btn-show-signup" type="button"><i data-lucide="user-plus"></i>Create account</button>
       <button class="btn sm ghost" id="li-theme" type="button"><i data-lucide="sun"></i><span>White Mode</span></button>
@@ -383,7 +384,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
       <div><h1 class="ptitle" id="page-title">Dashboard</h1><div class="psub" id="page-date"></div></div>
       <div class="searchbox">
         <i data-lucide="search"></i>
-        <input type="text" id="global-search" data-i18n-ph="searchPh" placeholder="Search products, customers…">
+        <input type="text" id="global-search" data-i18n-ph="searchPh" placeholder="Search…">
         <div id="search-results"></div>
       </div>
       <button class="iconbtn" id="btn-lang" title="Language / زبان" style="width:auto; padding:0 .7rem; font-weight:800; font-size:.8rem">اردو</button>
@@ -641,6 +642,12 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
               <button class="btn sm ghost" id="lang-en">English</button>
               <button class="btn sm ghost" id="lang-ur">اردو (Urdu)</button>
             </div>
+            <div style="margin-top:1.1rem; border-top:1px dashed var(--stroke2); padding-top:.85rem">
+              <div class="small" style="color:var(--danger); font-weight:800; letter-spacing:.04em">DANGER ZONE</div>
+              <p class="small muted" style="margin:.35rem 0 .6rem">Clear ALL shop data — products, customers, suppliers, sales, purchases, payments, expenses and stock — and start fresh. Your login accounts and shop name/logo will stay.</p>
+              <button class="btn danger" id="btn-clear-data"><i data-lucide="trash-2"></i>Clear All Data</button>
+            </div>
+            <p class="small muted" id="set-ver" style="text-align:center; margin-top:1rem"></p>
           </div>
         </div>
       </div>
@@ -663,6 +670,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
+const APP_VER = "2026.11.09-10";
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -678,8 +686,8 @@ function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.ad
 
 /* ---------------- i18n ---------------- */
 const I18N = {
-  en: { loginSub: "Iron & Steel Shop Management", username: "Username", password: "Password", login: "Login", mainMenu: "Main Menu", parties: "Parties", manage: "Manage", dashboard: "Dashboard", products: "Products", inventory: "Inventory / Stock", inventoryShort: "Stock", sales: "Sales", purchases: "Purchase", customers: "Customers", suppliers: "Suppliers", payments: "Payments", expenses: "Expenses", reports: "Reports", invoices: "Invoices", settings: "Shop Settings", salesChart: "Sales — last 14 days", profitChart: "Profit — last 6 months", topProducts: "Top-selling products", lowStock: "Low-stock alerts", recentTx: "Recent transactions", quickActions: "Quick actions", newSale: "New Sale", newPurchase: "New Purchase", addProduct: "Add Product", addPayment: "Add Payment", addExpense: "Add Expense", add: "Add", stockBalances: "Stock balances", adjustStock: "Add Stock / Adjust", stockHistory: "Stock movement history", customer: "Customer", supplier: "Supplier", date: "Date", paymentMethod: "Payment method", addItem: "Add item", note: "Note", allowOversell: "Allow sale despite low stock (Admin)", saveInvoice: "Save Invoice", savePurchase: "Save Purchase", recentSales: "Recent sales", recentPurchases: "Recent purchases", supplierBill: "Supplier bill / invoice no.", print: "Print", receiveFromCustomer: "Receive from Customer", payToSupplier: "Pay to Supplier", reportType: "Report type", repSales: "Sales Report", repPurchases: "Purchase Report", repProfit: "Profit & Loss", repStock: "Stock Report", repExpenses: "Expense Report", repCustOut: "Customer Outstanding", repSupOut: "Supplier Outstanding", repCash: "Cash Flow", from: "From", to: "To", run: "Run Report", printPdf: "Print / PDF", salesInvoices: "Sales Invoices", purchaseRecords: "Purchase Records", shopBranding: "Shop Branding", shopName: "Shop Name", shopLogo: "Shop Logo", upload: "Upload", remove: "Remove", logoPosition: "Logo position (invoice)", shopNameSize: "Shop name size", address: "Address", phone: "Phone", email: "Email", currency: "Currency", footerMsg: "Invoice footer message", defaultInvoice: "Default invoice format", defaultUnit: "Default measurement unit", saveSettings: "Save Settings", usersRoles: "Users & Roles", rolesNote: "Admin: full access. Staff: cannot delete/cancel invoices, change settings or manage users.", backupRestore: "Backup & Restore", backupNote: "Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.", downloadBackup: "Download Backup", restore: "Restore", language: "Language", searchPh: "Search products, customers…", more: "More" },
-  ur: { loginSub: "لوہے اور اسٹیل کی دکان کا نظام", username: "صارف نام", password: "پاس ورڈ", login: "لاگ ان", mainMenu: "مین مینو", parties: "پارٹیاں", manage: "انتظام", dashboard: "ڈیش بورڈ", products: "مصنوعات", inventory: "اسٹاک", inventoryShort: "اسٹاک", sales: "فروخت", purchases: "خریداری", customers: "گاہک", suppliers: "سپلائر", payments: "ادائیگیاں", expenses: "اخراجات", reports: "رپورٹس", invoices: "انوائسز", settings: "دکان کی ترتیبات", salesChart: "فروخت — پچھلے 14 دن", profitChart: "منافع — پچھلے 6 ماہ", topProducts: "زیادہ بکنے والی مصنوعات", lowStock: "کم اسٹاک الرٹ", recentTx: "حالیہ لین دین", quickActions: "فوری کام", newSale: "نئی فروخت", newPurchase: "نئی خریداری", addProduct: "مصنوعہ شامل کریں", addPayment: "ادائیگی شامل کریں", addExpense: "خرچ شامل کریں", add: "شامل کریں", stockBalances: "اسٹاک بیلنس", adjustStock: "اسٹاک شامل / ایڈجسٹ کریں", stockHistory: "اسٹاک کی تاریخ", customer: "گاہک", supplier: "سپلائر", date: "تاریخ", paymentMethod: "ادائیگی کا طریقہ", addItem: "آئٹم شامل کریں", note: "نوٹ", allowOversell: "کم اسٹاک کے باوجود فروخت کی اجازت (ایڈمن)", saveInvoice: "انوائس محفوظ کریں", savePurchase: "خریداری محفوظ کریں", recentSales: "حالیہ فروخت", recentPurchases: "حالیہ خریداری", supplierBill: "سپلائر بل نمبر", print: "پرنٹ", receiveFromCustomer: "گاہک سے وصولی", payToSupplier: "سپلائر کو ادائیگی", reportType: "رپورٹ کی قسم", repSales: "فروخت رپورٹ", repPurchases: "خریداری رپورٹ", repProfit: "نفع و نقصان", repStock: "اسٹاک رپورٹ", repExpenses: "اخراجات رپورٹ", repCustOut: "گاہکوں کے بقایا", repSupOut: "سپلائر کے بقایا", repCash: "کیش فلو", from: "سے", to: "تک", run: "رپورٹ چلائیں", printPdf: "پرنٹ / PDF", salesInvoices: "فروخت انوائسز", purchaseRecords: "خریداری ریکارڈ", shopBranding: "دکان کی برانڈنگ", shopName: "دکان کا نام", shopLogo: "دکان کا لوگو", upload: "اپ لوڈ", remove: "ہٹائیں", logoPosition: "لوگو کی جگہ (انوائس)", shopNameSize: "دکان کے نام کا سائز", address: "پتہ", phone: "فون", email: "ای میل", currency: "کرنسی", footerMsg: "انوائس فوٹر پیغام", defaultInvoice: "طے شدہ انوائس فارمیٹ", defaultUnit: "طے شدہ پیمائش یونٹ", saveSettings: "ترتیبات محفوظ کریں", usersRoles: "صارفین اور کردار", rolesNote: "ایڈمن: مکمل رسائی۔ اسٹاف: انوائس حذف/منسوخ، ترتیبات اور صارفین تبدیل نہیں کر سکتا۔", backupRestore: "بیک اپ اور بحالی", backupNote: "تمام ڈیٹا کا بیک اپ ڈاؤن لوڈ کریں یا بیک اپ فائل سے بحال کریں۔ ڈیٹا اسی براؤزر میں محفوظ ہوتا ہے۔", downloadBackup: "بیک اپ ڈاؤن لوڈ کریں", restore: "بحال کریں", language: "زبان", searchPh: "مصنوعات، گاہک تلاش کریں…", more: "مزید" }
+  en: { loginSub: "Iron & Steel Shop Management", username: "Username", password: "Password", login: "Login", mainMenu: "Main Menu", parties: "Parties", manage: "Manage", dashboard: "Dashboard", products: "Products", inventory: "Inventory / Stock", inventoryShort: "Stock", sales: "Sales", purchases: "Purchase", customers: "Customers", suppliers: "Suppliers", payments: "Payments", expenses: "Expenses", reports: "Reports", invoices: "Invoices", settings: "Shop Settings", salesChart: "Sales — last 14 days", profitChart: "Profit — last 6 months", topProducts: "Top-selling products", lowStock: "Low-stock alerts", recentTx: "Recent transactions", quickActions: "Quick actions", newSale: "New Sale", newPurchase: "New Purchase", addProduct: "Add Product", addPayment: "Add Payment", addExpense: "Add Expense", add: "Add", stockBalances: "Stock balances", adjustStock: "Add Stock / Adjust", stockHistory: "Stock movement history", customer: "Customer", supplier: "Supplier", date: "Date", paymentMethod: "Payment method", addItem: "Add item", note: "Note", allowOversell: "Allow sale despite low stock (Admin)", saveInvoice: "Save Invoice", savePurchase: "Save Purchase", recentSales: "Recent sales", recentPurchases: "Recent purchases", supplierBill: "Supplier bill / invoice no.", print: "Print", receiveFromCustomer: "Receive from Customer", payToSupplier: "Pay to Supplier", reportType: "Report type", repSales: "Sales Report", repPurchases: "Purchase Report", repProfit: "Profit & Loss", repStock: "Stock Report", repExpenses: "Expense Report", repCustOut: "Customer Outstanding", repSupOut: "Supplier Outstanding", repCash: "Cash Flow", from: "From", to: "To", run: "Run Report", printPdf: "Print / PDF", salesInvoices: "Sales Invoices", purchaseRecords: "Purchase Records", shopBranding: "Shop Branding", shopName: "Shop Name", shopLogo: "Shop Logo", upload: "Upload", remove: "Remove", logoPosition: "Logo position (invoice)", shopNameSize: "Shop name size", address: "Address", phone: "Phone", email: "Email", currency: "Currency", footerMsg: "Invoice footer message", defaultInvoice: "Default invoice format", defaultUnit: "Default measurement unit", saveSettings: "Save Settings", usersRoles: "Users & Roles", rolesNote: "Admin: full access. Staff: cannot delete/cancel invoices, change settings or manage users.", backupRestore: "Backup & Restore", backupNote: "Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.", downloadBackup: "Download Backup", restore: "Restore", language: "Language", searchPh: "Search…", more: "More" },
+  ur: { loginSub: "لوہے اور اسٹیل کی دکان کا نظام", username: "صارف نام", password: "پاس ورڈ", login: "لاگ ان", mainMenu: "مین مینو", parties: "پارٹیاں", manage: "انتظام", dashboard: "ڈیش بورڈ", products: "مصنوعات", inventory: "اسٹاک", inventoryShort: "اسٹاک", sales: "فروخت", purchases: "خریداری", customers: "گاہک", suppliers: "سپلائر", payments: "ادائیگیاں", expenses: "اخراجات", reports: "رپورٹس", invoices: "انوائسز", settings: "دکان کی ترتیبات", salesChart: "فروخت — پچھلے 14 دن", profitChart: "منافع — پچھلے 6 ماہ", topProducts: "زیادہ بکنے والی مصنوعات", lowStock: "کم اسٹاک الرٹ", recentTx: "حالیہ لین دین", quickActions: "فوری کام", newSale: "نئی فروخت", newPurchase: "نئی خریداری", addProduct: "مصنوعہ شامل کریں", addPayment: "ادائیگی شامل کریں", addExpense: "خرچ شامل کریں", add: "شامل کریں", stockBalances: "اسٹاک بیلنس", adjustStock: "اسٹاک شامل / ایڈجسٹ کریں", stockHistory: "اسٹاک کی تاریخ", customer: "گاہک", supplier: "سپلائر", date: "تاریخ", paymentMethod: "ادائیگی کا طریقہ", addItem: "آئٹم شامل کریں", note: "نوٹ", allowOversell: "کم اسٹاک کے باوجود فروخت کی اجازت (ایڈمن)", saveInvoice: "انوائس محفوظ کریں", savePurchase: "خریداری محفوظ کریں", recentSales: "حالیہ فروخت", recentPurchases: "حالیہ خریداری", supplierBill: "سپلائر بل نمبر", print: "پرنٹ", receiveFromCustomer: "گاہک سے وصولی", payToSupplier: "سپلائر کو ادائیگی", reportType: "رپورٹ کی قسم", repSales: "فروخت رپورٹ", repPurchases: "خریداری رپورٹ", repProfit: "نفع و نقصان", repStock: "اسٹاک رپورٹ", repExpenses: "اخراجات رپورٹ", repCustOut: "گاہکوں کے بقایا", repSupOut: "سپلائر کے بقایا", repCash: "کیش فلو", from: "سے", to: "تک", run: "رپورٹ چلائیں", printPdf: "پرنٹ / PDF", salesInvoices: "فروخت انوائسز", purchaseRecords: "خریداری ریکارڈ", shopBranding: "دکان کی برانڈنگ", shopName: "دکان کا نام", shopLogo: "دکان کا لوگو", upload: "اپ لوڈ", remove: "ہٹائیں", logoPosition: "لوگو کی جگہ (انوائس)", shopNameSize: "دکان کے نام کا سائز", address: "پتہ", phone: "فون", email: "ای میل", currency: "کرنسی", footerMsg: "انوائس فوٹر پیغام", defaultInvoice: "طے شدہ انوائس فارمیٹ", defaultUnit: "طے شدہ پیمائش یونٹ", saveSettings: "ترتیبات محفوظ کریں", usersRoles: "صارفین اور کردار", rolesNote: "ایڈمن: مکمل رسائی۔ اسٹاف: انوائس حذف/منسوخ، ترتیبات اور صارفین تبدیل نہیں کر سکتا۔", backupRestore: "بیک اپ اور بحالی", backupNote: "تمام ڈیٹا کا بیک اپ ڈاؤن لوڈ کریں یا بیک اپ فائل سے بحال کریں۔ ڈیٹا اسی براؤزر میں محفوظ ہوتا ہے۔", downloadBackup: "بیک اپ ڈاؤن لوڈ کریں", restore: "بحال کریں", language: "زبان", searchPh: "تلاش کریں…", more: "مزید" }
 };
 let LANG = "en";
 function t(k) { return (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k; }
@@ -870,6 +878,7 @@ function showLogin() {
   lg.innerHTML = S.settings.logo ? '<img src="' + S.settings.logo + '" alt="">' : '<i data-lucide="flame"></i>';
   const anyCustom = S.users.some((u) => u.pass !== "admin123");
   $("#login-hint").textContent = anyCustom ? "" : "Default login: admin / admin123 — change it in Shop Settings after login.";
+  $("#login-ver").textContent = "SteelDesk • Version " + APP_VER;
   icons();
 }
 function doLogin() {
@@ -921,6 +930,7 @@ function renderPage(page) {
   else if (page === "expenses") renderExpenses();
   else if (page === "invoices") renderInvoices();
   else if (page === "settings") renderSettings();
+  wireTxButtons(document);
   icons();
 }
 function renderAll() { const on = $(".page.on"); if (on) renderPage(on.id.replace("page-", "")); applyBranding(); }
@@ -1131,9 +1141,9 @@ function renderProducts() {
   });
   $$("#prod-table [data-del-prod]").forEach((b) => b.onclick = async () => {
     const p = prodById(b.getAttribute("data-del-prod")); if (!p) return;
-    if (S.movements.some((m) => m.productId === p.id && m.type !== "opening")) { toast("This product has stock history — it cannot be deleted."); return; }
+    if (S.sales.some((x) => x.items.some((i) => i.productId === p.id)) || S.purchases.some((x) => x.items.some((i) => i.productId === p.id))) { toast("This product is used in invoices — cancel or delete those invoices first."); return; }
     if (await confirmDlg("Delete product?", '"' + prodLabel(p) + '" will be removed permanently.', true)) {
-      S.products = S.products.filter((x) => x.id !== p.id); removeMovements("product", p.id); save(); renderAll(); toast("Product deleted.");
+      S.products = S.products.filter((x) => x.id !== p.id); removeMovements("product", p.id); S.movements = S.movements.filter((m) => m.productId !== p.id); save(); renderAll(); toast("Product deleted.");
     }
   });
   icons();
@@ -1212,6 +1222,18 @@ function quickParty(kind, selectSelector) {
     if (sel) { sel.innerHTML = (isCust ? S.customers : S.suppliers).map((x) => '<option value="' + x.id + '">' + esc(x.name) + "</option>").join(""); sel.value = np.id; }
     toast((isCust ? "Customer" : "Supplier") + " added: " + name);
   };
+}
+
+async function deleteParty(kind, id) {
+  const isCust = kind === "customer";
+  const p = isCust ? custById(id) : supById(id); if (!p) return;
+  const bal = isCust ? customerBalance(id) : supplierBalance(id);
+  const hasTx = isCust ? S.sales.some((x) => x.customerId === id) : S.purchases.some((x) => x.supplierId === id);
+  const hasPay = S.payments.some((x) => x.partyId === id);
+  if (bal !== 0 || hasTx || hasPay) { toast("Cannot delete: this " + kind + " has invoices, payments or a balance."); return; }
+  if (!(await confirmDlg("Delete " + kind + "?", '"' + p.name + '" will be removed permanently.', true))) return;
+  if (isCust) S.customers = S.customers.filter((x) => x.id !== id); else S.suppliers = S.suppliers.filter((x) => x.id !== id);
+  save(); renderAll(); toast("Deleted: " + p.name);
 }
 
 /* ---------------- sales & purchases ---------------- */
@@ -1339,10 +1361,20 @@ function invoiceBalance(kind, inv) {
   return Math.round(((Number(inv.total) || 0) - (Number(inv.paid) || 0) - extra) * 100) / 100;
 }
 function txButtons(kind, x) {
-  if (x.status !== "active") return "";
+  const del = isAdmin() ? ' <button class="iconbtn" title="Delete" data-del-' + kind + '="' + x.id + '"><i data-lucide="trash-2"></i></button>' : "";
+  if (x.status !== "active") return '<button class="iconbtn" title="Print" data-print-' + kind + '="' + x.id + '"><i data-lucide="printer"></i></button>' + del;
   return '<button class="iconbtn" title="Print" data-print-' + kind + '="' + x.id + '"><i data-lucide="printer"></i></button> ' +
     '<button class="iconbtn" title="Edit" data-edit-' + kind + '="' + x.id + '"><i data-lucide="pencil"></i></button>' +
-    (isAdmin() ? ' <button class="iconbtn" title="Cancel" data-cancel-' + kind + '="' + x.id + '"><i data-lucide="ban"></i></button>' : "");
+    (isAdmin() ? ' <button class="iconbtn" title="Cancel" data-cancel-' + kind + '="' + x.id + '"><i data-lucide="ban"></i></button>' : "") + del;
+}
+async function deleteTx(kind, id) {
+  if (!isAdmin()) { toast("Only Admin can delete invoices."); return; }
+  const inv = (kind === "sale" ? S.sales : S.purchases).find((x) => x.id === id); if (!inv) return;
+  if ((Number(inv.paid) || 0) > 0 || S.payments.some((p) => p.refType === kind && p.refId === id)) { toast("Cannot delete: payment is recorded on this invoice. Cancel it instead — the record stays safe."); return; }
+  if (!(await confirmDlg("Delete invoice?", '"' + inv.no + '" will be removed permanently and its stock will be restored. This cannot be undone.', true))) return;
+  removeMovements(kind, id);
+  if (kind === "sale") S.sales = S.sales.filter((x) => x.id !== id); else S.purchases = S.purchases.filter((x) => x.id !== id);
+  save(); renderAll(); toast("Invoice deleted: " + inv.no);
 }
 function wireTxButtons(root) {
   $$("[data-print-sale]", root).forEach((b) => b.onclick = () => printInvoice("sale", b.getAttribute("data-print-sale")));
@@ -1350,6 +1382,8 @@ function wireTxButtons(root) {
   $$("[data-edit-sale]", root).forEach((b) => b.onclick = () => loadSaleForEdit(b.getAttribute("data-edit-sale")));
   $$("[data-edit-purchase]", root).forEach((b) => b.onclick = () => loadPurchaseForEdit(b.getAttribute("data-edit-purchase")));
   $$("[data-cancel-sale]", root).forEach((b) => b.onclick = () => cancelTx("sale", b.getAttribute("data-cancel-sale")));
+  $$("[data-del-sale]", root).forEach((b) => b.onclick = () => deleteTx("sale", b.getAttribute("data-del-sale")));
+  $$("[data-del-purchase]", root).forEach((b) => b.onclick = () => deleteTx("purchase", b.getAttribute("data-del-purchase")));
   $$("[data-cancel-purchase]", root).forEach((b) => b.onclick = () => cancelTx("purchase", b.getAttribute("data-cancel-purchase")));
 }
 function validateStock(items, allowOver) {
@@ -1617,12 +1651,13 @@ function renderParties(kind) {
     (rows.length ? rows.map((p) => {
       const bal = balFn(p.id);
       return "<tr><td><b>" + esc(p.name) + "</b>" + (p.address ? '<div class="small muted">' + esc(p.address) + "</div>" : "") + "</td><td>" + esc(p.phone || "—") + "</td><td class='num'>" + fmtRs(totFn(p.id)) + "</td><td class='num'>" + fmtRs(recvFn(p.id)) + "</td><td class='num'><span class='pill " + (bal > 0 ? "warn" : "ok") + "'>" + fmtRs(bal) + "</span></td>" +
-        '<td class="num"><button class="btn sm ghost" data-ledger="' + p.id + '">Ledger</button> <button class="btn sm ok" data-pay="' + p.id + '">' + (isCust ? "Receive" : "Pay") + '</button> <button class="iconbtn" data-edit-party="' + p.id + '"><i data-lucide="pencil"></i></button></td></tr>';
+        '<td class="num"><button class="btn sm ghost" data-ledger="' + p.id + '">Ledger</button> <button class="btn sm ok" data-pay="' + p.id + '">' + (isCust ? "Receive" : "Pay") + '</button> <button class="iconbtn" data-edit-party="' + p.id + '"><i data-lucide="pencil"></i></button> <button class="iconbtn" data-del-party="' + p.id + '"><i data-lucide="trash-2"></i></button></td></tr>';
     }).join("") : '<tr><td colspan="6"><div class="empty"><i data-lucide="users"></i><div class="et">No ' + (isCust ? "customers" : "suppliers") + ' yet</div><div class="small">Click Add to create one.</div></div></td></tr>') + "</tbody>";
   const tbl = $(isCust ? "#cust-table" : "#sup-table");
   $$("[data-ledger]", tbl).forEach((b) => b.onclick = () => showLedger(kind, b.getAttribute("data-ledger")));
   $$("[data-pay]", tbl).forEach((b) => b.onclick = () => paymentForm(isCust ? "in" : "out", b.getAttribute("data-pay")));
   $$("[data-edit-party]", tbl).forEach((b) => b.onclick = () => partyForm(kind, isCust ? custById(b.getAttribute("data-edit-party")) : supById(b.getAttribute("data-edit-party"))));
+  $$("[data-del-party]", tbl).forEach((b) => b.onclick = () => deleteParty(kind, b.getAttribute("data-del-party")));
   icons();
 }
 const renderCustomers = () => renderParties("customer");
@@ -1810,6 +1845,7 @@ function download(name, content, type) {
 
 /* ---------------- settings ---------------- */
 function renderSettings() {
+  const sv = $("#set-ver"); if (sv) sv.textContent = "SteelDesk • Version " + APP_VER;
   const st = S.settings;
   $("#set-shopname").value = st.shopName || "";
   $("#set-address").value = st.address || ""; $("#set-phone").value = st.phone || "";
@@ -1871,6 +1907,15 @@ function globalSearch(q) {
   box.innerHTML = out.length ? out.slice(0, 9).map((r) => '<div class="sr" data-go="' + r.go + '"><span class="tag">' + esc(r.tag) + "</span><div><div><b>" + esc(r.label) + '</b></div><div class="small muted">' + esc(r.sub) + "</div></div></div>").join("") : '<div class="sr">No matches</div>';
   box.style.display = "block";
   $$(".sr[data-go]", box).forEach((el) => el.onclick = () => { box.style.display = "none"; go(el.getAttribute("data-go")); });
+}
+
+async function clearAllData() {
+  if (!isAdmin()) { toast("Only Admin can clear all data."); return; }
+  if (!(await confirmDlg("Clear ALL data?", "Products, customers, suppliers, sales, purchases, payments, expenses and stock history will ALL be deleted. Login accounts and shop name/logo will stay.", true))) return;
+  if (!(await confirmDlg("Are you sure?", "This cannot be undone. If you need the old data later, download a Backup first.", true))) return;
+  const keep = { settings: S.settings, users: S.users, session: S.session };
+  S = Object.assign(defaultState(), keep);
+  save(); enterApp(); toast("All data cleared — fresh start.");
 }
 
 /* ---------------- wiring & init ---------------- */
@@ -1940,6 +1985,7 @@ function wire() {
   });
   $("#set-logo-remove").onclick = () => { S.settings.logo = null; save(); renderSettings(); applyBranding(); };
   $("#btn-backup").onclick = () => download("steeldesk-backup-" + todayStr() + ".json", JSON.stringify(S, null, 2), "application/json");
+  $("#btn-clear-data").onclick = clearAllData;
   $("#file-restore").addEventListener("change", async (e) => {
     const f = e.target.files[0]; if (!f) return;
     if (!(await confirmDlg("Restore backup?", "ALL current data will be replaced by the backup file. This cannot be undone.", true))) return;
