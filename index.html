@@ -7,16 +7,16 @@
 <meta name="description" content="Premium iron & steel shop management: inventory, sales, purchases, ledgers, profit and professional invoices.">
 <style>
 :root{
-  --bg0:#060b18; --bg1:#0a1122; --bg2:#0d1830;
+  --bg0:#0d0a07; --bg1:#151009; --bg2:#1f1811;
   --glass:rgba(255,255,255,.055); --glass2:rgba(255,255,255,.09); --glass3:rgba(255,255,255,.14);
   --stroke:rgba(255,255,255,.10); --stroke2:rgba(255,255,255,.18);
   --text:#e8eefb; --muted:#93a4c4; --muted2:#6b7c9e;
-  --blue:#3b82f6; --cyan:#22d3ee; --blue-soft:rgba(59,130,246,.16);
+  --blue:#f97316; --cyan:#fbbf24; --blue-soft:rgba(249,115,22,.16);
   --ok:#34d399; --ok-soft:rgba(52,211,153,.14);
   --warn:#fbbf24; --warn-soft:rgba(251,191,36,.14);
   --danger:#fb7185; --danger-soft:rgba(251,113,133,.13);
-  --shadow:0 12px 40px rgba(2,6,18,.45);
-  --shadow-sm:0 4px 18px rgba(2,6,18,.35);
+  --shadow:0 12px 40px rgba(12,7,3,.45);
+  --shadow-sm:0 4px 18px rgba(12,7,3,.35);
   --r:18px; --r-sm:12px;
   --sidebar-w:248px;
 }
@@ -25,12 +25,12 @@ html,body{height:100%;}
 body{margin:0; color:var(--text); font-size:15px; line-height:1.5;
   font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,"Helvetica Neue",Arial,sans-serif;
   background:
-    radial-gradient(900px 600px at 85% -10%, rgba(34,211,238,.13), rgba(34,211,238,0) 60%),
-    radial-gradient(1000px 700px at -10% 110%, rgba(59,130,246,.14), rgba(59,130,246,0) 60%),
-    radial-gradient(700px 500px at 55% 45%, rgba(99,102,241,.07), rgba(99,102,241,0) 65%),
+    radial-gradient(900px 600px at 85% -10%, rgba(251,191,36,.13), rgba(251,191,36,0) 60%),
+    radial-gradient(1000px 700px at -10% 110%, rgba(249,115,22,.14), rgba(249,115,22,0) 60%),
+    radial-gradient(700px 500px at 55% 45%, rgba(194,120,46,.07), rgba(194,120,46,0) 65%),
     linear-gradient(155deg,var(--bg2) 0%,var(--bg1) 45%,var(--bg0) 100%);
   background-attachment:fixed; min-height:100vh;}
-::selection{background:rgba(59,130,246,.4);}
+::selection{background:rgba(249,115,22,.4);}
 h1,h2,h3{font-weight:700; letter-spacing:.2px;}
 button{font-family:inherit;}
 input,select,textarea{font-family:inherit;}
@@ -41,12 +41,12 @@ svg.lucide{width:19px; height:19px; stroke-width:1.9; flex:none;}
 #app.on{display:block;}
 .sidebar{position:fixed; inset:0 auto 0 0; width:var(--sidebar-w); z-index:60;
   display:flex; flex-direction:column; padding:1rem .8rem;
-  background:rgba(10,17,34,.55); border-right:1px solid var(--stroke);
+  background:rgba(24,18,12,.55); border-right:1px solid var(--stroke);
   -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5);}
 .brand{display:flex; align-items:center; gap:.65rem; padding:.35rem .5rem .9rem;}
 .brand .logo{width:42px; height:42px; border-radius:13px; overflow:hidden; flex:none;
   display:flex; align-items:center; justify-content:center;
-  background:linear-gradient(135deg,var(--blue),var(--cyan)); box-shadow:0 6px 18px rgba(59,130,246,.4);}
+  background:linear-gradient(135deg,var(--blue),var(--cyan)); box-shadow:0 6px 18px rgba(249,115,22,.4);}
 .brand .logo img{width:100%; height:100%; object-fit:cover;}
 .brand .logo svg{width:23px; height:23px; color:#fff;}
 .brand .bname{font-size:1.02rem; font-weight:800; line-height:1.15;}
@@ -58,8 +58,8 @@ svg.lucide{width:19px; height:19px; stroke-width:1.9; flex:none;}
   color:var(--muted); text-decoration:none; border-radius:12px; font-size:.9rem; font-weight:600;
   border:1px solid transparent; transition:all .18s ease; cursor:pointer;}
 .nav a:hover{color:var(--text); background:var(--glass2); transform:translateX(2px);}
-.nav a.active{color:#fff; background:linear-gradient(120deg,rgba(59,130,246,.30),rgba(34,211,238,.16));
-  border-color:rgba(96,165,250,.35); box-shadow:0 0 0 1px rgba(96,165,250,.12), 0 6px 20px rgba(59,130,246,.25);}
+.nav a.active{color:#fff; background:linear-gradient(120deg,rgba(249,115,22,.30),rgba(251,191,36,.16));
+  border-color:rgba(251,146,60,.35); box-shadow:0 0 0 1px rgba(251,146,60,.12), 0 6px 20px rgba(249,115,22,.25);}
 .nav a.active svg{color:var(--cyan);}
 .side-user{display:flex; align-items:center; gap:.6rem; padding:.6rem; border-radius:14px;
   background:var(--glass); border:1px solid var(--stroke);}
@@ -75,14 +75,14 @@ svg.lucide{width:19px; height:19px; stroke-width:1.9; flex:none;}
 .searchbox{flex:1; max-width:430px; margin-left:auto; position:relative;}
 .searchbox input{width:100%; padding:.62rem .9rem .62rem 2.5rem; border-radius:13px;
   background:var(--glass); border:1px solid var(--stroke); color:var(--text); font-size:.9rem;}
-.searchbox input:focus{outline:none; border-color:rgba(96,165,250,.55); box-shadow:0 0 0 3px rgba(59,130,246,.18);}
+.searchbox input:focus{outline:none; border-color:rgba(251,146,60,.55); box-shadow:0 0 0 3px rgba(249,115,22,.18);}
 .searchbox>svg{position:absolute; left:.75rem; top:50%; transform:translateY(-50%); color:var(--muted); width:17px; height:17px;}
 #search-results{position:absolute; top:calc(100% + 6px); left:0; right:0; z-index:80; display:none;
-  background:rgba(13,22,44,.92); border:1px solid var(--stroke2); border-radius:14px; box-shadow:var(--shadow);
+  background:rgba(28,21,14,.92); border:1px solid var(--stroke2); border-radius:14px; box-shadow:var(--shadow);
   -webkit-backdrop-filter:blur(24px); backdrop-filter:blur(24px); max-height:340px; overflow:auto; padding:.35rem;}
 #search-results .sr{display:flex; gap:.55rem; align-items:center; padding:.5rem .55rem; border-radius:9px; cursor:pointer; font-size:.86rem;}
 #search-results .sr:hover{background:var(--glass2);}
-#search-results .sr .tag{font-size:.62rem; font-weight:800; letter-spacing:.06em; padding:.12rem .45rem; border-radius:99px; background:var(--blue-soft); color:#93c5fd; text-transform:uppercase;}
+#search-results .sr .tag{font-size:.62rem; font-weight:800; letter-spacing:.06em; padding:.12rem .45rem; border-radius:99px; background:var(--blue-soft); color:#fdba74; text-transform:uppercase;}
 .iconbtn{width:40px; height:40px; border-radius:12px; display:inline-flex; align-items:center; justify-content:center;
   background:var(--glass); border:1px solid var(--stroke); color:var(--text); cursor:pointer; transition:all .15s;}
 .iconbtn:hover{background:var(--glass2); transform:translateY(-1px);}
@@ -99,8 +99,8 @@ svg.lucide{width:19px; height:19px; stroke-width:1.9; flex:none;}
 .card h3 .sp{margin-left:auto;}
 .btn{display:inline-flex; align-items:center; gap:.45rem; border:0; cursor:pointer; font-weight:700;
   padding:.6rem 1rem; border-radius:12px; font-size:.88rem; color:#fff; transition:all .15s;
-  background:linear-gradient(135deg,var(--blue),#2563eb); box-shadow:0 6px 18px rgba(59,130,246,.32);}
-.btn:hover{transform:translateY(-1px); box-shadow:0 9px 22px rgba(59,130,246,.4);}
+  background:linear-gradient(135deg,var(--blue),#ea580c); box-shadow:0 6px 18px rgba(249,115,22,.32);}
+.btn:hover{transform:translateY(-1px); box-shadow:0 9px 22px rgba(249,115,22,.4);}
 .btn:active{transform:translateY(0);}
 .btn svg{width:16px; height:16px;}
 .btn.ghost{background:var(--glass2); color:var(--text); border:1px solid var(--stroke); box-shadow:none;}
@@ -116,8 +116,8 @@ label.f{display:block; font-size:.74rem; font-weight:700; color:var(--muted); le
 input[type=text],input[type=email],input[type=password],input[type=number],input[type=date],input[type=tel],select,textarea{
   width:100%; padding:.58rem .7rem; border-radius:11px; font-size:.92rem; color:var(--text);
   background:rgba(255,255,255,.05); border:1px solid var(--stroke); transition:border-color .15s, box-shadow .15s;}
-input:focus,select:focus,textarea:focus{outline:none; border-color:rgba(96,165,250,.6); box-shadow:0 0 0 3px rgba(59,130,246,.16);}
-select option{background:#0d1830; color:var(--text);}
+input:focus,select:focus,textarea:focus{outline:none; border-color:rgba(251,146,60,.6); box-shadow:0 0 0 3px rgba(249,115,22,.16);}
+select option{background:#241a10; color:var(--text);}
 .muted{color:var(--muted);} .small{font-size:.8rem;} .b{font-weight:700;}
 .num{font-variant-numeric:tabular-nums; text-align:right;}
 .pos{color:var(--ok);} .neg{color:var(--danger);} .warn-t{color:var(--warn);}
@@ -134,7 +134,7 @@ table.tbl tbody tr:hover{background:rgba(255,255,255,.035);}
 .tblwrap{overflow-x:auto; margin:0 -.4rem; padding:0 .4rem;}
 .pill{display:inline-flex; align-items:center; gap:.3rem; padding:.16rem .6rem; border-radius:99px; font-size:.7rem; font-weight:800; letter-spacing:.02em;}
 .pill.ok{background:var(--ok-soft); color:var(--ok);} .pill.warn{background:var(--warn-soft); color:var(--warn);}
-.pill.bad{background:var(--danger-soft); color:var(--danger);} .pill.info{background:var(--blue-soft); color:#93c5fd;}
+.pill.bad{background:var(--danger-soft); color:var(--danger);} .pill.info{background:var(--blue-soft); color:#fdba74;}
 .pill.grey{background:var(--glass3); color:var(--muted);}
 .empty{padding:2.2rem 1rem; text-align:center; color:var(--muted);}
 .empty svg{width:40px; height:40px; opacity:.45; margin-bottom:.4rem;}
@@ -144,7 +144,7 @@ table.tbl tbody tr:hover{background:rgba(255,255,255,.035);}
 .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:1rem;}
 .stat{padding:1rem 1.05rem; position:relative; overflow:hidden;}
 .stat::after{content:""; position:absolute; inset:auto -30% -60% auto; width:150px; height:150px; border-radius:50%;
-  background:radial-gradient(circle,rgba(59,130,246,.20),transparent 70%);}
+  background:radial-gradient(circle,rgba(249,115,22,.20),transparent 70%);}
 .stat .sl{font-size:.7rem; font-weight:800; letter-spacing:.1em; text-transform:uppercase; color:var(--muted); display:flex; gap:.45rem; align-items:center;}
 .stat .sl svg{width:15px; height:15px; color:var(--cyan);}
 .stat .sv{font-size:1.42rem; font-weight:800; margin-top:.3rem; font-variant-numeric:tabular-nums;}
@@ -168,7 +168,7 @@ table.tbl tbody tr:hover{background:rgba(255,255,255,.035);}
   background:rgba(3,7,17,.6); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); overflow-y:auto; padding:4vh .8rem 2rem;}
 .mback.on{display:flex;}
 .modal{width:100%; max-width:560px; border-radius:20px; padding:1.2rem 1.25rem; animation:pageIn .22s ease both;
-  background:rgba(15,25,50,.82); border:1px solid var(--stroke2); box-shadow:var(--shadow);
+  background:rgba(30,23,16,.82); border:1px solid var(--stroke2); box-shadow:var(--shadow);
   -webkit-backdrop-filter:blur(26px) saturate(1.5); backdrop-filter:blur(26px) saturate(1.5);}
 .modal.wide{max-width:760px;}
 .modal h3{margin:0 0 .4rem; font-size:1.05rem; display:flex; align-items:center; gap:.5rem;}
@@ -176,7 +176,7 @@ table.tbl tbody tr:hover{background:rgba(255,255,255,.035);}
 .mgrid{display:grid; grid-template-columns:1fr 1fr; gap:0 .8rem;}
 .mfoot{display:flex; gap:.55rem; justify-content:flex-end; margin-top:1.05rem;}
 #toast{position:fixed; left:50%; bottom:1.3rem; transform:translateX(-50%) translateY(20px); z-index:200;
-  background:rgba(13,22,44,.9); border:1px solid var(--stroke2); color:var(--text); padding:.65rem 1.05rem;
+  background:rgba(28,21,14,.9); border:1px solid var(--stroke2); color:var(--text); padding:.65rem 1.05rem;
   border-radius:13px; font-size:.87rem; font-weight:600; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:all .25s;
   -webkit-backdrop-filter:blur(16px); backdrop-filter:blur(16px); max-width:92vw; text-align:center;}
 #toast.on{opacity:1; transform:translateX(-50%) translateY(0);}
@@ -187,7 +187,7 @@ table.tbl tbody tr:hover{background:rgba(255,255,255,.035);}
 .login-card{width:100%; max-width:400px; padding:2rem 1.8rem; border-radius:24px; text-align:center;}
 .login-card .logo{width:64px; height:64px; margin:0 auto .8rem; border-radius:19px; overflow:hidden;
   display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,var(--blue),var(--cyan));
-  box-shadow:0 12px 30px rgba(59,130,246,.45);}
+  box-shadow:0 12px 30px rgba(249,115,22,.45);}
 .login-card .logo img{width:100%; height:100%; object-fit:cover;}
 .login-card .logo svg{width:32px; height:32px; color:#fff;}
 .login-card h1{font-size:1.35rem; margin:.1rem 0 .15rem;}
@@ -210,12 +210,12 @@ table.tbl tbody tr:hover{background:rgba(255,255,255,.035);}
   .searchbox{max-width:none;}
   .bottomnav{display:flex; position:fixed; left:.6rem; right:.6rem; bottom:.55rem; z-index:65;
     padding:.4rem; border-radius:20px; justify-content:space-around;
-    background:rgba(10,17,34,.72); border:1px solid var(--stroke2);
+    background:rgba(24,18,12,.72); border:1px solid var(--stroke2);
     -webkit-backdrop-filter:blur(22px) saturate(1.5); backdrop-filter:blur(22px) saturate(1.5); box-shadow:var(--shadow);}
   .bottomnav a{display:flex; flex-direction:column; align-items:center; gap:1px; padding:.35rem .5rem; border-radius:13px;
     color:var(--muted); text-decoration:none; font-size:.6rem; font-weight:700; cursor:pointer;}
   .bottomnav a svg{width:20px; height:20px;}
-  .bottomnav a.active{color:#fff; background:linear-gradient(120deg,rgba(59,130,246,.35),rgba(34,211,238,.18));}
+  .bottomnav a.active{color:#fff; background:linear-gradient(120deg,rgba(249,115,22,.35),rgba(251,191,36,.18));}
   .mgrid{grid-template-columns:1fr;}
   .g2,.g3,.g4{grid-template-columns:1fr;}
   .stat .sv{font-size:1.2rem;}
@@ -229,47 +229,48 @@ html[dir="rtl"] .nav a:hover{transform:translateX(-2px);}
 /* inline daily-rate editing (Products list) */
 .rate-inp{width:98px; text-align:right; padding:.34rem .45rem; font-size:.88rem; font-weight:700;
   border:1px dashed var(--stroke2); background:rgba(255,255,255,.045); border-radius:9px;}
-.rate-inp:focus{border-style:solid; border-color:rgba(96,165,250,.75);}
+.rate-inp:focus{border-style:solid; border-color:rgba(251,146,60,.75);}
 .rate-when{min-height:.8rem;}
 
 /* ---------- glassier login ---------- */
 #login .login-card{
-  background:linear-gradient(155deg, rgba(255,255,255,.13), rgba(255,255,255,.045) 55%, rgba(34,211,238,.07));
+  background:linear-gradient(155deg, rgba(255,255,255,.13), rgba(255,255,255,.045) 55%, rgba(251,191,36,.07));
   border:1px solid rgba(255,255,255,.22);
   -webkit-backdrop-filter:blur(28px) saturate(1.7); backdrop-filter:blur(28px) saturate(1.7);
-  box-shadow:0 24px 60px rgba(2,6,18,.5), inset 0 1px 0 rgba(255,255,255,.25), 0 0 90px rgba(59,130,246,.13);
+  box-shadow:0 24px 60px rgba(12,7,3,.5), inset 0 1px 0 rgba(255,255,255,.25), 0 0 90px rgba(249,115,22,.13);
 }
 #login input{background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.16);}
-#login input:focus{border-color:rgba(96,165,250,.7); box-shadow:0 0 0 3px rgba(59,130,246,.22);}
+#login input:focus{border-color:rgba(251,146,60,.7); box-shadow:0 0 0 3px rgba(249,115,22,.22);}
 
 /* ---------- LIGHT / WHITE theme ---------- */
 html[data-theme="light"]{
-  --glass:rgba(255,255,255,.58); --glass2:rgba(255,255,255,.75); --glass3:rgba(15,40,80,.09);
-  --stroke:rgba(15,40,80,.13); --stroke2:rgba(15,40,80,.22);
+  --glass:rgba(255,255,255,.58); --glass2:rgba(255,255,255,.75); --glass3:rgba(90,55,16,.09);
+  --stroke:rgba(90,55,16,.13); --stroke2:rgba(90,55,16,.22);
   --text:#0b1526; --muted:#43597c; --muted2:#5d7194;
-  --blue-soft:rgba(37,99,235,.13);
+  --blue-soft:rgba(234,88,12,.13);
   --shadow:0 12px 40px rgba(30,58,110,.16); --shadow-sm:0 4px 18px rgba(30,58,110,.10);
 }
 html[data-theme="light"] body{
   background:
-    radial-gradient(900px 600px at 85% -10%, rgba(34,211,238,.20), rgba(34,211,238,0) 60%),
-    radial-gradient(1000px 700px at -10% 110%, rgba(59,130,246,.16), rgba(59,130,246,0) 60%),
+    radial-gradient(900px 600px at 85% -10%, rgba(251,191,36,.20), rgba(251,191,36,0) 60%),
+    radial-gradient(1000px 700px at -10% 110%, rgba(249,115,22,.16), rgba(249,115,22,0) 60%),
     radial-gradient(700px 500px at 55% 45%, rgba(16,185,129,.08), rgba(16,185,129,0) 65%),
-    linear-gradient(155deg,#ffffff 0%,#eef4fb 48%,#e3ecf9 100%);
+    linear-gradient(155deg,#ffffff 0%,#faf4e8 48%,#f2e7d3 100%);
   background-attachment:fixed;
 }
 html[data-theme="light"] .sidebar{background:rgba(255,255,255,.62); box-shadow:6px 0 30px rgba(30,58,110,.08);}
-html[data-theme="light"] .nav a.active{color:#0b3b8f; box-shadow:0 6px 20px rgba(59,130,246,.18);}
+html[data-theme="light"] .nav a.active{color:#9a3412; box-shadow:0 6px 20px rgba(249,115,22,.18);}
 html[data-theme="light"] .modal{background:rgba(255,255,255,.9); box-shadow:0 24px 60px rgba(30,58,110,.25);}
 html[data-theme="light"] #search-results{background:rgba(255,255,255,.94);}
+html[data-theme="light"] #search-results .sr .tag, html[data-theme="light"] .pill.info{color:#9a3412;}
 html[data-theme="light"] .bottomnav{background:rgba(255,255,255,.78);}
-html[data-theme="light"] .bottomnav a.active{color:#0b3b8f;}
+html[data-theme="light"] .bottomnav a.active{color:#9a3412;}
 html[data-theme="light"] select option{background:#ffffff; color:#0b1526;}
 html[data-theme="light"] input,html[data-theme="light"] select,html[data-theme="light"] textarea{background:rgba(255,255,255,.6);}
 html[data-theme="light"] #toast{background:rgba(255,255,255,.94); color:#0b1526;}
-html[data-theme="light"] table.tbl tbody tr:hover{background:rgba(15,40,80,.045);}
-html[data-theme="light"] #login .login-card{background:linear-gradient(155deg, rgba(255,255,255,.75), rgba(255,255,255,.45) 55%, rgba(34,211,238,.12)); border-color:rgba(15,40,80,.14); box-shadow:0 24px 60px rgba(30,58,110,.20), inset 0 1px 0 rgba(255,255,255,.9);}
-html[data-theme="light"] #login input{background:rgba(255,255,255,.65); border-color:rgba(15,40,80,.18); color:#0b1526;}
+html[data-theme="light"] table.tbl tbody tr:hover{background:rgba(90,55,16,.045);}
+html[data-theme="light"] #login .login-card{background:linear-gradient(155deg, rgba(255,255,255,.75), rgba(255,255,255,.45) 55%, rgba(251,191,36,.12)); border-color:rgba(90,55,16,.14); box-shadow:0 24px 60px rgba(30,58,110,.20), inset 0 1px 0 rgba(255,255,255,.9);}
+html[data-theme="light"] #login input{background:rgba(255,255,255,.65); border-color:rgba(90,55,16,.18); color:#0b1526;}
 html[data-theme="light"] .btn.ghost{color:#0b1526;}
 html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{color:#43597c;}
 
@@ -314,7 +315,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
 <!-- ================= LOGIN ================= -->
 <div id="login">
   <div class="login-card glass">
-    <div class="logo" id="login-logo"><i data-lucide="layers"></i></div>
+    <div class="logo" id="login-logo"><i data-lucide="flame"></i></div>
     <h1 id="login-shop">SteelDesk</h1>
     <div class="sub" data-i18n="loginSub">Iron &amp; Steel Shop Management</div>
     <label class="f" data-i18n="username">Username</label>
@@ -348,7 +349,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
 <div id="app">
   <aside class="sidebar" id="sidebar">
     <div class="brand">
-      <div class="logo" id="side-logo"><i data-lucide="layers"></i></div>
+      <div class="logo" id="side-logo"><i data-lucide="flame"></i></div>
       <div><div class="bname" id="side-shop">SteelDesk</div><div class="bsub">Iron &amp; Steel</div></div>
     </div>
     <nav class="nav" id="main-nav">
@@ -382,7 +383,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
       <div><h1 class="ptitle" id="page-title">Dashboard</h1><div class="psub" id="page-date"></div></div>
       <div class="searchbox">
         <i data-lucide="search"></i>
-        <input type="text" id="global-search" data-i18n-ph="searchPh" placeholder="Search products, customers, invoices…">
+        <input type="text" id="global-search" data-i18n-ph="searchPh" placeholder="Search products, customers…">
         <div id="search-results"></div>
       </div>
       <button class="iconbtn" id="btn-lang" title="Language / زبان" style="width:auto; padding:0 .7rem; font-weight:800; font-size:.8rem">اردو</button>
@@ -401,15 +402,6 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
         <div class="glass card"><h3><i data-lucide="flame"></i><span data-i18n="topProducts">Top-selling products</span></h3><div id="dash-top"></div></div>
         <div class="glass card"><h3><i data-lucide="alert-triangle"></i><span data-i18n="lowStock">Low-stock alerts</span><span class="sp pill bad" id="dash-low-count" style="display:none"></span></h3><div id="dash-low"></div></div>
         <div class="glass card"><h3><i data-lucide="history"></i><span data-i18n="recentTx">Recent transactions</span></h3><div id="dash-recent"></div></div>
-      </div>
-      <div class="glass card"><h3><i data-lucide="zap"></i><span data-i18n="quickActions">Quick actions</span></h3>
-        <div class="quick">
-          <button class="btn" data-goto="sales"><i data-lucide="shopping-cart"></i><span data-i18n="newSale">New Sale</span></button>
-          <button class="btn ghost" data-goto="purchases"><i data-lucide="truck"></i><span data-i18n="newPurchase">New Purchase</span></button>
-          <button class="btn ghost" id="qa-product"><i data-lucide="package-plus"></i><span data-i18n="addProduct">Add Product</span></button>
-          <button class="btn ghost" id="qa-payment"><i data-lucide="wallet"></i><span data-i18n="addPayment">Add Payment</span></button>
-          <button class="btn ghost" id="qa-expense"><i data-lucide="receipt-text"></i><span data-i18n="addExpense">Add Expense</span></button>
-        </div>
       </div>
     </section>
 
@@ -686,8 +678,8 @@ function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.ad
 
 /* ---------------- i18n ---------------- */
 const I18N = {
-  en: { loginSub: "Iron & Steel Shop Management", username: "Username", password: "Password", login: "Login", mainMenu: "Main Menu", parties: "Parties", manage: "Manage", dashboard: "Dashboard", products: "Products", inventory: "Inventory / Stock", inventoryShort: "Stock", sales: "Sales", purchases: "Purchase", customers: "Customers", suppliers: "Suppliers", payments: "Payments", expenses: "Expenses", reports: "Reports", invoices: "Invoices", settings: "Shop Settings", salesChart: "Sales — last 14 days", profitChart: "Profit — last 6 months", topProducts: "Top-selling products", lowStock: "Low-stock alerts", recentTx: "Recent transactions", quickActions: "Quick actions", newSale: "New Sale", newPurchase: "New Purchase", addProduct: "Add Product", addPayment: "Add Payment", addExpense: "Add Expense", add: "Add", stockBalances: "Stock balances", adjustStock: "Add Stock / Adjust", stockHistory: "Stock movement history", customer: "Customer", supplier: "Supplier", date: "Date", paymentMethod: "Payment method", addItem: "Add item", note: "Note", allowOversell: "Allow sale despite low stock (Admin)", saveInvoice: "Save Invoice", savePurchase: "Save Purchase", recentSales: "Recent sales", recentPurchases: "Recent purchases", supplierBill: "Supplier bill / invoice no.", print: "Print", receiveFromCustomer: "Receive from Customer", payToSupplier: "Pay to Supplier", reportType: "Report type", repSales: "Sales Report", repPurchases: "Purchase Report", repProfit: "Profit & Loss", repStock: "Stock Report", repExpenses: "Expense Report", repCustOut: "Customer Outstanding", repSupOut: "Supplier Outstanding", repCash: "Cash Flow", from: "From", to: "To", run: "Run Report", printPdf: "Print / PDF", salesInvoices: "Sales Invoices", purchaseRecords: "Purchase Records", shopBranding: "Shop Branding", shopName: "Shop Name", shopLogo: "Shop Logo", upload: "Upload", remove: "Remove", logoPosition: "Logo position (invoice)", shopNameSize: "Shop name size", address: "Address", phone: "Phone", email: "Email", currency: "Currency", footerMsg: "Invoice footer message", defaultInvoice: "Default invoice format", defaultUnit: "Default measurement unit", saveSettings: "Save Settings", usersRoles: "Users & Roles", rolesNote: "Admin: full access. Staff: cannot delete/cancel invoices, change settings or manage users.", backupRestore: "Backup & Restore", backupNote: "Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.", downloadBackup: "Download Backup", restore: "Restore", language: "Language", searchPh: "Search products, customers, invoices…", more: "More" },
-  ur: { loginSub: "لوہے اور اسٹیل کی دکان کا نظام", username: "صارف نام", password: "پاس ورڈ", login: "لاگ ان", mainMenu: "مین مینو", parties: "پارٹیاں", manage: "انتظام", dashboard: "ڈیش بورڈ", products: "مصنوعات", inventory: "اسٹاک", inventoryShort: "اسٹاک", sales: "فروخت", purchases: "خریداری", customers: "گاہک", suppliers: "سپلائر", payments: "ادائیگیاں", expenses: "اخراجات", reports: "رپورٹس", invoices: "انوائسز", settings: "دکان کی ترتیبات", salesChart: "فروخت — پچھلے 14 دن", profitChart: "منافع — پچھلے 6 ماہ", topProducts: "زیادہ بکنے والی مصنوعات", lowStock: "کم اسٹاک الرٹ", recentTx: "حالیہ لین دین", quickActions: "فوری کام", newSale: "نئی فروخت", newPurchase: "نئی خریداری", addProduct: "مصنوعہ شامل کریں", addPayment: "ادائیگی شامل کریں", addExpense: "خرچ شامل کریں", add: "شامل کریں", stockBalances: "اسٹاک بیلنس", adjustStock: "اسٹاک شامل / ایڈجسٹ کریں", stockHistory: "اسٹاک کی تاریخ", customer: "گاہک", supplier: "سپلائر", date: "تاریخ", paymentMethod: "ادائیگی کا طریقہ", addItem: "آئٹم شامل کریں", note: "نوٹ", allowOversell: "کم اسٹاک کے باوجود فروخت کی اجازت (ایڈمن)", saveInvoice: "انوائس محفوظ کریں", savePurchase: "خریداری محفوظ کریں", recentSales: "حالیہ فروخت", recentPurchases: "حالیہ خریداری", supplierBill: "سپلائر بل نمبر", print: "پرنٹ", receiveFromCustomer: "گاہک سے وصولی", payToSupplier: "سپلائر کو ادائیگی", reportType: "رپورٹ کی قسم", repSales: "فروخت رپورٹ", repPurchases: "خریداری رپورٹ", repProfit: "نفع و نقصان", repStock: "اسٹاک رپورٹ", repExpenses: "اخراجات رپورٹ", repCustOut: "گاہکوں کے بقایا", repSupOut: "سپلائر کے بقایا", repCash: "کیش فلو", from: "سے", to: "تک", run: "رپورٹ چلائیں", printPdf: "پرنٹ / PDF", salesInvoices: "فروخت انوائسز", purchaseRecords: "خریداری ریکارڈ", shopBranding: "دکان کی برانڈنگ", shopName: "دکان کا نام", shopLogo: "دکان کا لوگو", upload: "اپ لوڈ", remove: "ہٹائیں", logoPosition: "لوگو کی جگہ (انوائس)", shopNameSize: "دکان کے نام کا سائز", address: "پتہ", phone: "فون", email: "ای میل", currency: "کرنسی", footerMsg: "انوائس فوٹر پیغام", defaultInvoice: "طے شدہ انوائس فارمیٹ", defaultUnit: "طے شدہ پیمائش یونٹ", saveSettings: "ترتیبات محفوظ کریں", usersRoles: "صارفین اور کردار", rolesNote: "ایڈمن: مکمل رسائی۔ اسٹاف: انوائس حذف/منسوخ، ترتیبات اور صارفین تبدیل نہیں کر سکتا۔", backupRestore: "بیک اپ اور بحالی", backupNote: "تمام ڈیٹا کا بیک اپ ڈاؤن لوڈ کریں یا بیک اپ فائل سے بحال کریں۔ ڈیٹا اسی براؤزر میں محفوظ ہوتا ہے۔", downloadBackup: "بیک اپ ڈاؤن لوڈ کریں", restore: "بحال کریں", language: "زبان", searchPh: "مصنوعات، گاہک، انوائس تلاش کریں…", more: "مزید" }
+  en: { loginSub: "Iron & Steel Shop Management", username: "Username", password: "Password", login: "Login", mainMenu: "Main Menu", parties: "Parties", manage: "Manage", dashboard: "Dashboard", products: "Products", inventory: "Inventory / Stock", inventoryShort: "Stock", sales: "Sales", purchases: "Purchase", customers: "Customers", suppliers: "Suppliers", payments: "Payments", expenses: "Expenses", reports: "Reports", invoices: "Invoices", settings: "Shop Settings", salesChart: "Sales — last 14 days", profitChart: "Profit — last 6 months", topProducts: "Top-selling products", lowStock: "Low-stock alerts", recentTx: "Recent transactions", quickActions: "Quick actions", newSale: "New Sale", newPurchase: "New Purchase", addProduct: "Add Product", addPayment: "Add Payment", addExpense: "Add Expense", add: "Add", stockBalances: "Stock balances", adjustStock: "Add Stock / Adjust", stockHistory: "Stock movement history", customer: "Customer", supplier: "Supplier", date: "Date", paymentMethod: "Payment method", addItem: "Add item", note: "Note", allowOversell: "Allow sale despite low stock (Admin)", saveInvoice: "Save Invoice", savePurchase: "Save Purchase", recentSales: "Recent sales", recentPurchases: "Recent purchases", supplierBill: "Supplier bill / invoice no.", print: "Print", receiveFromCustomer: "Receive from Customer", payToSupplier: "Pay to Supplier", reportType: "Report type", repSales: "Sales Report", repPurchases: "Purchase Report", repProfit: "Profit & Loss", repStock: "Stock Report", repExpenses: "Expense Report", repCustOut: "Customer Outstanding", repSupOut: "Supplier Outstanding", repCash: "Cash Flow", from: "From", to: "To", run: "Run Report", printPdf: "Print / PDF", salesInvoices: "Sales Invoices", purchaseRecords: "Purchase Records", shopBranding: "Shop Branding", shopName: "Shop Name", shopLogo: "Shop Logo", upload: "Upload", remove: "Remove", logoPosition: "Logo position (invoice)", shopNameSize: "Shop name size", address: "Address", phone: "Phone", email: "Email", currency: "Currency", footerMsg: "Invoice footer message", defaultInvoice: "Default invoice format", defaultUnit: "Default measurement unit", saveSettings: "Save Settings", usersRoles: "Users & Roles", rolesNote: "Admin: full access. Staff: cannot delete/cancel invoices, change settings or manage users.", backupRestore: "Backup & Restore", backupNote: "Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.", downloadBackup: "Download Backup", restore: "Restore", language: "Language", searchPh: "Search products, customers…", more: "More" },
+  ur: { loginSub: "لوہے اور اسٹیل کی دکان کا نظام", username: "صارف نام", password: "پاس ورڈ", login: "لاگ ان", mainMenu: "مین مینو", parties: "پارٹیاں", manage: "انتظام", dashboard: "ڈیش بورڈ", products: "مصنوعات", inventory: "اسٹاک", inventoryShort: "اسٹاک", sales: "فروخت", purchases: "خریداری", customers: "گاہک", suppliers: "سپلائر", payments: "ادائیگیاں", expenses: "اخراجات", reports: "رپورٹس", invoices: "انوائسز", settings: "دکان کی ترتیبات", salesChart: "فروخت — پچھلے 14 دن", profitChart: "منافع — پچھلے 6 ماہ", topProducts: "زیادہ بکنے والی مصنوعات", lowStock: "کم اسٹاک الرٹ", recentTx: "حالیہ لین دین", quickActions: "فوری کام", newSale: "نئی فروخت", newPurchase: "نئی خریداری", addProduct: "مصنوعہ شامل کریں", addPayment: "ادائیگی شامل کریں", addExpense: "خرچ شامل کریں", add: "شامل کریں", stockBalances: "اسٹاک بیلنس", adjustStock: "اسٹاک شامل / ایڈجسٹ کریں", stockHistory: "اسٹاک کی تاریخ", customer: "گاہک", supplier: "سپلائر", date: "تاریخ", paymentMethod: "ادائیگی کا طریقہ", addItem: "آئٹم شامل کریں", note: "نوٹ", allowOversell: "کم اسٹاک کے باوجود فروخت کی اجازت (ایڈمن)", saveInvoice: "انوائس محفوظ کریں", savePurchase: "خریداری محفوظ کریں", recentSales: "حالیہ فروخت", recentPurchases: "حالیہ خریداری", supplierBill: "سپلائر بل نمبر", print: "پرنٹ", receiveFromCustomer: "گاہک سے وصولی", payToSupplier: "سپلائر کو ادائیگی", reportType: "رپورٹ کی قسم", repSales: "فروخت رپورٹ", repPurchases: "خریداری رپورٹ", repProfit: "نفع و نقصان", repStock: "اسٹاک رپورٹ", repExpenses: "اخراجات رپورٹ", repCustOut: "گاہکوں کے بقایا", repSupOut: "سپلائر کے بقایا", repCash: "کیش فلو", from: "سے", to: "تک", run: "رپورٹ چلائیں", printPdf: "پرنٹ / PDF", salesInvoices: "فروخت انوائسز", purchaseRecords: "خریداری ریکارڈ", shopBranding: "دکان کی برانڈنگ", shopName: "دکان کا نام", shopLogo: "دکان کا لوگو", upload: "اپ لوڈ", remove: "ہٹائیں", logoPosition: "لوگو کی جگہ (انوائس)", shopNameSize: "دکان کے نام کا سائز", address: "پتہ", phone: "فون", email: "ای میل", currency: "کرنسی", footerMsg: "انوائس فوٹر پیغام", defaultInvoice: "طے شدہ انوائس فارمیٹ", defaultUnit: "طے شدہ پیمائش یونٹ", saveSettings: "ترتیبات محفوظ کریں", usersRoles: "صارفین اور کردار", rolesNote: "ایڈمن: مکمل رسائی۔ اسٹاف: انوائس حذف/منسوخ، ترتیبات اور صارفین تبدیل نہیں کر سکتا۔", backupRestore: "بیک اپ اور بحالی", backupNote: "تمام ڈیٹا کا بیک اپ ڈاؤن لوڈ کریں یا بیک اپ فائل سے بحال کریں۔ ڈیٹا اسی براؤزر میں محفوظ ہوتا ہے۔", downloadBackup: "بیک اپ ڈاؤن لوڈ کریں", restore: "بحال کریں", language: "زبان", searchPh: "مصنوعات، گاہک تلاش کریں…", more: "مزید" }
 };
 let LANG = "en";
 function t(k) { return (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k; }
@@ -875,7 +867,7 @@ function showLogin() {
   $("#app").classList.remove("on"); $("#login").classList.remove("off");
   $("#login-shop").textContent = S.settings.shopName || "SteelDesk";
   const lg = $("#login-logo");
-  lg.innerHTML = S.settings.logo ? '<img src="' + S.settings.logo + '" alt="">' : '<i data-lucide="layers"></i>';
+  lg.innerHTML = S.settings.logo ? '<img src="' + S.settings.logo + '" alt="">' : '<i data-lucide="flame"></i>';
   const anyCustom = S.users.some((u) => u.pass !== "admin123");
   $("#login-hint").textContent = anyCustom ? "" : "Default login: admin / admin123 — change it in Shop Settings after login.";
   icons();
@@ -903,7 +895,7 @@ function applyBranding() {
   $("#side-shop").textContent = S.settings.shopName || "SteelDesk";
   $("#login-shop").textContent = S.settings.shopName || "SteelDesk";
   const sl = $("#side-logo");
-  sl.innerHTML = S.settings.logo ? '<img src="' + S.settings.logo + '" alt="">' : '<i data-lucide="layers"></i>';
+  sl.innerHTML = S.settings.logo ? '<img src="' + S.settings.logo + '" alt="">' : '<i data-lucide="flame"></i>';
   icons();
 }
 
@@ -997,10 +989,10 @@ function renderDashboard() {
     dPur.push(sum(aPur.filter((p) => p.date === ds), (p) => p.total));
   }
   const light = S.settings.theme === "light";
-  const grid = { color: light ? "rgba(15,40,80,.09)" : "rgba(255,255,255,.06)" }, tick = { color: light ? "#43597c" : "#93a4c4", font: { size: 10 } };
+  const grid = { color: light ? "rgba(90,55,16,.09)" : "rgba(255,255,255,.06)" }, tick = { color: light ? "#43597c" : "#93a4c4", font: { size: 10 } };
   makeChart("ch-sales", { type: "bar", data: { labels: days, datasets: [
-    { label: "Sales", data: dSales, backgroundColor: "rgba(59,130,246,.65)", borderRadius: 5 },
-    { label: "Purchases", data: dPur, backgroundColor: "rgba(34,211,238,.45)", borderRadius: 5 } ] },
+    { label: "Sales", data: dSales, backgroundColor: "rgba(249,115,22,.65)", borderRadius: 5 },
+    { label: "Purchases", data: dPur, backgroundColor: "rgba(251,191,36,.45)", borderRadius: 5 } ] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: light ? "#22314f" : "#c7d3ec", boxWidth: 10 } } }, scales: { x: { ticks: tick, grid: { display: false } }, y: { ticks: tick, grid } } } });
   const mLabels = [], mProf = [];
   for (let i = 5; i >= 0; i--) {
@@ -1026,8 +1018,6 @@ function productForm(p) {
     '<div><label class="f">Or New Category (your own)</label><input type="text" id="pf-newcat" placeholder="Type to create a new category"></div>' +
     '<div><label class="f">Brand / Company</label><input type="text" id="pf-brand" value="' + esc(p.brand || "") + '" placeholder="Mughal Steel"></div>' +
     '<div><label class="f">Size</label><input type="text" id="pf-size" value="' + esc(p.size || "") + '" placeholder="12mm"></div>' +
-    '<div><label class="f">Diameter / Thickness</label><input type="text" id="pf-dia" value="' + esc(p.dia || "") + '" placeholder="—"></div>' +
-    '<div><label class="f">Length</label><input type="text" id="pf-length" value="' + esc(p.length || "") + '" placeholder="40 ft"></div>' +
     '<div><label class="f">Unit of Measurement</label><select id="pf-unit">' + UNITS.map((u) => '<option ' + ((p.unit || S.settings.defaultUnit) === u ? "selected" : "") + ">" + u + "</option>").join("") + "</select></div>" +
     '<div><label class="f">Weight per Piece (KG, optional)</label><input type="number" id="pf-wpp" step="any" min="0" value="' + (p.weightPerPiece || "") + '" placeholder="e.g. 10.67"></div>' +
     '<div><label class="f">Purchase Rate (per unit)</label><input type="number" id="pf-prate" step="any" min="0" value="' + (p.purchaseRate || "") + '"></div>' +
@@ -1035,17 +1025,13 @@ function productForm(p) {
     '<div><label class="f">Opening Stock' + (p.id ? " (starting stock only)" : "") + '</label><input type="number" id="pf-open" step="any" value="' + (p.id ? openingOf(p.id) : (p.opening || 0)) + '"></div>' +
     '<div><label class="f">Minimum Stock Level</label><input type="number" id="pf-min" step="any" min="0" value="' + (p.minStock || 0) + '"></div>' +
     "</div>" +
-    '<label class="f">Description</label><input type="text" id="pf-desc" value="' + esc(p.desc || "") + '">' +
-    '<label class="f">Product Image (optional)</label><div class="row"><img id="pf-img-preview" style="width:52px; height:52px; object-fit:cover; border-radius:10px; display:' + (p.image ? "block" : "none") + '" src="' + (p.image || "") + '"><label class="btn sm ghost" style="cursor:pointer">Upload<input type="file" id="pf-img" accept="image/*" hidden></label></div>' +
     '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="pf-save">' + (p.id ? "Save Changes" : "Add Product") + "</button></div>", true);
-  let imgData = p.image || null;
-  $("#pf-img", back).onchange = (e) => { const f = e.target.files[0]; if (!f) return; readImage(f, 300, (d) => { imgData = d; const im = $("#pf-img-preview", back); im.src = d; im.style.display = "block"; }); };
   $("#pf-save", back).onclick = () => {
     const name = $("#pf-name", back).value.trim();
     if (!name) { toast("Product name is required."); return; }
     const newCat = $("#pf-newcat", back).value.trim();
     if (newCat && !S.categories.includes(newCat)) S.categories.push(newCat);
-    const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: $("#pf-dia", back).value.trim(), length: $("#pf-length", back).value.trim(), unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: $("#pf-desc", back).value.trim(), image: imgData };
+    const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: p.dia || "", length: p.length || "", unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: p.desc || "", image: p.image || "" };
     if (p.id) {
       const before = prodById(p.id);
       const rateChanged = (Number(before.purchaseRate) || 0) !== data.purchaseRate || (Number(before.saleRate) || 0) !== data.saleRate;
@@ -1185,18 +1171,24 @@ function adjustForm(presetPid) {
   const back = openModal(modalHead("Stock Adjustment / Damage", "sliders-horizontal") +
     '<label class="f">Product</label><select id="af-prod">' + S.products.map((p) => '<option value="' + p.id + '">' + esc(prodLabel(p)) + " — stock " + fmtNum(stockOf(p.id)) + " " + esc(p.unit) + "</option>").join("") + "</select>" +
     '<div class="mgrid"><div><label class="f">Type</label><select id="af-type"><option value="adjust-in">Adjustment (+)</option><option value="adjust-out">Adjustment (−)</option><option value="damage">Damaged Stock (−)</option></select></div>' +
+    '<div><label class="f">Unit</label><select id="af-unit">' + UNITS.map((u) => "<option>" + u + "</option>").join("") + "</select></div>" +
     '<div><label class="f">Quantity</label><input type="number" id="af-qty" step="any" min="0" value="0"></div></div>' +
     '<label class="f">Note</label><input type="text" id="af-note" placeholder="Reason…">' +
     '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="af-save">Save Adjustment</button></div>');
-  if (presetPid && prodById(presetPid)) { $("#af-prod", back).value = presetPid; $("#af-type", back).value = "adjust-in"; }
+  if (presetPid && prodById(presetPid)) { $("#af-prod", back).value = presetPid; $("#af-type", back).value = "adjust-in"; $("#af-unit", back).value = prodById(presetPid).unit; }
+  else if (S.products.length) { $("#af-unit", back).value = S.products[0].unit; }
+  $("#af-prod", back).onchange = () => { const pp = prodById($("#af-prod", back).value); if (pp) $("#af-unit", back).value = pp.unit; };
   $("#af-save", back).onclick = () => {
     const pid = $("#af-prod", back).value, p = prodById(pid);
     const q = Math.abs(Number($("#af-qty", back).value) || 0);
     if (!q) { toast("Enter a quantity."); return; }
     const typ = $("#af-type", back).value;
     const sign = typ === "adjust-in" ? 1 : -1;
-    if (sign < 0 && q > stockOf(pid)) { toast("Quantity is more than current stock."); return; }
-    addMovement(pid, sign * q, typ === "damage" ? "damage" : "adjust", "adjust", uid(), todayStr(), $("#af-note", back).value.trim() || (typ === "damage" ? "Damaged stock" : "Manual adjustment"));
+    const unit = $("#af-unit", back).value;
+    const conv = convertQty(q, unit, p.unit, p);
+    if (conv == null) { toast("Unit conversion needs the product's weight per piece."); return; }
+    if (sign < 0 && conv > stockOf(pid)) { toast("Quantity is more than current stock."); return; }
+    addMovement(pid, sign * conv, typ === "damage" ? "damage" : "adjust", "adjust", uid(), todayStr(), ($("#af-note", back).value.trim() || (typ === "damage" ? "Damaged stock" : "Manual adjustment")) + (unit !== p.unit ? " [" + fmtNum(q) + " " + unit + "]" : ""));
     save(); closeModal(); renderAll(); toast("Stock updated: " + prodLabel(p) + " → " + fmtNum(stockOf(pid)) + " " + p.unit);
   };
 }
@@ -1405,6 +1397,8 @@ function saveSale() {
   printInvoice("sale", inv.id);
 }
 function resetSaleForm() {
+  editingSaleId = null;
+  const bsb = $("#btn-save-sale"); if (bsb && bsb.querySelector("span")) bsb.querySelector("span").textContent = t("saveInvoice");
   saleLinesApi = setupLines("#sale-lines", "sale");
   $("#sale-totals").dataset.ready = ""; $("#sale-totals").innerHTML = ""; recalc("sale");
   $("#sale-date").value = todayStr(); $("#sale-note").value = "";
@@ -1449,6 +1443,8 @@ function savePurchase() {
   save(); toast("Purchase saved: " + inv.no); resetPurForm(); renderAll();
 }
 function resetPurForm() {
+  editingPurId = null;
+  const bpb = $("#btn-save-purchase"); if (bpb && bpb.querySelector("span")) bpb.querySelector("span").textContent = t("savePurchase");
   purLinesApi = setupLines("#pur-lines", "purchase");
   $("#pur-totals").dataset.ready = ""; $("#pur-totals").innerHTML = ""; recalc("purchase");
   $("#pur-date").value = todayStr(); $("#pur-note").value = ""; $("#pur-billno").value = "";
@@ -1899,7 +1895,6 @@ function wire() {
   // products
   $("#btn-add-product").onclick = () => productForm();
   $("#btn-cats").onclick = () => catManager();
-  $("#qa-product").onclick = () => productForm();
   $("#prod-search").addEventListener("input", renderProducts);
   $("#prod-cat-filter").addEventListener("change", renderProducts);
   // inventory
@@ -1926,10 +1921,8 @@ function wire() {
   // payments
   $("#btn-pay-in").onclick = () => paymentForm("in");
   $("#btn-pay-out").onclick = () => paymentForm("out");
-  $("#qa-payment").onclick = () => paymentForm("in");
   // expenses
   $("#btn-add-expense").onclick = () => expenseForm();
-  $("#qa-expense").onclick = () => expenseForm();
   // invoices
   $("#inv-search").addEventListener("input", renderInvoices);
   // reports
