@@ -226,6 +226,47 @@ html[dir="rtl"] .main{margin-left:0; margin-right:var(--sidebar-w);}
 html[dir="rtl"] .nav a:hover{transform:translateX(-2px);}
 @media (max-width:860px){ html[dir="rtl"] .main{margin-right:0;} html[dir="rtl"] .sidebar{transform:translateX(105%);} html[dir="rtl"] .sidebar.open{transform:none;} }
 
+/* ---------- glassier login ---------- */
+#login .login-card{
+  background:linear-gradient(155deg, rgba(255,255,255,.13), rgba(255,255,255,.045) 55%, rgba(34,211,238,.07));
+  border:1px solid rgba(255,255,255,.22);
+  -webkit-backdrop-filter:blur(28px) saturate(1.7); backdrop-filter:blur(28px) saturate(1.7);
+  box-shadow:0 24px 60px rgba(2,6,18,.5), inset 0 1px 0 rgba(255,255,255,.25), 0 0 90px rgba(59,130,246,.13);
+}
+#login input{background:rgba(255,255,255,.07); border-color:rgba(255,255,255,.16);}
+#login input:focus{border-color:rgba(96,165,250,.7); box-shadow:0 0 0 3px rgba(59,130,246,.22);}
+
+/* ---------- LIGHT / WHITE theme ---------- */
+html[data-theme="light"]{
+  --glass:rgba(255,255,255,.58); --glass2:rgba(255,255,255,.75); --glass3:rgba(15,40,80,.09);
+  --stroke:rgba(15,40,80,.13); --stroke2:rgba(15,40,80,.22);
+  --text:#0b1526; --muted:#43597c; --muted2:#5d7194;
+  --blue-soft:rgba(37,99,235,.13);
+  --shadow:0 12px 40px rgba(30,58,110,.16); --shadow-sm:0 4px 18px rgba(30,58,110,.10);
+}
+html[data-theme="light"] body{
+  background:
+    radial-gradient(900px 600px at 85% -10%, rgba(34,211,238,.20), rgba(34,211,238,0) 60%),
+    radial-gradient(1000px 700px at -10% 110%, rgba(59,130,246,.16), rgba(59,130,246,0) 60%),
+    radial-gradient(700px 500px at 55% 45%, rgba(16,185,129,.08), rgba(16,185,129,0) 65%),
+    linear-gradient(155deg,#ffffff 0%,#eef4fb 48%,#e3ecf9 100%);
+  background-attachment:fixed;
+}
+html[data-theme="light"] .sidebar{background:rgba(255,255,255,.62); box-shadow:6px 0 30px rgba(30,58,110,.08);}
+html[data-theme="light"] .nav a.active{color:#0b3b8f; box-shadow:0 6px 20px rgba(59,130,246,.18);}
+html[data-theme="light"] .modal{background:rgba(255,255,255,.9); box-shadow:0 24px 60px rgba(30,58,110,.25);}
+html[data-theme="light"] #search-results{background:rgba(255,255,255,.94);}
+html[data-theme="light"] .bottomnav{background:rgba(255,255,255,.78);}
+html[data-theme="light"] .bottomnav a.active{color:#0b3b8f;}
+html[data-theme="light"] select option{background:#ffffff; color:#0b1526;}
+html[data-theme="light"] input,html[data-theme="light"] select,html[data-theme="light"] textarea{background:rgba(255,255,255,.6);}
+html[data-theme="light"] #toast{background:rgba(255,255,255,.94); color:#0b1526;}
+html[data-theme="light"] table.tbl tbody tr:hover{background:rgba(15,40,80,.045);}
+html[data-theme="light"] #login .login-card{background:linear-gradient(155deg, rgba(255,255,255,.75), rgba(255,255,255,.45) 55%, rgba(34,211,238,.12)); border-color:rgba(15,40,80,.14); box-shadow:0 24px 60px rgba(30,58,110,.20), inset 0 1px 0 rgba(255,255,255,.9);}
+html[data-theme="light"] #login input{background:rgba(255,255,255,.65); border-color:rgba(15,40,80,.18); color:#0b1526;}
+html[data-theme="light"] .btn.ghost{color:#0b1526;}
+html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{color:#43597c;}
+
 /* ---------- print ---------- */
 #print-area{display:none;}
 @media print{
@@ -272,6 +313,22 @@ html[dir="rtl"] .nav a:hover{transform:translateX(-2px);}
     <button class="btn" id="btn-login" style="width:100%; justify-content:center"><i data-lucide="log-in"></i><span data-i18n="login">Login</span></button>
     <div class="login-err" id="login-err"></div>
     <div class="small muted" style="margin-top:1rem" id="login-hint"></div>
+    <div class="row" style="justify-content:center; margin-top:.9rem">
+      <button class="btn sm ghost" id="btn-show-signup" type="button"><i data-lucide="user-plus"></i>Create account</button>
+      <button class="btn sm ghost" id="li-theme" type="button"><i data-lucide="sun"></i><span>White Mode</span></button>
+    </div>
+    <div id="signup-box" style="display:none; text-align:left; margin-top:.6rem">
+      <label class="f">Full Name</label>
+      <input type="text" id="su-name" placeholder="Your name">
+      <label class="f">Username</label>
+      <input type="text" id="su-user" placeholder="Choose a username">
+      <label class="f">Password</label>
+      <input type="password" id="su-pass" placeholder="Choose a password">
+      <div style="height:.8rem"></div>
+      <button class="btn ok" id="btn-signup" type="button" style="width:100%; justify-content:center"><i data-lucide="user-plus"></i>Create my account</button>
+      <div class="small muted" style="margin-top:.55rem; text-align:center">New accounts get Staff access. The Admin can change roles or remove accounts in Shop Settings.</div>
+      <div class="login-err" id="signup-err"></div>
+    </div>
   </div>
 </div>
 
@@ -317,6 +374,7 @@ html[dir="rtl"] .nav a:hover{transform:translateX(-2px);}
         <div id="search-results"></div>
       </div>
       <button class="iconbtn" id="btn-lang" title="Language / زبان" style="width:auto; padding:0 .7rem; font-weight:800; font-size:.8rem">اردو</button>
+      <button class="iconbtn" id="btn-theme" title="White / Dark mode"><i data-lucide="sun"></i></button>
       <button class="iconbtn" id="btn-quick-sale" title="New Sale"><i data-lucide="plus"></i></button>
     </div>
 
@@ -350,6 +408,7 @@ html[dir="rtl"] .nav a:hover{transform:translateX(-2px);}
           <span class="sp row">
             <input type="text" id="prod-search" placeholder="Search…" style="width:170px; padding:.45rem .6rem">
             <select id="prod-cat-filter" style="width:150px; padding:.45rem .6rem"></select>
+            <button class="btn sm ghost" id="btn-cats"><i data-lucide="folder-cog"></i>Categories</button>
             <button class="btn sm" id="btn-add-product"><i data-lucide="plus"></i><span data-i18n="add">Add</span></button>
           </span></h3>
         <div class="tblwrap"><table class="tbl" id="prod-table"></table></div>
@@ -635,6 +694,29 @@ function applyI18n() {
   icons();
 }
 function setLang(l) { LANG = l; S.settings.lang = l; save(); applyI18n(); renderAll(); }
+/* ---------------- theme (dark / white) ---------------- */
+function applyTheme() {
+  const th = S.settings.theme === "light" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", th);
+  const lt = $("#li-theme"); if (lt) lt.querySelector("span").textContent = th === "light" ? "Dark Mode" : "White Mode";
+  const bt = $("#btn-theme"); if (bt) bt.innerHTML = '<i data-lucide="' + (th === "light" ? "moon" : "sun") + '"></i>';
+  icons();
+}
+function toggleTheme() { S.settings.theme = S.settings.theme === "light" ? "dark" : "light"; save(); applyTheme(); renderAll(); }
+/* ---------------- signup (create account) ---------------- */
+function doSignup() {
+  const name = $("#su-name").value.trim(), un = $("#su-user").value.trim(), pw = $("#su-pass").value;
+  const err = $("#signup-err");
+  const bad = (m) => { err.textContent = m; err.style.display = "block"; };
+  if (!name || !un || !pw) return bad("Please fill name, username and password.");
+  if (pw.length < 4) return bad("Password must be at least 4 characters.");
+  if (S.users.some((x) => x.username.toLowerCase() === un.toLowerCase())) return bad("That username is already taken — choose another.");
+  err.style.display = "none";
+  const u = { id: uid(), name, username: un, pass: pw, role: "staff" };
+  S.users.push(u); S.session = { userId: u.id }; save();
+  toast("Account created — welcome, " + name + "!");
+  enterApp();
+}
 
 /* ---------------- state ---------------- */
 const CATEGORIES = ["Sariya / Steel Rebar", "Girder", "I-Beam", "C-Channel", "Angle Iron", "Steel Pipes", "GI Sheets", "Steel Plates", "Flat Bars", "Other Steel Products"];
@@ -643,8 +725,9 @@ const EXP_CATS = ["Shop Rent", "Electricity", "Transportation", "Labour", "Loadi
 const METHODS = ["Cash", "Bank Transfer", "Online Transfer", "Other"];
 function defaultState() {
   return {
-    settings: { shopName: "SteelDesk Traders", logo: null, address: "", phone: "", email: "", ntn: "", footerMsg: "Thank you for your business!", currency: "PKR", invoiceFormat: "a4", defaultUnit: "KG", logoPos: "left", nameSize: 26, lang: "en" },
+    settings: { shopName: "ABU HASSAN IRON & STEEL TRADERS", logo: null, address: "", phone: "", email: "", ntn: "", footerMsg: "Thank you for your business!", currency: "PKR", invoiceFormat: "a4", defaultUnit: "KG", logoPos: "left", nameSize: 26, lang: "en", theme: "dark" },
     users: [{ id: uid(), name: "Owner", username: "admin", pass: "admin123", role: "admin" }],
+    categories: CATEGORIES.slice(),
     session: null,
     products: [], customers: [], suppliers: [],
     sales: [], purchases: [], payments: [], expenses: [], movements: [],
@@ -652,8 +735,14 @@ function defaultState() {
   };
 }
 let S = loadState();
+function normalizeState(s) {
+  if (!Array.isArray(s.categories) || !s.categories.length) s.categories = CATEGORIES.slice();
+  if (!s.settings.theme) s.settings.theme = "dark";
+  if (s.settings.shopName === "SteelDesk Traders") s.settings.shopName = "ABU HASSAN IRON & STEEL TRADERS";
+  return s;
+}
 function loadState() {
-  try { const raw = localStorage.getItem(LS_KEY); if (raw) { const s = JSON.parse(raw); if (s && s.settings && s.users) return s; } } catch (e) { console.warn("state load failed", e); }
+  try { const raw = localStorage.getItem(LS_KEY); if (raw) { const s = JSON.parse(raw); if (s && s.settings && s.users) return normalizeState(s); } } catch (e) { console.warn("state load failed", e); }
   return defaultState();
 }
 function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { toast("Storage full — logo image may be too large."); } }
@@ -695,6 +784,11 @@ function rateInUnit(ratePerFrom, from, to, product) {
   const one = convertQty(1, to, from, product); // how many 'from' units in 1 'to' unit
   if (one == null) return null;
   return ratePerFrom * one;
+}
+function openingOf(productId) {
+  let s = 0;
+  for (const m of S.movements) if (m.productId === productId && m.type === "opening" && m.refType === "product") s += m.qty;
+  return Math.round(s * 1000) / 1000;
 }
 function stockOf(productId) {
   let s = 0;
@@ -771,6 +865,7 @@ window.closeModal = closeModal;
 
 /* ---------------- auth ---------------- */
 function showLogin() {
+  applyTheme();
   $("#app").classList.remove("on"); $("#login").classList.remove("off");
   $("#login-shop").textContent = S.settings.shopName || "SteelDesk";
   const lg = $("#login-logo");
@@ -790,6 +885,7 @@ function doLogin() {
 }
 function enterApp() {
   const u = me(); if (!u) { showLogin(); return; }
+  applyTheme();
   $("#login").classList.add("off"); $("#app").classList.add("on");
   $("#su-name").textContent = u.name; $("#su-role").textContent = u.role;
   $("#su-avatar").textContent = (u.name || "U").slice(0, 1).toUpperCase();
@@ -894,11 +990,12 @@ function renderDashboard() {
     dSales.push(sum(aSales.filter((s) => s.date === ds), (s) => s.total));
     dPur.push(sum(aPur.filter((p) => p.date === ds), (p) => p.total));
   }
-  const grid = { color: "rgba(255,255,255,.06)" }, tick = { color: "#93a4c4", font: { size: 10 } };
+  const light = S.settings.theme === "light";
+  const grid = { color: light ? "rgba(15,40,80,.09)" : "rgba(255,255,255,.06)" }, tick = { color: light ? "#43597c" : "#93a4c4", font: { size: 10 } };
   makeChart("ch-sales", { type: "bar", data: { labels: days, datasets: [
     { label: "Sales", data: dSales, backgroundColor: "rgba(59,130,246,.65)", borderRadius: 5 },
     { label: "Purchases", data: dPur, backgroundColor: "rgba(34,211,238,.45)", borderRadius: 5 } ] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: "#c7d3ec", boxWidth: 10 } } }, scales: { x: { ticks: tick, grid: { display: false } }, y: { ticks: tick, grid } } } });
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: light ? "#22314f" : "#c7d3ec", boxWidth: 10 } } }, scales: { x: { ticks: tick, grid: { display: false } }, y: { ticks: tick, grid } } } });
   const mLabels = [], mProf = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i);
@@ -910,7 +1007,7 @@ function renderDashboard() {
   }
   makeChart("ch-profit", { type: "line", data: { labels: mLabels, datasets: [
     { label: "Net Profit", data: mProf, borderColor: "#34d399", backgroundColor: "rgba(52,211,153,.15)", fill: true, tension: .4, pointBackgroundColor: "#34d399" } ] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: "#c7d3ec", boxWidth: 10 } } }, scales: { x: { ticks: tick, grid: { display: false } }, y: { ticks: tick, grid } } } });
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: light ? "#22314f" : "#c7d3ec", boxWidth: 10 } } }, scales: { x: { ticks: tick, grid: { display: false } }, y: { ticks: tick, grid } } } });
 }
 
 /* ---------------- products ---------------- */
@@ -919,7 +1016,8 @@ function productForm(p) {
   const back = openModal(modalHead(p.id ? "Edit Product" : "Add Product", "package") +
     '<div class="mgrid">' +
     '<div><label class="f">Product Name *</label><input type="text" id="pf-name" value="' + esc(p.name || "") + '" placeholder="Sariya"></div>' +
-    '<div><label class="f">Category</label><select id="pf-cat">' + CATEGORIES.map((c) => '<option ' + (p.category === c ? "selected" : "") + ">" + esc(c) + "</option>").join("") + "</select></div>" +
+    '<div><label class="f">Category</label><select id="pf-cat">' + S.categories.concat(p.category && !S.categories.includes(p.category) ? [p.category] : []).map((c) => '<option ' + (p.category === c ? "selected" : "") + ">" + esc(c) + "</option>").join("") + "</select></div>" +
+    '<div><label class="f">Or New Category (your own)</label><input type="text" id="pf-newcat" placeholder="Type to create a new category"></div>' +
     '<div><label class="f">Brand / Company</label><input type="text" id="pf-brand" value="' + esc(p.brand || "") + '" placeholder="Mughal Steel"></div>' +
     '<div><label class="f">Size</label><input type="text" id="pf-size" value="' + esc(p.size || "") + '" placeholder="12mm"></div>' +
     '<div><label class="f">Diameter / Thickness</label><input type="text" id="pf-dia" value="' + esc(p.dia || "") + '" placeholder="—"></div>' +
@@ -928,7 +1026,7 @@ function productForm(p) {
     '<div><label class="f">Weight per Piece (KG, optional)</label><input type="number" id="pf-wpp" step="any" min="0" value="' + (p.weightPerPiece || "") + '" placeholder="e.g. 10.67"></div>' +
     '<div><label class="f">Purchase Rate (per unit)</label><input type="number" id="pf-prate" step="any" min="0" value="' + (p.purchaseRate || "") + '"></div>' +
     '<div><label class="f">Sale Rate (per unit)</label><input type="number" id="pf-srate" step="any" min="0" value="' + (p.saleRate || "") + '"></div>' +
-    '<div><label class="f">' + (p.id ? "Opening Stock (edit via Adjust)" : "Opening Stock") + '</label><input type="number" id="pf-open" step="any" value="' + (p.id ? stockOf(p.id) : (p.opening || 0)) + '"' + (p.id ? " disabled" : "") + "></div>" +
+    '<div><label class="f">Opening Stock' + (p.id ? " (starting stock only)" : "") + '</label><input type="number" id="pf-open" step="any" value="' + (p.id ? openingOf(p.id) : (p.opening || 0)) + '"></div>' +
     '<div><label class="f">Minimum Stock Level</label><input type="number" id="pf-min" step="any" min="0" value="' + (p.minStock || 0) + '"></div>' +
     "</div>" +
     '<label class="f">Description</label><input type="text" id="pf-desc" value="' + esc(p.desc || "") + '">' +
@@ -939,8 +1037,18 @@ function productForm(p) {
   $("#pf-save", back).onclick = () => {
     const name = $("#pf-name", back).value.trim();
     if (!name) { toast("Product name is required."); return; }
-    const data = { name, category: $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: $("#pf-dia", back).value.trim(), length: $("#pf-length", back).value.trim(), unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: $("#pf-desc", back).value.trim(), image: imgData };
-    if (p.id) { Object.assign(prodById(p.id), data); toast("Product updated."); }
+    const newCat = $("#pf-newcat", back).value.trim();
+    if (newCat && !S.categories.includes(newCat)) S.categories.push(newCat);
+    const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: $("#pf-dia", back).value.trim(), length: $("#pf-length", back).value.trim(), unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: $("#pf-desc", back).value.trim(), image: imgData };
+    if (p.id) {
+      Object.assign(prodById(p.id), data);
+      const wantOpen = Number($("#pf-open", back).value) || 0;
+      if (Math.abs(wantOpen - openingOf(p.id)) > 1e-9) {
+        S.movements = S.movements.filter((m) => !(m.productId === p.id && m.type === "opening" && m.refType === "product"));
+        if (wantOpen) addMovement(p.id, wantOpen, "opening", "product", p.id, todayStr(), "Opening stock");
+      }
+      toast("Product updated.");
+    }
     else {
       const np = Object.assign({ id: uid(), createdAt: todayStr() }, data);
       S.products.push(np);
@@ -966,17 +1074,49 @@ function readImage(file, maxSize, cb) {
   };
   r.readAsDataURL(file);
 }
+function catManager() {
+  const back = openModal(modalHead("Manage Categories", "folder-cog") +
+    '<div class="row"><input type="text" id="cm-new" placeholder="New category name" style="flex:1"><button class="btn sm" id="cm-add">Add</button></div>' +
+    '<div id="cm-list" style="margin-top:.8rem"></div>' +
+    '<p class="small muted">Rename updates every product in that category. A category that still has products cannot be deleted.</p>' +
+    '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Close</button></div>');
+  const render = () => {
+    $("#cm-list", back).innerHTML = S.categories.map((c, i) => {
+      const used = S.products.filter((p) => p.category === c).length;
+      return '<div class="row" style="margin-bottom:.45rem"><input type="text" value="' + esc(c) + '" data-cm-name="' + i + '" style="flex:1"><span class="pill grey">' + used + '</span><button class="btn sm ghost" data-cm-ren="' + i + '">Rename</button><button class="btn sm danger" data-cm-del="' + i + '"' + (used ? " disabled" : "") + ">Delete</button></div>";
+    }).join("");
+    $$("[data-cm-ren]", back).forEach((b) => b.onclick = () => {
+      const i = Number(b.getAttribute("data-cm-ren")), old = S.categories[i];
+      const nv = $('[data-cm-name="' + i + '"]', back).value.trim();
+      if (!nv) { toast("Category name cannot be empty."); return; }
+      if (nv !== old && S.categories.includes(nv)) { toast("That category already exists."); return; }
+      S.products.forEach((p) => { if (p.category === old) p.category = nv; });
+      S.categories[i] = nv; save(); render(); renderAll(); toast("Category renamed.");
+    });
+    $$("[data-cm-del]", back).forEach((b) => b.onclick = () => {
+      const i = Number(b.getAttribute("data-cm-del"));
+      S.categories.splice(i, 1); save(); render(); renderAll(); toast("Category deleted.");
+    });
+  };
+  $("#cm-add", back).onclick = () => {
+    const nv = $("#cm-new", back).value.trim();
+    if (!nv) { toast("Type a category name first."); return; }
+    if (S.categories.includes(nv)) { toast("That category already exists."); return; }
+    S.categories.push(nv); save(); $("#cm-new", back).value = ""; render(); renderAll(); toast("Category added.");
+  };
+  render();
+}
 function renderProducts() {
   const q = ($("#prod-search").value || "").toLowerCase();
   const cf = $("#prod-cat-filter");
-  if (!cf.options.length) cf.innerHTML = '<option value="">All Categories</option>' + CATEGORIES.map((c) => "<option>" + esc(c) + "</option>").join("");
+  if (!cf.options.length) cf.innerHTML = '<option value="">All Categories</option>' + S.categories.map((c) => "<option>" + esc(c) + "</option>").join("");
   const cat = cf.value;
   const rows = S.products.filter((p) => (!cat || p.category === cat) && (!q || (p.name + " " + p.brand + " " + p.size + " " + p.category).toLowerCase().includes(q)));
   $("#prod-table").innerHTML = "<thead><tr><th>Product</th><th>Category</th><th>Brand</th><th>Size</th><th class='num'>Purchase Rate</th><th class='num'>Sale Rate</th><th class='num'>Stock</th><th></th></tr></thead><tbody>" +
     (rows.length ? rows.map((p) => {
       const st = stockOf(p.id), low = st <= (Number(p.minStock) || 0);
       return "<tr><td><b>" + esc(p.name) + "</b>" + (p.desc ? '<div class="small muted">' + esc(p.desc) + "</div>" : "") + "</td><td>" + esc(p.category) + "</td><td>" + esc(p.brand || "—") + "</td><td>" + esc(p.size || "—") + "</td><td class='num'>" + fmtRs(p.purchaseRate) + "</td><td class='num'>" + fmtRs(p.saleRate) + "</td><td class='num'><span class='pill " + (low ? "warn" : "ok") + "'>" + fmtNum(st) + " " + esc(p.unit) + "</span></td>" +
-        '<td class="num"><button class="iconbtn" data-edit-prod="' + p.id + '"><i data-lucide="pencil"></i></button> <button class="iconbtn" data-del-prod="' + p.id + '"><i data-lucide="trash-2"></i></button></td></tr>';
+        '<td class="num"><button class="btn sm ghost" data-edit-prod="' + p.id + '"><i data-lucide="pencil"></i>Edit</button> <button class="iconbtn" data-del-prod="' + p.id + '"><i data-lucide="trash-2"></i></button></td></tr>';
     }).join("") : '<tr><td colspan="8"><div class="empty"><i data-lucide="package-open"></i><div class="et">No products yet</div><div class="small">Click Add to create your first product — e.g. Sariya 12mm, Mughal Steel.</div></div></td></tr>') + "</tbody>";
   $$("#prod-table [data-edit-prod]").forEach((b) => b.onclick = () => productForm(prodById(b.getAttribute("data-edit-prod"))));
   $$("#prod-table [data-del-prod]").forEach((b) => b.onclick = async () => {
@@ -1319,7 +1459,7 @@ function invoiceHtml(kind, inv, format) {
   const received = (Number(inv.paid) || 0) + S.payments.filter((p) => p.refType === kind && p.refId === inv.id).reduce((a, p) => a + (Number(p.amount) || 0), 0);
   const bal = Math.round(((Number(inv.total) || 0) - received) * 100) / 100;
   const logoImg = st.logo ? '<div class="ilogobox"><img src="' + st.logo + '" alt=""></div>' : "";
-  const shopBlock = '<div style="flex:1"><div class="iname" style="font-size:' + (st.nameSize || 26) + 'px">' + esc(st.shopName || "SteelDesk Traders") + "</div>" +
+  const shopBlock = '<div style="flex:1"><div class="iname" style="font-size:' + (st.nameSize || 26) + 'px">' + esc(st.shopName || "ABU HASSAN IRON & STEEL TRADERS") + "</div>" +
     '<div class="imeta">' + esc(st.address || "") + (st.phone ? " • " + esc(st.phone) : "") + (st.email ? " • " + esc(st.email) : "") + (st.ntn ? "<br>NTN: " + esc(st.ntn) : "") + "</div></div>";
   let head;
   if (st.logoPos === "center") head = '<div class="ihead" style="flex-direction:column; text-align:center">' + logoImg + shopBlock + "</div>";
@@ -1657,7 +1797,7 @@ function userForm(u) {
 function saveSettingsFromForm() {
   if (!isAdmin()) { toast("Only Admin can change settings."); return; }
   Object.assign(S.settings, {
-    shopName: $("#set-shopname").value.trim() || "SteelDesk Traders",
+    shopName: $("#set-shopname").value.trim() || "ABU HASSAN IRON & STEEL TRADERS",
     address: $("#set-address").value.trim(), phone: $("#set-phone").value.trim(),
     email: $("#set-email").value.trim(), ntn: $("#set-ntn").value.trim(),
     currency: $("#set-currency").value.trim() || "PKR", footerMsg: $("#set-footer").value.trim(),
@@ -1696,12 +1836,17 @@ function wire() {
   $("#scrim").onclick = () => { $("#sidebar").classList.remove("open"); $("#scrim").classList.remove("on"); };
   $("#btn-quick-sale").onclick = () => go("sales");
   $("#btn-lang").onclick = () => setLang(LANG === "ur" ? "en" : "ur");
+  $("#btn-theme").onclick = toggleTheme;
+  $("#li-theme").onclick = toggleTheme;
+  $("#btn-show-signup").onclick = () => { const b = $("#signup-box"); b.style.display = b.style.display === "none" ? "" : "none"; };
+  $("#btn-signup").onclick = doSignup;
   $("#lang-en").onclick = () => setLang("en");
   $("#lang-ur").onclick = () => setLang("ur");
   $("#global-search").addEventListener("input", (e) => globalSearch(e.target.value));
   document.addEventListener("click", (e) => { if (!e.target.closest(".searchbox")) $("#search-results").style.display = "none"; });
   // products
   $("#btn-add-product").onclick = () => productForm();
+  $("#btn-cats").onclick = () => catManager();
   $("#qa-product").onclick = () => productForm();
   $("#prod-search").addEventListener("input", renderProducts);
   $("#prod-cat-filter").addEventListener("change", renderProducts);
@@ -1756,7 +1901,7 @@ function wire() {
       try {
         const data = JSON.parse(reader.result);
         if (!data.settings || !data.products) throw new Error("bad file");
-        S = data; save(); toast("Backup restored."); enterApp();
+        S = normalizeState(data); save(); toast("Backup restored."); enterApp();
       } catch (err) { toast("That file is not a valid SteelDesk backup."); }
     };
     reader.readAsText(f);
@@ -1766,6 +1911,7 @@ function wire() {
   obs.observe(document.body, { childList: true, subtree: true });
 }
 document.addEventListener("DOMContentLoaded", () => {
+  applyTheme();
   wire();
   if (S.session && me()) enterApp(); else showLogin();
   icons();
