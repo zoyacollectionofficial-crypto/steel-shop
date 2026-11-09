@@ -404,6 +404,15 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
         <div class="glass card"><h3><i data-lucide="alert-triangle"></i><span data-i18n="lowStock">Low-stock alerts</span><span class="sp pill bad" id="dash-low-count" style="display:none"></span></h3><div id="dash-low"></div></div>
         <div class="glass card"><h3><i data-lucide="history"></i><span data-i18n="recentTx">Recent transactions</span></h3><div id="dash-recent"></div></div>
       </div>
+      <div class="glass card"><h3><i data-lucide="zap"></i><span data-i18n="quickActions">Quick actions</span></h3>
+        <div class="quick">
+          <button class="btn" data-goto="sales"><i data-lucide="shopping-cart"></i><span data-i18n="newSale">New Sale</span></button>
+          <button class="btn ghost" data-goto="purchases"><i data-lucide="truck"></i><span data-i18n="newPurchase">New Purchase</span></button>
+          <button class="btn ghost" id="qa-product"><i data-lucide="package-plus"></i><span data-i18n="addProduct">Add Product</span></button>
+          <button class="btn ghost" id="qa-payment"><i data-lucide="wallet"></i><span data-i18n="addPayment">Add Payment</span></button>
+          <button class="btn ghost" id="qa-expense"><i data-lucide="receipt-text"></i><span data-i18n="addExpense">Add Expense</span></button>
+        </div>
+      </div>
     </section>
 
     <!-- PRODUCTS -->
@@ -670,7 +679,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.09-10";
+const APP_VER = "2026.11.09-11";
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -1939,6 +1948,7 @@ function wire() {
   document.addEventListener("click", (e) => { if (!e.target.closest(".searchbox")) $("#search-results").style.display = "none"; });
   // products
   $("#btn-add-product").onclick = () => productForm();
+  $("#qa-product").onclick = () => productForm();
   $("#btn-cats").onclick = () => catManager();
   $("#prod-search").addEventListener("input", renderProducts);
   $("#prod-cat-filter").addEventListener("change", renderProducts);
@@ -1965,9 +1975,11 @@ function wire() {
   $("#sup-ledger-print").onclick = () => { const t = $("#sup-ledger-title").textContent; const id = S.suppliers.find((s) => t.includes(s.name)); if (id) printLedger("supplier", id.id); };
   // payments
   $("#btn-pay-in").onclick = () => paymentForm("in");
+  $("#qa-payment").onclick = () => paymentForm("in");
   $("#btn-pay-out").onclick = () => paymentForm("out");
   // expenses
   $("#btn-add-expense").onclick = () => expenseForm();
+  $("#qa-expense").onclick = () => expenseForm();
   // invoices
   $("#inv-search").addEventListener("input", renderInvoices);
   // reports
