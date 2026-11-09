@@ -324,6 +324,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
     <input type="password" id="li-pass" autocomplete="current-password" placeholder="••••••••">
     <div style="height:.9rem"></div>
     <button class="btn" id="btn-login" style="width:100%; justify-content:center"><i data-lucide="log-in"></i><span data-i18n="login">Login</span></button>
+    <div style="text-align:center; margin-top:.55rem"><a href="#" id="li-forgot" class="small" style="color:var(--cyan)">Forgot password?</a></div>
     <div class="login-err" id="login-err"></div>
     <div class="small muted" style="margin-top:1rem" id="login-hint"></div>
     <div class="small muted" id="login-ver" style="margin-top:.45rem; opacity:.75"></div>
@@ -679,7 +680,7 @@ html[data-theme="light"] .side-user .ur,html[data-theme="light"] .brand .bsub{co
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.09-11";
+const APP_VER = "2026.11.09-12";
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -754,6 +755,11 @@ function normalizeState(s) {
   if (!Array.isArray(s.categories) || !s.categories.length) s.categories = CATEGORIES.slice();
   if (!s.settings.theme) s.settings.theme = "dark";
   if (s.settings.shopName === "SteelDesk Traders") s.settings.shopName = "ABU HASSAN IRON & STEEL TRADERS";
+  if (!Array.isArray(s.users)) s.users = [];
+  if (!s.users.some((u) => u.role === "admin")) {
+    const ex = s.users.find((u) => u.username === "admin");
+    if (ex) ex.role = "admin"; else s.users.push({ id: uid(), name: "Owner", username: "admin", pass: "admin123", role: "admin" });
+  }
   return s;
 }
 function loadState() {
@@ -879,6 +885,20 @@ function confirmDlg(title, msg, dangerBtn) {
 window.closeModal = closeModal;
 
 /* ---------------- auth ---------------- */
+function forgotForm() {
+  const back = openModal(modalHead("Forgot Password", "key-round") +
+    '<p class="muted" style="margin:.4rem 0 0">This app runs on your own device, so there is no email reset. Recovery works like this: the <b>Admin password will be reset to <span style="color:var(--cyan)">admin123</span></b>. Your shop data will NOT be touched — only the password changes. After logging in, set a new password in Settings → Users.</p>' +
+    '<div class="mfoot"><button class="btn ghost" id="fp-no">Cancel</button><button class="btn danger" id="fp-yes">Reset Admin Password</button></div>');
+  $("#fp-no", back).onclick = () => closeModal();
+  $("#fp-yes", back).onclick = () => {
+    let adm = S.users.find((u) => u.username === "admin") || S.users.find((u) => u.role === "admin");
+    if (!adm) { adm = { id: uid(), name: "Owner", username: "admin", pass: "admin123", role: "admin" }; S.users.push(adm); }
+    adm.pass = "admin123"; adm.role = "admin";
+    save(); closeModal();
+    $("#li-user").value = adm.username; $("#li-pass").value = "";
+    toast("Password reset — login with " + adm.username + " / admin123");
+  };
+}
 function showLogin() {
   applyTheme();
   $("#app").classList.remove("on"); $("#login").classList.remove("off");
@@ -1867,7 +1887,7 @@ function renderSettings() {
     S.users.map((u) => "<tr><td><b>" + esc(u.name) + "</b></td><td>" + esc(u.username) + "</td><td><span class='pill " + (u.role === "admin" ? "info" : "grey") + "'>" + esc(u.role) + "</span></td>" +
       '<td class="num"><button class="iconbtn" data-edit-user="' + u.id + '"><i data-lucide="pencil"></i></button>' + (S.users.length > 1 && (!me() || me().id !== u.id) ? ' <button class="iconbtn" data-del-user="' + u.id + '"><i data-lucide="trash-2"></i></button>' : "") + "</td></tr>").join("") + "</tbody>";
   $$("#user-table [data-edit-user]").forEach((b) => b.onclick = () => userForm(userById(b.getAttribute("data-edit-user"))));
-  $$("#user-table [data-del-user]").forEach((b) => b.onclick = async () => { if (await confirmDlg("Delete user?", "This login will be removed.", true)) { S.users = S.users.filter((u) => u.id !== b.getAttribute("data-del-user")); save(); renderSettings(); } });
+  $$("#user-table [data-del-user]").forEach((b) => b.onclick = async () => { const target = S.users.find((u) => u.id === b.getAttribute("data-del-user")); if (target && target.role === "admin" && S.users.filter((x) => x.role === "admin").length <= 1) { toast("The last Admin cannot be deleted."); return; } if (await confirmDlg("Delete user?", "This login will be removed.", true)) { S.users = S.users.filter((u) => u.id !== b.getAttribute("data-del-user")); save(); renderSettings(); } });
   const adminOnly = !isAdmin();
   ["btn-save-settings", "btn-add-user", "set-logo-remove"].forEach((id) => { const el = document.getElementById(id); if (el) el.disabled = adminOnly; });
   icons();
@@ -1884,6 +1904,7 @@ function userForm(u) {
     const name = $("#uf-name", back).value.trim(), un = $("#uf-user", back).value.trim(), pw = $("#uf-pass", back).value;
     if (!name || !un || !pw) { toast("All fields are required."); return; }
     if (S.users.some((x) => x.username.toLowerCase() === un.toLowerCase() && x.id !== u.id)) { toast("That username already exists."); return; }
+    if (u.id && userById(u.id) && userById(u.id).role === "admin" && $("#uf-role", back).value !== "admin" && S.users.filter((x) => x.role === "admin").length <= 1) { toast("The last Admin cannot be made Staff."); return; }
     const data = { name, username: un, pass: pw, role: $("#uf-role", back).value };
     if (u.id) Object.assign(userById(u.id), data); else S.users.push(Object.assign({ id: uid() }, data));
     save(); closeModal(); renderSettings(); toast("User saved.");
@@ -1930,6 +1951,7 @@ async function clearAllData() {
 /* ---------------- wiring & init ---------------- */
 function wire() {
   $("#btn-login").onclick = doLogin;
+  $("#li-forgot").onclick = (e) => { e.preventDefault(); forgotForm(); };
   $("#li-pass").addEventListener("keydown", (e) => { if (e.key === "Enter") doLogin(); });
   $("#btn-logout").onclick = () => { S.session = null; save(); showLogin(); };
   $$("#main-nav a").forEach((a) => a.onclick = () => go(a.getAttribute("data-page")));
