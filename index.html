@@ -693,7 +693,7 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.10-16";
+const APP_VER = "2026.11.10-17";
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -813,6 +813,15 @@ function convertQty(qty, from, to, product) {
   const kg = toKg(qty, from);
   if (kg == null) return null;
   return fromKg(kg, to);
+}
+/* Total weight of an invoice line, in KG (user labour rule, 2026-11-10:
+   each product's labour = its total weight × its own labour rate per KG). */
+function lineWeightKg(qty, unit, product) {
+  qty = Number(qty) || 0;
+  if (unit === "KG") return qty;
+  if (unit === "Ton") return qty * 1000;
+  if (unit === "Piece") { const w = product ? Number(product.weightPerPiece) : 0; return w ? qty * w : 0; }
+  return 0;
 }
 function rateInUnit(ratePerFrom, from, to, product) {
   const one = convertQty(1, to, from, product); // how many 'from' units in 1 'to' unit
@@ -1072,6 +1081,7 @@ function productForm(p) {
     '<div><label class="f">Size</label><input type="text" id="pf-size" value="' + esc(p.size || "") + '" placeholder="12mm"></div>' +
     '<div><label class="f">Unit of Measurement</label><select id="pf-unit">' + UNITS.map((u) => '<option ' + ((p.unit || S.settings.defaultUnit) === u ? "selected" : "") + ">" + u + "</option>").join("") + "</select></div>" +
     '<div><label class="f">Weight per Piece (KG, optional)</label><input type="number" id="pf-wpp" step="any" min="0" value="' + (p.weightPerPiece || "") + '" placeholder="e.g. 10.67"></div>' +
+    '<div><label class="f">Labour Rate (Rs per KG)</label><input type="number" id="pf-labour" step="any" min="0" value="' + (p.labourRate || "") + '" placeholder="e.g. 0.7"></div>' +
     '<div><label class="f">Purchase Rate (per unit)</label><input type="number" id="pf-prate" step="any" min="0" value="' + (p.purchaseRate || "") + '"></div>' +
     '<div><label class="f">Sale Rate (per unit)</label><input type="number" id="pf-srate" step="any" min="0" value="' + (p.saleRate || "") + '"></div>' +
     '<div><label class="f">Opening Stock' + (p.id ? " (starting stock only)" : "") + '</label><input type="number" id="pf-open" step="any" value="' + (p.id ? openingOf(p.id) : (p.opening || 0)) + '"></div>' +
@@ -1084,7 +1094,7 @@ function productForm(p) {
     if (!name) { toast("Product name is required."); return; }
     const newCat = $("#pf-newcat", back).value.trim();
     if (newCat && !S.categories.includes(newCat)) S.categories.push(newCat);
-    const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: p.dia || "", length: p.length || "", unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: p.desc || "", image: p.image || "", service: $("#pf-service", back).checked };
+    const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: p.dia || "", length: p.length || "", unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, labourRate: Number($("#pf-labour", back).value) || 0, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: p.desc || "", image: p.image || "", service: $("#pf-service", back).checked };
     if (p.id) {
       const before = prodById(p.id);
       const rateChanged = (Number(before.purchaseRate) || 0) !== data.purchaseRate || (Number(before.saleRate) || 0) !== data.saleRate;
@@ -1289,12 +1299,13 @@ function lineRow(kind, item) {
     '<td style="width:96px"><select class="li-unit">' + UNITS.map((u) => "<option" + (item.unit === u ? " selected" : "") + ">" + u + "</option>").join("") + "</select></td>" +
     '<td style="width:110px"><input type="number" class="li-rate" step="any" min="0" value="' + (item.rate || "") + '" placeholder="0"></td>' +
     '<td class="num li-amt" style="width:110px">Rs 0</td>' +
+    (kind === "sale" ? '<td style="width:96px"><input type="number" class="li-lab" step="any" min="0" value="' + (item.labourRate || "") + '" placeholder="0"></td><td class="num li-labamt" style="width:100px">Rs 0</td>' : "") +
     '<td style="width:40px"><button class="iconbtn li-del" type="button"><i data-lucide="x"></i></button></td></tr>';
 }
-function linesHead() { return "<thead><tr><th>Product</th><th>Qty</th><th>Unit</th><th>Rate</th><th class='num'>Amount</th><th></th></tr></thead><tbody></tbody>"; }
+function linesHead(kind) { return "<thead><tr><th>Product</th><th>Qty</th><th>Unit</th><th>Rate</th><th class='num'>Amount</th>" + (kind === "sale" ? "<th>Labour Rate /KG</th><th class='num'>Labour</th>" : "") + "<th></th></tr></thead><tbody></tbody>"; }
 function setupLines(tableSel, kind) {
   const tbl = $(tableSel);
-  tbl.innerHTML = linesHead();
+  tbl.innerHTML = linesHead(kind);
   const tbody = tbl.querySelector("tbody");
   const addRow = (item) => { tbody.insertAdjacentHTML("beforeend", lineRow(kind, item)); wireRow(tbody.lastElementChild, kind); icons(); recalc(kind); };
   const wireRow = (tr, kind) => {
@@ -1304,6 +1315,8 @@ function setupLines(tableSel, kind) {
       if (p) {
         unitSel.value = p.unit;
         rateIn.value = kind === "sale" ? (p.saleRate || "") : (p.purchaseRate || "");
+        const labIn = tr.querySelector(".li-lab");
+        if (labIn) labIn.value = p.labourRate || "";
       }
       recalc(kind);
     };
@@ -1331,14 +1344,19 @@ function readLines(kind) {
     const qty = Number(tr.querySelector(".li-qty").value) || 0;
     const unit = tr.querySelector(".li-unit").value;
     const rate = Number(tr.querySelector(".li-rate").value) || 0;
-    if (pid && qty > 0) items.push({ productId: pid, qty, unit, rate, amount: Math.round(qty * rate * 100) / 100 });
+    const labEl = tr.querySelector(".li-lab");
+    const labourRate = labEl ? (Number(labEl.value) || 0) : 0;
+    const p = pid ? prodById(pid) : null;
+    const weightKg = p ? Math.round(lineWeightKg(qty, unit, p) * 100) / 100 : 0;
+    const labour = Math.round(weightKg * labourRate * 100) / 100;
+    if (pid && qty > 0) items.push({ productId: pid, qty, unit, rate, amount: Math.round(qty * rate * 100) / 100, labourRate, weightKg, labour });
   });
   return items;
 }
 function totalsHtml(kind, items) {
   const sub = items.reduce((a, i) => a + i.amount, 0);
   return '<div class="kv"><span>Subtotal</span><b>' + fmtRs(sub) + "</b></div>" +
-    (kind === "sale" ? '<div class="kv"><span>Discount</span><input type="number" id="' + kind + '-discount" step="any" min="0" value="0"></div><div class="kv"><span>Labour Multiplier <small style="opacity:.65">(× bill, e.g. 0.7)</small></span><input type="number" id="' + kind + '-labour-factor" step="any" min="0" placeholder="0.7"></div><div class="kv"><span>Labour Cost</span><input type="number" id="' + kind + '-labour" step="any" min="0" value="0"></div>' : "") +
+    (kind === "sale" ? '<div class="kv"><span>Discount</span><input type="number" id="' + kind + '-discount" step="any" min="0" value="0"></div><div class="kv"><span>Labour Cost <small style="opacity:.65">(auto: weight × rate)</small></span><input type="number" id="' + kind + '-labour" step="any" min="0" value="0"></div>' : "") +
     '<div class="kv grand"><span>Grand Total</span><span id="' + kind + '-grand">' + fmtRs(sub) + "</span></div>" +
     '<div class="kv"><span>Paid Amount</span><input type="number" id="' + kind + '-paid" step="any" min="0" value="0"></div>' +
     '<div class="kv"><span>Remaining</span><b id="' + kind + '-remain">' + fmtRs(sub) + "</b></div>";
@@ -1348,6 +1366,12 @@ function recalc(kind) {
   $$(kind === "sale" ? "#sale-lines .lrow" : "#pur-lines .lrow").forEach((tr) => {
     const q = Number(tr.querySelector(".li-qty").value) || 0, r = Number(tr.querySelector(".li-rate").value) || 0;
     tr.querySelector(".li-amt").textContent = fmtRs(q * r);
+    const la = tr.querySelector(".li-labamt");
+    if (la) {
+      const pid = tr.querySelector(".li-prod").value, p = pid ? prodById(pid) : null;
+      const lr = Number((tr.querySelector(".li-lab") || {}).value) || 0;
+      la.textContent = fmtRs(p ? lineWeightKg(q, tr.querySelector(".li-unit").value, p) * lr : 0);
+    }
   });
   const box = kind === "sale" ? $("#sale-totals") : $("#pur-totals");
   if (!box.dataset.ready) { box.innerHTML = totalsHtml(kind, items); box.dataset.ready = "1"; wireTotals(kind); }
@@ -1355,11 +1379,13 @@ function recalc(kind) {
   const disc = kind === "sale" ? (Number(($("#sale-discount") || {}).value) || 0) : 0;
   let lab = kind === "sale" ? (Number(($("#sale-labour") || {}).value) || 0) : 0;
   if (kind === "sale") {
-    // Labour multiplier (user rule, 2026-11-10): when a factor like 0.7 is
-    // entered, Labour Cost = factor × (bill total after discount), auto-filled.
-    const fac = Number(($("#sale-labour-factor") || {}).value) || 0;
-    if (fac > 0) {
-      lab = Math.round(Math.max(0, sub - disc) * fac * 100) / 100;
+    // Per-product labour (user rule, 2026-11-10): each line's labour =
+    // that product's total weight (KG) × its own labour rate per KG.
+    // The totals field auto-fills with the sum of line labours; when no
+    // line carries a labour rate, a hand-typed amount is left untouched.
+    const labSum = Math.round(items.reduce((a, i) => a + (i.labour || 0), 0) * 100) / 100;
+    if (labSum > 0) {
+      lab = labSum;
       const lEl = $("#sale-labour");
       if (lEl && document.activeElement !== lEl) lEl.value = lab;
     }
@@ -1372,14 +1398,7 @@ function recalc(kind) {
   const subEl = box.querySelector(".kv b"); if (subEl) subEl.textContent = fmtRs(sub);
 }
 function wireTotals(kind) {
-  if (kind === "sale") {
-    // Typing a Labour Cost amount by hand = manual override: clear the
-    // multiplier FIRST (this listener must run before recalc's listener,
-    // otherwise recalc would refill the amount from the factor).
-    const lEl = document.getElementById("sale-labour"), fEl = document.getElementById("sale-labour-factor");
-    if (lEl && fEl) lEl.addEventListener("input", () => { if (fEl.value) fEl.value = ""; });
-  }
-  ["discount", "paid", "labour", "labour-factor"].forEach((k) => {
+  ["discount", "paid", "labour"].forEach((k) => {
     const el = document.getElementById(kind + "-" + k);
     if (el) el.addEventListener("input", () => recalc(kind));
   });
@@ -1471,8 +1490,9 @@ function saveSale() {
   if (!items.length) { toast("Add at least one product with quantity."); return; }
   const sub = items.reduce((a, i) => a + i.amount, 0);
   const disc = Number(($("#sale-discount") || {}).value) || 0;
-  const labFac = Number(($("#sale-labour-factor") || {}).value) || 0;
-  const lab = labFac > 0 ? Math.round(Math.max(0, sub - disc) * labFac * 100) / 100 : (Number(($("#sale-labour") || {}).value) || 0);
+  const labSum = Math.round(items.reduce((a, i) => a + (i.labour || 0), 0) * 100) / 100;
+  const lab = labSum > 0 ? labSum : (Number(($("#sale-labour") || {}).value) || 0);
+  const labFac = 0;
   const total = Math.max(0, Math.round((sub - disc + lab) * 100) / 100);
   const paid = Number(($("#sale-paid") || {}).value) || 0;
   if (paid > total) { toast("Paid amount cannot exceed the grand total."); return; }
@@ -1509,10 +1529,10 @@ function loadSaleForEdit(id) {
   editingSaleId = id;
   $("#sale-customer").value = inv.customerId || ""; $("#sale-date").value = inv.date; $("#sale-method").value = inv.method || "Cash"; $("#sale-note").value = inv.note || "";
   saleLinesApi = setupLines("#sale-lines", "sale");
-  inv.items.forEach((it, i) => { if (i > 0) saleLinesApi.addRow(it); else { const tr = $("#sale-lines .lrow"); tr.querySelector(".li-prod").value = it.productId; tr.querySelector(".li-qty").value = it.qty; tr.querySelector(".li-unit").value = it.unit; tr.querySelector(".li-rate").value = it.rate; } });
+  inv.items.forEach((it, i) => { if (i > 0) saleLinesApi.addRow(it); else { const tr = $("#sale-lines .lrow"); tr.querySelector(".li-prod").value = it.productId; tr.querySelector(".li-qty").value = it.qty; tr.querySelector(".li-unit").value = it.unit; tr.querySelector(".li-rate").value = it.rate; const _ll = tr.querySelector(".li-lab"); if (_ll) _ll.value = it.labourRate || ""; } });
   $("#sale-totals").dataset.ready = "1"; $("#sale-totals").innerHTML = totalsHtml("sale", inv.items);
   wireTotals("sale");
-  $("#sale-discount").value = inv.discount || 0; $("#sale-paid").value = inv.paid || 0; const _sl = $("#sale-labour"); if (_sl) _sl.value = inv.labour || 0; const _sf = $("#sale-labour-factor"); if (_sf) _sf.value = inv.labourFactor || "";
+  $("#sale-discount").value = inv.discount || 0; $("#sale-paid").value = inv.paid || 0; const _sl = $("#sale-labour"); if (_sl) _sl.value = inv.labour || 0;
   recalc("sale");
   $("#sale-inv-no").textContent = "Editing " + inv.no;
   $("#btn-save-sale").querySelector("span").textContent = "Update Invoice";
@@ -1624,6 +1644,7 @@ function invoiceHtml(kind, inv, format) {
     '<div class="kv"><span>Subtotal</span><span>' + fmtRs(inv.subtotal != null ? inv.subtotal : inv.total) + "</span></div>" +
     (isSale && inv.discount ? '<div class="kv"><span>Discount</span><span>− ' + fmtRs(inv.discount) + "</span></div>" : "") +
     (isSale && inv.labour ? '<div class="kv"><span>Labour Cost' + (inv.labourFactor ? " (" + inv.labourFactor + " × bill)" : "") + '</span><span>+ ' + fmtRs(inv.labour) + "</span></div>" : "") +
+    (isSale ? (inv.items || []).filter((it) => it.labour > 0).map((it) => { const p = prodById(it.productId) || {}; return '<div class="kv" style="opacity:.72;font-size:.92em"><span>&nbsp;&nbsp;↳ Labour — ' + esc(p.name || "") + (it.weightKg ? " · " + fmtNum(it.weightKg) + " KG × " + fmtRs(it.labourRate || 0) + "/KG" : "") + '</span><span>+ ' + fmtRs(it.labour) + "</span></div>"; }).join("") : "") +
     '<div class="kv grand"><span>Grand Total</span><span>' + fmtRs(inv.total) + "</span></div>" +
     '<div class="kv"><span>Paid</span><span>' + fmtRs(received) + "</span></div>" +
     '<div class="kv"><span>Remaining Balance</span><span>' + fmtRs(bal) + "</span></div></div>" +
