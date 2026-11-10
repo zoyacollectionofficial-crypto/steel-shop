@@ -693,7 +693,7 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.09-15";
+const APP_VER = "2026.11.10-16";
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -1338,7 +1338,7 @@ function readLines(kind) {
 function totalsHtml(kind, items) {
   const sub = items.reduce((a, i) => a + i.amount, 0);
   return '<div class="kv"><span>Subtotal</span><b>' + fmtRs(sub) + "</b></div>" +
-    (kind === "sale" ? '<div class="kv"><span>Discount</span><input type="number" id="' + kind + '-discount" step="any" min="0" value="0"></div><div class="kv"><span>Labour Cost</span><input type="number" id="' + kind + '-labour" step="any" min="0" value="0"></div>' : "") +
+    (kind === "sale" ? '<div class="kv"><span>Discount</span><input type="number" id="' + kind + '-discount" step="any" min="0" value="0"></div><div class="kv"><span>Labour Multiplier <small style="opacity:.65">(× bill, e.g. 0.7)</small></span><input type="number" id="' + kind + '-labour-factor" step="any" min="0" placeholder="0.7"></div><div class="kv"><span>Labour Cost</span><input type="number" id="' + kind + '-labour" step="any" min="0" value="0"></div>' : "") +
     '<div class="kv grand"><span>Grand Total</span><span id="' + kind + '-grand">' + fmtRs(sub) + "</span></div>" +
     '<div class="kv"><span>Paid Amount</span><input type="number" id="' + kind + '-paid" step="any" min="0" value="0"></div>' +
     '<div class="kv"><span>Remaining</span><b id="' + kind + '-remain">' + fmtRs(sub) + "</b></div>";
@@ -1353,7 +1353,17 @@ function recalc(kind) {
   if (!box.dataset.ready) { box.innerHTML = totalsHtml(kind, items); box.dataset.ready = "1"; wireTotals(kind); }
   const sub = items.reduce((a, i) => a + i.amount, 0);
   const disc = kind === "sale" ? (Number(($("#sale-discount") || {}).value) || 0) : 0;
-  const lab = kind === "sale" ? (Number(($("#sale-labour") || {}).value) || 0) : 0;
+  let lab = kind === "sale" ? (Number(($("#sale-labour") || {}).value) || 0) : 0;
+  if (kind === "sale") {
+    // Labour multiplier (user rule, 2026-11-10): when a factor like 0.7 is
+    // entered, Labour Cost = factor × (bill total after discount), auto-filled.
+    const fac = Number(($("#sale-labour-factor") || {}).value) || 0;
+    if (fac > 0) {
+      lab = Math.round(Math.max(0, sub - disc) * fac * 100) / 100;
+      const lEl = $("#sale-labour");
+      if (lEl && document.activeElement !== lEl) lEl.value = lab;
+    }
+  }
   const grand = Math.max(0, sub - disc + lab);
   const paid = Number((document.getElementById(kind + "-paid") || {}).value) || 0;
   const g = document.getElementById(kind + "-grand"), rm = document.getElementById(kind + "-remain");
@@ -1362,7 +1372,14 @@ function recalc(kind) {
   const subEl = box.querySelector(".kv b"); if (subEl) subEl.textContent = fmtRs(sub);
 }
 function wireTotals(kind) {
-  ["discount", "paid", "labour"].forEach((k) => {
+  if (kind === "sale") {
+    // Typing a Labour Cost amount by hand = manual override: clear the
+    // multiplier FIRST (this listener must run before recalc's listener,
+    // otherwise recalc would refill the amount from the factor).
+    const lEl = document.getElementById("sale-labour"), fEl = document.getElementById("sale-labour-factor");
+    if (lEl && fEl) lEl.addEventListener("input", () => { if (fEl.value) fEl.value = ""; });
+  }
+  ["discount", "paid", "labour", "labour-factor"].forEach((k) => {
     const el = document.getElementById(kind + "-" + k);
     if (el) el.addEventListener("input", () => recalc(kind));
   });
@@ -1454,7 +1471,8 @@ function saveSale() {
   if (!items.length) { toast("Add at least one product with quantity."); return; }
   const sub = items.reduce((a, i) => a + i.amount, 0);
   const disc = Number(($("#sale-discount") || {}).value) || 0;
-  const lab = Number(($("#sale-labour") || {}).value) || 0;
+  const labFac = Number(($("#sale-labour-factor") || {}).value) || 0;
+  const lab = labFac > 0 ? Math.round(Math.max(0, sub - disc) * labFac * 100) / 100 : (Number(($("#sale-labour") || {}).value) || 0);
   const total = Math.max(0, Math.round((sub - disc + lab) * 100) / 100);
   const paid = Number(($("#sale-paid") || {}).value) || 0;
   if (paid > total) { toast("Paid amount cannot exceed the grand total."); return; }
@@ -1463,7 +1481,7 @@ function saveSale() {
   if (editingSaleId) {
     const old = S.sales.find((s) => s.id === editingSaleId);
     removeMovements("sale", old.id);
-    Object.assign(old, { customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, labour: lab, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim() });
+    Object.assign(old, { customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, labour: lab, labourFactor: labFac, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim() });
     applyMovements("sale", old);
     editingSaleId = null; $("#btn-save-sale").querySelector("span").textContent = t("saveInvoice");
     save(); toast("Invoice updated: " + old.no); resetSaleForm(); renderAll();
@@ -1471,7 +1489,7 @@ function saveSale() {
     return;
   }
   S.counters.sale += 1;
-  const inv = { id: uid(), no: "S-" + String(S.counters.sale).padStart(4, "0"), customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, labour: lab, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim(), status: "active", createdBy: me() ? me().username : "" };
+  const inv = { id: uid(), no: "S-" + String(S.counters.sale).padStart(4, "0"), customerId: $("#sale-customer").value || "", date: $("#sale-date").value || todayStr(), items, subtotal: sub, discount: disc, labour: lab, labourFactor: labFac, total, paid, method: $("#sale-method").value, note: $("#sale-note").value.trim(), status: "active", createdBy: me() ? me().username : "" };
   S.sales.push(inv);
   applyMovements("sale", inv);
   save(); toast("Invoice saved: " + inv.no); resetSaleForm(); renderAll();
@@ -1494,7 +1512,7 @@ function loadSaleForEdit(id) {
   inv.items.forEach((it, i) => { if (i > 0) saleLinesApi.addRow(it); else { const tr = $("#sale-lines .lrow"); tr.querySelector(".li-prod").value = it.productId; tr.querySelector(".li-qty").value = it.qty; tr.querySelector(".li-unit").value = it.unit; tr.querySelector(".li-rate").value = it.rate; } });
   $("#sale-totals").dataset.ready = "1"; $("#sale-totals").innerHTML = totalsHtml("sale", inv.items);
   wireTotals("sale");
-  $("#sale-discount").value = inv.discount || 0; $("#sale-paid").value = inv.paid || 0; const _sl = $("#sale-labour"); if (_sl) _sl.value = inv.labour || 0;
+  $("#sale-discount").value = inv.discount || 0; $("#sale-paid").value = inv.paid || 0; const _sl = $("#sale-labour"); if (_sl) _sl.value = inv.labour || 0; const _sf = $("#sale-labour-factor"); if (_sf) _sf.value = inv.labourFactor || "";
   recalc("sale");
   $("#sale-inv-no").textContent = "Editing " + inv.no;
   $("#btn-save-sale").querySelector("span").textContent = "Update Invoice";
@@ -1605,7 +1623,7 @@ function invoiceHtml(kind, inv, format) {
     '<div class="itot">' +
     '<div class="kv"><span>Subtotal</span><span>' + fmtRs(inv.subtotal != null ? inv.subtotal : inv.total) + "</span></div>" +
     (isSale && inv.discount ? '<div class="kv"><span>Discount</span><span>− ' + fmtRs(inv.discount) + "</span></div>" : "") +
-    (isSale && inv.labour ? '<div class="kv"><span>Labour Cost</span><span>+ ' + fmtRs(inv.labour) + "</span></div>" : "") +
+    (isSale && inv.labour ? '<div class="kv"><span>Labour Cost' + (inv.labourFactor ? " (" + inv.labourFactor + " × bill)" : "") + '</span><span>+ ' + fmtRs(inv.labour) + "</span></div>" : "") +
     '<div class="kv grand"><span>Grand Total</span><span>' + fmtRs(inv.total) + "</span></div>" +
     '<div class="kv"><span>Paid</span><span>' + fmtRs(received) + "</span></div>" +
     '<div class="kv"><span>Remaining Balance</span><span>' + fmtRs(bal) + "</span></div></div>" +
