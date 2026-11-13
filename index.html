@@ -320,6 +320,28 @@ canvas{max-width:100%;}
 .inv .itot .kv{display:flex; justify-content:space-between; padding:2px 0;}
 .inv .itot .grand{border-top:2px solid #000; font-weight:800; font-size:1.12em; padding-top:5px; margin-top:4px;}
 .inv .ifoot{border-top:1px solid #000; margin-top:12px; padding-top:6px; text-align:center; font-size:.85em;}
+/* --- v2 beautiful A4 invoice (user sample, 2026-11-13) --- */
+.inv.v2 .ihead{border-bottom:2px solid #f97316;}
+.inv.v2 .iname{color:#ea580c;}
+.inv .v2-title{text-align:center; font-size:1.3em; font-weight:800; letter-spacing:.18em; margin:2px 0 8px;}
+.inv .v2-band{display:flex; justify-content:space-between; gap:8px; background:#f97316 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; color:#fff; padding:5px 9px; border-radius:4px; font-size:.95em; margin-top:8px;}
+.inv .v2-cols{display:flex; gap:14px; margin-top:10px;}
+.inv .v2-billto{flex:1.2;}
+.inv .v2-balbox{flex:1; border:1px solid #999; padding:7px 9px; border-radius:4px;}
+.inv .v2-h{font-weight:800; font-size:.78em; letter-spacing:.12em; text-transform:uppercase; color:#c2410c; margin-bottom:4px;}
+.inv .v2-balbox .kv{display:flex; justify-content:space-between; padding:1.5px 0;}
+.inv .v2-balbox .kv.grand{border-top:1.5px solid #000; font-weight:800; margin-top:3px; padding-top:4px;}
+.inv table.v2t th{background:#f97316 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; color:#fff; border-color:#c2410c;}
+.inv table.v2t .v2-sub td{background:#ffedd5 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact; font-weight:700;}
+.inv .v2-bottom{display:flex; gap:14px; margin-top:10px; align-items:flex-start;}
+.inv .v2-left{flex:1.25; display:flex; flex-direction:column; gap:10px;}
+.inv .v2-paybox,.inv .v2-terms{border:1px solid #999; border-radius:4px; padding:7px 9px;}
+.inv .v2-paybox .prow{display:flex; justify-content:space-between; gap:8px; padding:1.5px 0;}
+.inv .v2-qr{float:right; width:92px; height:92px; object-fit:contain; margin-left:8px;}
+.inv .v2-terms ol{margin:2px 0 2px 16px; padding:0; font-size:.9em;}
+.inv .v2-tot{flex:1;}
+.inv .v2-tot .kv{display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px solid #ddd;}
+.inv .v2-tot .grand{font-weight:800; font-size:1.15em; color:#c2410c; border-bottom:2px solid #f97316;}
 .inv .irow{display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-top:5px; font-size:.92em;}
 </style>
 </head>
@@ -648,6 +670,28 @@ canvas{max-width:100%;}
         </div>
         <div>
           <div class="glass card">
+            <h3><i data-lucide="wallet"></i><span>Invoice Payment Details</span></h3>
+            <p class="small muted">Ye details printed invoice par aati hain — customer Easypaisa / JazzCash par payment kar sakta hai, ya QR scan karke. Save karne ke liye Shop Settings wala Save button dabayein.</p>
+            <div class="mgrid">
+              <div><label class="f">Easypaisa Account Title</label><input type="text" id="set-eptitle" placeholder="e.g. Abu Hassan"></div>
+              <div><label class="f">Easypaisa Number</label><input type="text" id="set-epnumber" placeholder="03XX-XXXXXXX"></div>
+            </div>
+            <div class="mgrid">
+              <div><label class="f">JazzCash Account Title</label><input type="text" id="set-jctitle"></div>
+              <div><label class="f">JazzCash Number</label><input type="text" id="set-jcnumber" placeholder="03XX-XXXXXXX"></div>
+            </div>
+            <label class="f">Payment QR Code (Easypaisa / JazzCash app se screenshot)</label>
+            <div class="row">
+              <div id="set-qr-preview" style="width:74px; height:74px; border-radius:14px; overflow:hidden; background:var(--glass2); border:1px solid var(--stroke); display:flex; align-items:center; justify-content:center"></div>
+              <div class="row">
+                <label class="btn sm ghost" style="cursor:pointer"><i data-lucide="upload"></i><span>Upload</span><input type="file" id="set-qr-file" accept="image/*" hidden></label>
+                <button class="btn sm ghost" id="set-qr-remove"><i data-lucide="trash-2"></i><span>Remove</span></button>
+              </div>
+            </div>
+            <label class="f">Invoice Terms &amp; Conditions (aik line = aik term)</label>
+            <textarea id="set-invterms" rows="3" placeholder="e.g. Goods once sold will not be taken back or exchanged."></textarea>
+          </div>
+          <div class="glass card">
             <h3><i data-lucide="database"></i><span data-i18n="backupRestore">Backup &amp; Restore</span></h3>
             <p class="small muted" data-i18n="backupNote">Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.</p>
             <div class="row">
@@ -693,7 +737,7 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.13-20";
+const APP_VER = "2026.11.13-21";
 /* Cloud sync (Supabase) — baked defaults so every device of this shop
    connects with zero setup. Anon key is public by design. */
 const CLOUD_DEFAULTS = { url: "https://bhvpajfcnefarnwbvfgb.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJodnBhamZjbmVmYXJud2J2ZmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1NjE1MTMsImV4cCI6MjExMDEzNzUxM30.ltTS3aVFNattdlAv7F8LrDUYWxUG-MgE1v0GOjJ3Gzk", code: "abu-hassan-bbizh1" };
@@ -759,7 +803,7 @@ function defaultState() {
   return {
     _rev: 0,
     cloud: { url: CLOUD_DEFAULTS.url, key: CLOUD_DEFAULTS.key, code: CLOUD_DEFAULTS.code },
-    settings: { shopName: "ABU HASSAN IRON & STEEL TRADERS", logo: null, address: "", phone: "", email: "", ntn: "", footerMsg: "Thank you for your business!", currency: "PKR", invoiceFormat: "a4", defaultUnit: "KG", logoPos: "left", nameSize: 26, lang: "en", theme: "dark" },
+    settings: { shopName: "ABU HASSAN IRON & STEEL TRADERS", logo: null, address: "", phone: "", email: "", ntn: "", footerMsg: "Thank you for your business!", currency: "PKR", invoiceFormat: "a4", defaultUnit: "KG", logoPos: "left", nameSize: 26, epTitle: "", epNumber: "", jcTitle: "", jcNumber: "", qrImage: null, invTerms: "", lang: "en", theme: "dark" },
     users: [{ id: uid(), name: "Owner", username: "admin", pass: "admin123", role: "admin" }],
     categories: CATEGORIES.slice(),
     session: null,
@@ -1753,12 +1797,96 @@ function renderInvoices() {
   wireTxButtons($("#page-invoices"));
   icons();
 }
+function amountInWords(n) {
+  n = Math.round(Math.abs(Number(n) || 0));
+  if (n === 0) return "Zero";
+  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+  const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+  const two = (x) => x < 20 ? ones[x] : tens[Math.floor(x / 10)] + (x % 10 ? " " + ones[x % 10] : "");
+  const three = (x) => (Math.floor(x / 100) ? ones[Math.floor(x / 100)] + " Hundred" + (x % 100 ? " " : "") : "") + (x % 100 ? two(x % 100) : "");
+  let out = "";
+  const crore = Math.floor(n / 10000000); n %= 10000000;
+  const lakh = Math.floor(n / 100000); n %= 100000;
+  const thou = Math.floor(n / 1000); n %= 1000;
+  if (crore) out += three(crore) + " Crore ";
+  if (lakh) out += two(lakh) + " Lakh ";
+  if (thou) out += two(thou) + " Thousand ";
+  if (n) out += three(n);
+  return out.trim();
+}
+/* Beautiful A4 invoice, modelled on the sample the user shared (2026-11-13):
+   orange band + table header, Bill To + party balance box, payment details
+   (Easypaisa / JazzCash + QR) and terms — all from Shop Settings. */
+function invoiceHtmlA4(kind, inv, ctx) {
+  const st = S.settings;
+  const isSale = kind === "sale";
+  const party = ctx.party, received = ctx.received, bal = ctx.bal;
+  const logoImg = st.logo ? '<div class="ilogobox"><img src="' + st.logo + '" alt=""></div>' : "";
+  const shopBlock = '<div style="flex:1"><div class="iname" style="font-size:' + (st.nameSize || 26) + 'px">' + esc(st.shopName || "ABU HASSAN IRON & STEEL TRADERS") + "</div>" +
+    '<div class="imeta">' + esc(st.address || "") + (st.phone ? " &bull; " + esc(st.phone) : "") + (st.email ? " &bull; " + esc(st.email) : "") + (st.ntn ? "<br>NTN: " + esc(st.ntn) : "") + "</div></div>";
+  let head;
+  if (st.logoPos === "center") head = '<div class="ihead" style="flex-direction:column; text-align:center">' + logoImg + shopBlock + "</div>";
+  else if (st.logoPos === "right") head = '<div class="ihead">' + shopBlock + logoImg + "</div>";
+  else head = '<div class="ihead">' + logoImg + shopBlock + "</div>";
+  const hasLab = isSale && (inv.items || []).some((it) => (Number(it.labour) || 0) > 0);
+  const rows = inv.items.map((it, i) => {
+    const pr = prodById(it.productId) || {};
+    const sub = [pr.brand, pr.size].filter(Boolean).join(" \u2014 ");
+    return "<tr><td class='c'>" + (i + 1) + "</td><td><b>" + esc(pr.name || "\u2014") + "</b>" + (sub ? '<div style="font-size:.85em;color:#444">' + esc(sub) + "</div>" : "") + "</td><td class='r'>" + fmtNum(it.qty) + " " + esc(it.unit) + "</td><td class='r'>" + fmtRs(it.rate) + "</td>" + (hasLab ? "<td class='r'>" + (it.labour ? fmtRs(it.labour) : "\u2014") + "</td>" : "") + "<td class='r'>" + fmtRs(it.amount) + "</td></tr>";
+  }).join("");
+  const totalQty = inv.items.reduce((a, it) => a + (Number(it.qty) || 0), 0);
+  const table = '<table class="v2t"><tr><th class="c">#</th><th>Item</th><th class="r">Quantity</th><th class="r">Rate</th>' + (hasLab ? '<th class="r">Labour</th>' : "") + '<th class="r">Amount</th></tr>' + rows +
+    '<tr class="v2-sub"><td colspan="2">Sub Total</td><td class="r">' + fmtNum(totalQty) + "</td><td></td>" + (hasLab ? "<td></td>" : "") + '<td class="r">' + fmtRs(inv.subtotal != null ? inv.subtotal : inv.total) + "</td></tr></table>";
+  let balBox = "";
+  const pid = isSale ? inv.customerId : inv.supplierId;
+  if (pid && inv.status === "active") {
+    const totalBal = isSale ? customerBalance(pid) : supplierBalance(pid);
+    const prev = Math.round((totalBal - bal) * 100) / 100;
+    balBox = '<div class="v2-balbox"><div class="v2-h">' + (isSale ? "Customer Balance" : "Supplier Balance") + "</div>" +
+      '<div class="kv"><span>Previous Balance</span><span>' + fmtRs(prev) + "</span></div>" +
+      '<div class="kv"><span>' + (isSale ? "This Invoice" : "This Purchase") + '</span><span>' + fmtRs(inv.total) + "</span></div>" +
+      '<div class="kv"><span>' + (isSale ? "Received" : "Paid") + '</span><span>' + fmtRs(received) + "</span></div>" +
+      '<div class="kv grand"><span>Total Balance Due</span><span>' + fmtRs(totalBal) + "</span></div></div>";
+  }
+  const billTo = '<div class="v2-billto"><div class="v2-h">' + (isSale ? "Bill To" : "Supplier") + "</div><b>" + esc(party.name || "\u2014") + "</b>" +
+    (party.phone ? "<br>Phone: " + esc(party.phone) : "") + (party.address ? "<br>" + esc(party.address) : "") +
+    '<div style="margin-top:5px; font-size:.9em">Payment Method: ' + esc(inv.method || "Cash") + "</div></div>";
+  let payBox = "";
+  if (st.epNumber || st.jcNumber || st.qrImage) {
+    payBox = '<div class="v2-paybox">' + (st.qrImage ? '<img class="v2-qr" src="' + st.qrImage + '" alt="QR">' : "") + '<div class="v2-h">Payment Details</div>' +
+      (st.epNumber ? '<div class="prow"><span>Easypaisa' + (st.epTitle ? " \u2014 " + esc(st.epTitle) : "") + '</span><b>' + esc(st.epNumber) + "</b></div>" : "") +
+      (st.jcNumber ? '<div class="prow"><span>JazzCash' + (st.jcTitle ? " \u2014 " + esc(st.jcTitle) : "") + '</span><b>' + esc(st.jcNumber) + "</b></div>" : "") +
+      (st.qrImage ? '<div style="font-size:.82em; color:#444">Scan the QR code to pay</div>' : "") + '<div style="clear:both"></div></div>';
+  }
+  let termsBox = "";
+  const terms = (st.invTerms || "").split("\n").map((x) => x.trim()).filter(Boolean);
+  if (terms.length) termsBox = '<div class="v2-terms"><div class="v2-h">Terms &amp; Conditions</div><ol>' + terms.map((t) => "<li>" + esc(t) + "</li>").join("") + "</ol></div>";
+  const labourDetail = isSale ? (inv.items || []).filter((it) => it.labour > 0).map((it) => { const pr = prodById(it.productId) || {}; return '<div class="kv" style="opacity:.72;font-size:.92em"><span>&nbsp;&nbsp;\u21b3 Labour \u2014 ' + esc(pr.name || "") + (it.weightKg ? " \u00b7 " + fmtNum(it.weightKg) + " KG \u00d7 " + fmtRs(it.labourRate || 0) + "/KG" : "") + '</span><span>+ ' + fmtRs(it.labour) + "</span></div>"; }).join("") : "";
+  const totals = '<div class="v2-tot">' +
+    '<div class="kv"><span>Subtotal</span><span>' + fmtRs(inv.subtotal != null ? inv.subtotal : inv.total) + "</span></div>" +
+    (isSale && inv.discount ? '<div class="kv"><span>Discount</span><span>\u2212 ' + fmtRs(inv.discount) + "</span></div>" : "") +
+    (isSale && inv.labour ? '<div class="kv"><span>Labour Cost' + (inv.labourFactor ? " (" + inv.labourFactor + " \u00d7 bill)" : "") + '</span><span>+ ' + fmtRs(inv.labour) + "</span></div>" : "") +
+    labourDetail +
+    '<div class="kv grand"><span>Total Amount</span><span>' + fmtRs(inv.total) + "</span></div>" +
+    '<div class="kv"><span>' + (isSale ? "Received Amount" : "Paid Amount") + '</span><span>' + fmtRs(received) + "</span></div>" +
+    '<div class="kv"><span>Balance</span><span>' + fmtRs(bal) + "</span></div></div>";
+  return '<div class="inv a4 v2">' +
+    '<div class="v2-title">' + (isSale ? "SALES INVOICE" : "PURCHASE RECORD") + "</div>" + head +
+    '<div class="v2-band"><span>Invoice No: <b>' + esc(inv.no) + "</b></span>" + (inv.status !== "active" ? "<span><b>CANCELLED</b></span>" : "") + '<span>Invoice Date: <b>' + fmtDate(inv.date) + "</b></span></div>" +
+    '<div class="v2-cols">' + billTo + balBox + "</div>" +
+    table +
+    '<div class="v2-bottom"><div class="v2-left">' + payBox + termsBox + "</div>" + totals + "</div>" +
+    '<div class="v2-words"><b>Total Amount in Words:</b> Rupees ' + amountInWords(inv.total) + " Only</div>" +
+    (inv.note ? '<div style="margin-top:6px; font-size:.88em"><b>Note:</b> ' + esc(inv.note) + "</div>" : "") +
+    '<div class="ifoot">' + esc(st.footerMsg || "Thank you for your business!") + "<br><span style='color:#555'>Generated by SteelDesk \u2022 " + esc(st.shopName || "") + "</span></div></div>";
+}
 function invoiceHtml(kind, inv, format) {
   const st = S.settings;
   const isSale = kind === "sale";
   const party = isSale ? (custById(inv.customerId) || { name: "Walk-in Customer", phone: "" }) : (supById(inv.supplierId) || { name: "—", phone: "" });
   const received = (Number(inv.paid) || 0) + S.payments.filter((p) => p.refType === kind && p.refId === inv.id).reduce((a, p) => a + (Number(p.amount) || 0), 0);
   const bal = Math.round(((Number(inv.total) || 0) - received) * 100) / 100;
+  if (format === "a4") return invoiceHtmlA4(kind, inv, { party, received, bal });
   const logoImg = st.logo ? '<div class="ilogobox"><img src="' + st.logo + '" alt=""></div>' : "";
   const shopBlock = '<div style="flex:1"><div class="iname" style="font-size:' + (st.nameSize || 26) + 'px">' + esc(st.shopName || "ABU HASSAN IRON & STEEL TRADERS") + "</div>" +
     '<div class="imeta">' + esc(st.address || "") + (st.phone ? " • " + esc(st.phone) : "") + (st.email ? " • " + esc(st.email) : "") + (st.ntn ? "<br>NTN: " + esc(st.ntn) : "") + "</div></div>";
@@ -1796,6 +1924,20 @@ function setPageSize(format) {
   el.textContent = format === "t80" ? "@page{size:80mm 200mm; margin:2mm;}" : format === "t58" ? "@page{size:58mm 200mm; margin:2mm;}" : "@page{size:A4; margin:6mm;}";
 }
 function printInvoice(kind, id, format) {
+  const inv = (kind === "sale" ? S.sales : S.purchases).find((x) => x.id === id);
+  if (!inv) return;
+  if (format) { printInvoiceSize(kind, id, format); return; }
+  /* Print-size chooser (user, 2026-11-13): pick the bill size at print time so
+     the bill fits the paper being used; the default comes from Shop Settings. */
+  const def = S.settings.invoiceFormat || "a4";
+  const label = (f) => f === "a4" ? "A4 \u2014 Full invoice (new design)" : f === "t80" ? "80mm \u2014 Thermal roll" : "58mm \u2014 Thermal roll (small)";
+  const back = openModal(modalHead("Print \u2014 choose bill size", "printer") +
+    '<p class="small muted">Is bill ke liye paper size chunein. Aap ka default size: <b>' + label(def) + '</b> (Shop Settings se badal sakte hain).</p>' +
+    '<div style="display:flex; flex-direction:column; gap:.55rem">' +
+    ["a4", "t80", "t58"].map((f) => '<button class="btn' + (f === def ? "" : " ghost") + '" data-psz="' + f + '">' + label(f) + (f === def ? " \u2713" : "") + "</button>").join("") + "</div>");
+  $$("[data-psz]", back).forEach((b) => b.onclick = () => { closeModal(); printInvoiceSize(kind, id, b.getAttribute("data-psz")); });
+}
+function printInvoiceSize(kind, id, format) {
   const inv = (kind === "sale" ? S.sales : S.purchases).find((x) => x.id === id);
   if (!inv) return;
   const fmt = format || S.settings.invoiceFormat || "a4";
@@ -2082,6 +2224,10 @@ function renderSettings() {
   $("#set-invformat").value = st.invoiceFormat || "a4"; $("#set-defunit").value = st.defaultUnit || "KG";
   $("#set-logopos").value = st.logoPos || "left"; $("#set-namesize").value = String(st.nameSize || 26);
   $("#set-logo-preview").innerHTML = st.logo ? '<img src="' + st.logo + '" style="width:100%; height:100%; object-fit:cover">' : '<i data-lucide="image" style="color:var(--muted)"></i>';
+  $("#set-eptitle").value = st.epTitle || ""; $("#set-epnumber").value = st.epNumber || "";
+  $("#set-jctitle").value = st.jcTitle || ""; $("#set-jcnumber").value = st.jcNumber || "";
+  $("#set-invterms").value = st.invTerms || "";
+  $("#set-qr-preview").innerHTML = st.qrImage ? '<img src="' + st.qrImage + '" style="width:100%; height:100%; object-fit:contain">' : '<i data-lucide="qr-code" style="color:var(--muted)"></i>';
   /* Users & Roles card removed from Settings (user, 2026-11-13) — the render
      block stays guarded so the card can be restored by re-adding the HTML. */
   if ($("#user-table")) {
@@ -2120,6 +2266,9 @@ function saveSettingsFromForm() {
     email: $("#set-email").value.trim(), ntn: $("#set-ntn").value.trim(),
     currency: $("#set-currency").value.trim() || "PKR", footerMsg: $("#set-footer").value.trim(),
     invoiceFormat: $("#set-invformat").value, defaultUnit: $("#set-defunit").value,
+    epTitle: $("#set-eptitle").value.trim(), epNumber: $("#set-epnumber").value.trim(),
+    jcTitle: $("#set-jctitle").value.trim(), jcNumber: $("#set-jcnumber").value.trim(),
+    invTerms: $("#set-invterms").value,
     logoPos: $("#set-logopos").value, nameSize: Number($("#set-namesize").value) || 26
   });
   save(); applyBranding(); toast("Settings saved — branding will appear on new invoices.");
@@ -2221,6 +2370,8 @@ function wire() {
     readImage(f, 360, (d) => { S.settings.logo = d; save(); renderSettings(); applyBranding(); toast("Logo updated."); });
   });
   $("#set-logo-remove").onclick = () => { S.settings.logo = null; save(); renderSettings(); applyBranding(); };
+  $("#set-qr-file").addEventListener("change", (e) => { const f = e.target.files[0]; if (!f) return; readImage(f, 480, (d) => { S.settings.qrImage = d; save(); renderSettings(); toast("QR code updated — invoice par aayega."); }); });
+  $("#set-qr-remove").onclick = () => { S.settings.qrImage = null; save(); renderSettings(); };
   $("#btn-backup").onclick = () => download("steeldesk-backup-" + todayStr() + ".json", JSON.stringify(S, null, 2), "application/json");
   $("#btn-clear-data").onclick = clearAllData;
   $("#file-restore").addEventListener("change", async (e) => {
