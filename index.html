@@ -337,7 +337,10 @@ canvas{max-width:100%;}
 .inv .v2-left{flex:1.25; display:flex; flex-direction:column; gap:10px;}
 .inv .v2-paybox,.inv .v2-terms{border:1px solid #999; border-radius:4px; padding:7px 9px;}
 .inv .v2-paybox .prow{display:flex; justify-content:space-between; gap:8px; padding:1.5px 0;}
-.inv .v2-qr{float:right; width:92px; height:92px; object-fit:contain; margin-left:8px;}
+.inv.v2 .v2-paybox{display:flex; gap:16px; align-items:stretch;}
+.inv.v2 .v2-paytxt{flex:1;}
+.inv.v2 .v2-payqr{flex:1; display:flex; align-items:center; justify-content:center;}
+.inv .v2-qr{width:100%; max-width:320px; height:auto; object-fit:contain;}
 .inv .v2-terms ol{margin:2px 0 2px 16px; padding:0; font-size:.9em;}
 .inv .v2-tot{flex:1;}
 .inv .v2-tot .kv{display:flex; justify-content:space-between; padding:2.5px 0; border-bottom:1px solid #ddd;}
@@ -699,11 +702,7 @@ canvas{max-width:100%;}
                 <button class="btn sm ghost" id="set-qr-remove"><i data-lucide="trash-2"></i><span>Remove</span></button>
               </div>
             </div>
-            <label class="f">Bill par QR ka size — chota / bara karein</label>
-            <div class="row" style="align-items:center; gap:.7rem">
-              <input type="range" id="set-qrsize" min="56" max="170" step="2" style="flex:1">
-              <span class="pill info" id="set-qrsize-val">92px</span>
-            </div>
+            <p class="small muted" style="margin:.1rem 0 .4rem">Bill par QR code payment box ki aadhi jagah mein bara aayega; text baaki aadhi mein.</p>
             <label class="f">Invoice Terms &amp; Conditions (aik line = aik term)</label>
             <textarea id="set-invterms" rows="3" placeholder="e.g. Goods once sold will not be taken back or exchanged."></textarea>
           </div>
@@ -753,7 +752,7 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.13-25";
+const APP_VER = "2026.11.13-26";
 /* Cloud sync (Supabase) — baked defaults so every device of this shop
    connects with zero setup. Anon key is public by design. */
 const CLOUD_DEFAULTS = { url: "https://bhvpajfcnefarnwbvfgb.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJodnBhamZjbmVmYXJud2J2ZmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1NjE1MTMsImV4cCI6MjExMDEzNzUxM30.ltTS3aVFNattdlAv7F8LrDUYWxUG-MgE1v0GOjJ3Gzk", code: "abu-hassan-bbizh1" };
@@ -1906,13 +1905,13 @@ function invoiceHtmlA4(kind, inv, ctx) {
   const showBank = st.payBank === true && !!(st.bankNumber || st.bankName);
   const showQR = !!st.qrImage && (showEP || showJC);
   if (showEP || showJC || showBank || showQR) {
-    payBox = '<div class="v2-paybox">' + (showQR ? '<img class="v2-qr" style="width:' + (st.qrSize || 92) + "px; height:" + (st.qrSize || 92) + 'px" src="' + st.qrImage + '" alt="QR">' : "") + '<div class="v2-h">Payment Details</div>' +
+    payBox = '<div class="v2-paybox"><div class="v2-paytxt"><div class="v2-h">Payment Details</div>' +
       (showEP ? '<div class="prow"><span>Easypaisa' + (st.epTitle ? " \u2014 " + esc(st.epTitle) : "") + '</span><b>' + esc(st.epNumber) + "</b></div>" : "") +
       (showJC ? '<div class="prow"><span>JazzCash' + (st.jcTitle ? " \u2014 " + esc(st.jcTitle) : "") + '</span><b>' + esc(st.jcNumber) + "</b></div>" : "") +
       (showBank ? '<div class="prow"><span>Bank' + (st.bankName ? " \u2014 " + esc(st.bankName) : "") + '</span><b>' + esc(st.bankTitle || "") + "</b></div>" +
         (st.bankNumber ? '<div class="prow"><span>Account No</span><b>' + esc(st.bankNumber) + "</b></div>" : "") +
         (st.bankIban ? '<div class="prow"><span>IBAN</span><b>' + esc(st.bankIban) + "</b></div>" : "") : "") +
-      (showQR ? '<div style="font-size:.82em; color:#444">Scan the QR code to pay</div>' : "") + '<div style="clear:both"></div></div>';
+      (showQR ? '<div style="font-size:.82em; color:#444">Scan the QR code to pay</div>' : "") + '</div>' + (showQR ? '<div class="v2-payqr"><img class="v2-qr" src="' + st.qrImage + '" alt="QR"></div>' : "") + '</div>';
   }
   let termsBox = "";
   const terms = (st.invTerms || "").split("\n").map((x) => x.trim()).filter(Boolean);
@@ -2344,7 +2343,6 @@ function renderSettings() {
   $("#set-show-ep").checked = st.payEP !== false; $("#set-show-jc").checked = st.payJC !== false; $("#set-show-bank").checked = st.payBank === true;
   $("#set-bankname").value = st.bankName || ""; $("#set-banktitle").value = st.bankTitle || "";
   $("#set-banknumber").value = st.bankNumber || ""; $("#set-bankiban").value = st.bankIban || "";
-  $("#set-qrsize").value = st.qrSize || 92; $("#set-qrsize-val").textContent = (st.qrSize || 92) + "px";
   $("#set-qr-preview").innerHTML = st.qrImage ? '<img src="' + st.qrImage + '" style="width:100%; height:100%; object-fit:contain">' : '<i data-lucide="qr-code" style="color:var(--muted)"></i>';
   /* Users & Roles card removed from Settings (user, 2026-11-13) — the render
      block stays guarded so the card can be restored by re-adding the HTML. */
@@ -2390,7 +2388,6 @@ function saveSettingsFromForm() {
     payEP: $("#set-show-ep").checked, payJC: $("#set-show-jc").checked, payBank: $("#set-show-bank").checked,
     bankName: $("#set-bankname").value.trim(), bankTitle: $("#set-banktitle").value.trim(),
     bankNumber: $("#set-banknumber").value.trim(), bankIban: $("#set-bankiban").value.trim(),
-    qrSize: Number($("#set-qrsize").value) || 92,
     logoPos: $("#set-logopos").value, nameSize: Number($("#set-namesize").value) || 26
   });
   save(); applyBranding(); toast("Settings saved — branding will appear on new invoices.");
@@ -2492,7 +2489,6 @@ function wire() {
     readImage(f, 360, (d) => { S.settings.logo = d; save(); renderSettings(); applyBranding(); toast("Logo updated."); });
   });
   $("#set-logo-remove").onclick = () => { S.settings.logo = null; save(); renderSettings(); applyBranding(); };
-  $("#set-qrsize").addEventListener("input", (e) => { $("#set-qrsize-val").textContent = e.target.value + "px"; });
   $("#set-qr-file").addEventListener("change", (e) => { const f = e.target.files[0]; if (!f) return; readImage(f, 560, (d) => { processQrImage(d, (clean) => { S.settings.qrImage = clean; save(); renderSettings(); toast("QR code tayyar hai — background hata diya gaya."); }); }); });
   $("#set-qr-remove").onclick = () => { S.settings.qrImage = null; save(); renderSettings(); };
   $("#btn-backup").onclick = () => download("steeldesk-backup-" + todayStr() + ".json", JSON.stringify(S, null, 2), "application/json");
