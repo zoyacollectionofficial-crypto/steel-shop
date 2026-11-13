@@ -354,7 +354,7 @@ canvas{max-width:100%;}
       <input type="password" id="su-pass" placeholder="Choose a password">
       <div style="height:.8rem"></div>
       <button class="btn ok" id="btn-signup" type="button" style="width:100%; justify-content:center"><i data-lucide="user-plus"></i>Create my account</button>
-      <div class="small muted" style="margin-top:.55rem; text-align:center">Every account has full access — there are no Admin/Staff roles. Accounts are managed in Shop Settings.</div>
+      <div class="small muted" style="margin-top:.55rem; text-align:center">Every account has full access — there are no Admin/Staff roles.</div>
       <div class="login-err" id="signup-err"></div>
     </div>
   </div>
@@ -648,12 +648,6 @@ canvas{max-width:100%;}
         </div>
         <div>
           <div class="glass card">
-            <h3><i data-lucide="shield"></i><span data-i18n="usersRoles">Users &amp; Roles</span>
-              <span class="sp"><button class="btn sm" id="btn-add-user"><i data-lucide="plus"></i><span data-i18n="add">Add</span></button></span></h3>
-            <div class="tblwrap"><table class="tbl" id="user-table"></table></div>
-            <p class="small muted" data-i18n="rolesNote">Every user has full access — there are no Admin/Staff roles.</p>
-          </div>
-          <div class="glass card">
             <h3><i data-lucide="database"></i><span data-i18n="backupRestore">Backup &amp; Restore</span></h3>
             <p class="small muted" data-i18n="backupNote">Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.</p>
             <div class="row">
@@ -699,7 +693,7 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.13-19";
+const APP_VER = "2026.11.13-20";
 /* Cloud sync (Supabase) — baked defaults so every device of this shop
    connects with zero setup. Anon key is public by design. */
 const CLOUD_DEFAULTS = { url: "https://bhvpajfcnefarnwbvfgb.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJodnBhamZjbmVmYXJud2J2ZmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1NjE1MTMsImV4cCI6MjExMDEzNzUxM30.ltTS3aVFNattdlAv7F8LrDUYWxUG-MgE1v0GOjJ3Gzk", code: "abu-hassan-bbizh1" };
@@ -2088,11 +2082,15 @@ function renderSettings() {
   $("#set-invformat").value = st.invoiceFormat || "a4"; $("#set-defunit").value = st.defaultUnit || "KG";
   $("#set-logopos").value = st.logoPos || "left"; $("#set-namesize").value = String(st.nameSize || 26);
   $("#set-logo-preview").innerHTML = st.logo ? '<img src="' + st.logo + '" style="width:100%; height:100%; object-fit:cover">' : '<i data-lucide="image" style="color:var(--muted)"></i>';
-  $("#user-table").innerHTML = "<thead><tr><th>Name</th><th>Username</th><th></th></tr></thead><tbody>" +
-    S.users.map((u) => "<tr><td><b>" + esc(u.name) + "</b></td><td>" + esc(u.username) + "</td>" +
-      '<td class="num"><button class="iconbtn" data-edit-user="' + u.id + '"><i data-lucide="pencil"></i></button>' + (S.users.length > 1 && (!me() || me().id !== u.id) ? ' <button class="iconbtn" data-del-user="' + u.id + '"><i data-lucide="trash-2"></i></button>' : "") + "</td></tr>").join("") + "</tbody>";
-  $$("#user-table [data-edit-user]").forEach((b) => b.onclick = () => userForm(userById(b.getAttribute("data-edit-user"))));
-  $$("#user-table [data-del-user]").forEach((b) => b.onclick = async () => { if (await confirmDlg("Delete user?", "This login will be removed.", true)) { S.users = S.users.filter((u) => u.id !== b.getAttribute("data-del-user")); save(); renderSettings(); } });
+  /* Users & Roles card removed from Settings (user, 2026-11-13) — the render
+     block stays guarded so the card can be restored by re-adding the HTML. */
+  if ($("#user-table")) {
+    $("#user-table").innerHTML = "<thead><tr><th>Name</th><th>Username</th><th></th></tr></thead><tbody>" +
+      S.users.map((u) => "<tr><td><b>" + esc(u.name) + "</b></td><td>" + esc(u.username) + "</td>" +
+        '<td class="num"><button class="iconbtn" data-edit-user="' + u.id + '"><i data-lucide="pencil"></i></button>' + (S.users.length > 1 && (!me() || me().id !== u.id) ? ' <button class="iconbtn" data-del-user="' + u.id + '"><i data-lucide="trash-2"></i></button>' : "") + "</td></tr>").join("") + "</tbody>";
+    $$("#user-table [data-edit-user]").forEach((b) => b.onclick = () => userForm(userById(b.getAttribute("data-edit-user"))));
+    $$("#user-table [data-del-user]").forEach((b) => b.onclick = async () => { if (await confirmDlg("Delete user?", "This login will be removed.", true)) { S.users = S.users.filter((u) => u.id !== b.getAttribute("data-del-user")); save(); renderSettings(); } });
+  }
   const adminOnly = !isAdmin();
   ["btn-save-settings", "btn-add-user", "set-logo-remove"].forEach((id) => { const el = document.getElementById(id); if (el) el.disabled = adminOnly; });
   icons();
@@ -2217,7 +2215,7 @@ function wire() {
   $("#btn-rep-print").onclick = reportPrint;
   // settings
   $("#btn-save-settings").onclick = saveSettingsFromForm;
-  $("#btn-add-user").onclick = () => { if (!isAdmin()) { toast("Only Admin can manage users."); return; } userForm(); };
+  const bau = $("#btn-add-user"); if (bau) bau.onclick = () => userForm();
   $("#set-logo-file").addEventListener("change", (e) => {
     const f = e.target.files[0]; if (!f) return;
     readImage(f, 360, (d) => { S.settings.logo = d; save(); renderSettings(); applyBranding(); toast("Logo updated."); });
