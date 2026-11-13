@@ -354,7 +354,7 @@ canvas{max-width:100%;}
       <input type="password" id="su-pass" placeholder="Choose a password">
       <div style="height:.8rem"></div>
       <button class="btn ok" id="btn-signup" type="button" style="width:100%; justify-content:center"><i data-lucide="user-plus"></i>Create my account</button>
-      <div class="small muted" style="margin-top:.55rem; text-align:center">New accounts get Staff access. The Admin can change roles or remove accounts in Shop Settings.</div>
+      <div class="small muted" style="margin-top:.55rem; text-align:center">Every account has full access — there are no Admin/Staff roles. Accounts are managed in Shop Settings.</div>
       <div class="login-err" id="signup-err"></div>
     </div>
   </div>
@@ -386,7 +386,7 @@ canvas{max-width:100%;}
     </nav>
     <div class="side-user">
       <div class="avatar" id="su-avatar">A</div>
-      <div><div class="un" id="su-name">Admin</div><div class="ur" id="su-role">admin</div></div>
+      <div><div class="un" id="su-name">Admin</div><div class="ur" id="su-role">Full access</div></div>
       <button class="iconbtn" id="btn-logout" title="Logout"><i data-lucide="log-out"></i></button>
     </div>
   </aside>
@@ -651,7 +651,7 @@ canvas{max-width:100%;}
             <h3><i data-lucide="shield"></i><span data-i18n="usersRoles">Users &amp; Roles</span>
               <span class="sp"><button class="btn sm" id="btn-add-user"><i data-lucide="plus"></i><span data-i18n="add">Add</span></button></span></h3>
             <div class="tblwrap"><table class="tbl" id="user-table"></table></div>
-            <p class="small muted" data-i18n="rolesNote">Admin: full access. Staff: cannot delete/cancel invoices, change settings or manage users.</p>
+            <p class="small muted" data-i18n="rolesNote">Every user has full access — there are no Admin/Staff roles.</p>
           </div>
           <div class="glass card">
             <h3><i data-lucide="database"></i><span data-i18n="backupRestore">Backup &amp; Restore</span></h3>
@@ -699,7 +699,7 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.13-18";
+const APP_VER = "2026.11.13-19";
 /* Cloud sync (Supabase) — baked defaults so every device of this shop
    connects with zero setup. Anon key is public by design. */
 const CLOUD_DEFAULTS = { url: "https://bhvpajfcnefarnwbvfgb.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJodnBhamZjbmVmYXJud2J2ZmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1NjE1MTMsImV4cCI6MjExMDEzNzUxM30.ltTS3aVFNattdlAv7F8LrDUYWxUG-MgE1v0GOjJ3Gzk", code: "abu-hassan-bbizh1" };
@@ -718,8 +718,8 @@ function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.ad
 
 /* ---------------- i18n ---------------- */
 const I18N = {
-  en: { loginSub: "Iron & Steel Shop Management", username: "Username", password: "Password", login: "Login", mainMenu: "Main Menu", parties: "Parties", manage: "Manage", dashboard: "Dashboard", products: "Products", inventory: "Inventory / Stock", inventoryShort: "Stock", sales: "Sales", purchases: "Purchase", customers: "Customers", suppliers: "Suppliers", payments: "Payments", expenses: "Expenses", reports: "Reports", invoices: "Invoices", settings: "Shop Settings", salesChart: "Sales — last 14 days", profitChart: "Profit — last 6 months", topProducts: "Top-selling products", lowStock: "Low-stock alerts", recentTx: "Recent transactions", quickActions: "Quick actions", newSale: "New Sale", newPurchase: "New Purchase", addProduct: "Add Product", addPayment: "Add Payment", addExpense: "Add Expense", add: "Add", stockBalances: "Stock balances", adjustStock: "Add Stock / Adjust", stockHistory: "Stock movement history", customer: "Customer", supplier: "Supplier", date: "Date", paymentMethod: "Payment method", addItem: "Add item", note: "Note", allowOversell: "Allow sale despite low stock (Admin)", saveInvoice: "Save Invoice", savePurchase: "Save Purchase", recentSales: "Recent sales", recentPurchases: "Recent purchases", supplierBill: "Supplier bill / invoice no.", print: "Print", receiveFromCustomer: "Receive from Customer", payToSupplier: "Pay to Supplier", reportType: "Report type", repSales: "Sales Report", repPurchases: "Purchase Report", repProfit: "Profit & Loss", repStock: "Stock Report", repExpenses: "Expense Report", repCustOut: "Customer Outstanding", repSupOut: "Supplier Outstanding", repCash: "Cash Flow", from: "From", to: "To", run: "Run Report", printPdf: "Print / PDF", salesInvoices: "Sales Invoices", purchaseRecords: "Purchase Records", shopBranding: "Shop Branding", shopName: "Shop Name", shopLogo: "Shop Logo", upload: "Upload", remove: "Remove", logoPosition: "Logo position (invoice)", shopNameSize: "Shop name size", address: "Address", phone: "Phone", email: "Email", currency: "Currency", footerMsg: "Invoice footer message", defaultInvoice: "Default invoice format", defaultUnit: "Default measurement unit", saveSettings: "Save Settings", usersRoles: "Users & Roles", rolesNote: "Admin: full access. Staff: cannot delete/cancel invoices, change settings or manage users.", backupRestore: "Backup & Restore", backupNote: "Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.", downloadBackup: "Download Backup", restore: "Restore", language: "Language", searchPh: "Search…", more: "More" },
-  ur: { loginSub: "لوہے اور اسٹیل کی دکان کا نظام", username: "صارف نام", password: "پاس ورڈ", login: "لاگ ان", mainMenu: "مین مینو", parties: "پارٹیاں", manage: "انتظام", dashboard: "ڈیش بورڈ", products: "مصنوعات", inventory: "اسٹاک", inventoryShort: "اسٹاک", sales: "فروخت", purchases: "خریداری", customers: "گاہک", suppliers: "سپلائر", payments: "ادائیگیاں", expenses: "اخراجات", reports: "رپورٹس", invoices: "انوائسز", settings: "دکان کی ترتیبات", salesChart: "فروخت — پچھلے 14 دن", profitChart: "منافع — پچھلے 6 ماہ", topProducts: "زیادہ بکنے والی مصنوعات", lowStock: "کم اسٹاک الرٹ", recentTx: "حالیہ لین دین", quickActions: "فوری کام", newSale: "نئی فروخت", newPurchase: "نئی خریداری", addProduct: "مصنوعہ شامل کریں", addPayment: "ادائیگی شامل کریں", addExpense: "خرچ شامل کریں", add: "شامل کریں", stockBalances: "اسٹاک بیلنس", adjustStock: "اسٹاک شامل / ایڈجسٹ کریں", stockHistory: "اسٹاک کی تاریخ", customer: "گاہک", supplier: "سپلائر", date: "تاریخ", paymentMethod: "ادائیگی کا طریقہ", addItem: "آئٹم شامل کریں", note: "نوٹ", allowOversell: "کم اسٹاک کے باوجود فروخت کی اجازت (ایڈمن)", saveInvoice: "انوائس محفوظ کریں", savePurchase: "خریداری محفوظ کریں", recentSales: "حالیہ فروخت", recentPurchases: "حالیہ خریداری", supplierBill: "سپلائر بل نمبر", print: "پرنٹ", receiveFromCustomer: "گاہک سے وصولی", payToSupplier: "سپلائر کو ادائیگی", reportType: "رپورٹ کی قسم", repSales: "فروخت رپورٹ", repPurchases: "خریداری رپورٹ", repProfit: "نفع و نقصان", repStock: "اسٹاک رپورٹ", repExpenses: "اخراجات رپورٹ", repCustOut: "گاہکوں کے بقایا", repSupOut: "سپلائر کے بقایا", repCash: "کیش فلو", from: "سے", to: "تک", run: "رپورٹ چلائیں", printPdf: "پرنٹ / PDF", salesInvoices: "فروخت انوائسز", purchaseRecords: "خریداری ریکارڈ", shopBranding: "دکان کی برانڈنگ", shopName: "دکان کا نام", shopLogo: "دکان کا لوگو", upload: "اپ لوڈ", remove: "ہٹائیں", logoPosition: "لوگو کی جگہ (انوائس)", shopNameSize: "دکان کے نام کا سائز", address: "پتہ", phone: "فون", email: "ای میل", currency: "کرنسی", footerMsg: "انوائس فوٹر پیغام", defaultInvoice: "طے شدہ انوائس فارمیٹ", defaultUnit: "طے شدہ پیمائش یونٹ", saveSettings: "ترتیبات محفوظ کریں", usersRoles: "صارفین اور کردار", rolesNote: "ایڈمن: مکمل رسائی۔ اسٹاف: انوائس حذف/منسوخ، ترتیبات اور صارفین تبدیل نہیں کر سکتا۔", backupRestore: "بیک اپ اور بحالی", backupNote: "تمام ڈیٹا کا بیک اپ ڈاؤن لوڈ کریں یا بیک اپ فائل سے بحال کریں۔ ڈیٹا اسی براؤزر میں محفوظ ہوتا ہے۔", downloadBackup: "بیک اپ ڈاؤن لوڈ کریں", restore: "بحال کریں", language: "زبان", searchPh: "تلاش کریں…", more: "مزید" }
+  en: { loginSub: "Iron & Steel Shop Management", username: "Username", password: "Password", login: "Login", mainMenu: "Main Menu", parties: "Parties", manage: "Manage", dashboard: "Dashboard", products: "Products", inventory: "Inventory / Stock", inventoryShort: "Stock", sales: "Sales", purchases: "Purchase", customers: "Customers", suppliers: "Suppliers", payments: "Payments", expenses: "Expenses", reports: "Reports", invoices: "Invoices", settings: "Shop Settings", salesChart: "Sales — last 14 days", profitChart: "Profit — last 6 months", topProducts: "Top-selling products", lowStock: "Low-stock alerts", recentTx: "Recent transactions", quickActions: "Quick actions", newSale: "New Sale", newPurchase: "New Purchase", addProduct: "Add Product", addPayment: "Add Payment", addExpense: "Add Expense", add: "Add", stockBalances: "Stock balances", adjustStock: "Add Stock / Adjust", stockHistory: "Stock movement history", customer: "Customer", supplier: "Supplier", date: "Date", paymentMethod: "Payment method", addItem: "Add item", note: "Note", allowOversell: "Allow sale despite low stock", saveInvoice: "Save Invoice", savePurchase: "Save Purchase", recentSales: "Recent sales", recentPurchases: "Recent purchases", supplierBill: "Supplier bill / invoice no.", print: "Print", receiveFromCustomer: "Receive from Customer", payToSupplier: "Pay to Supplier", reportType: "Report type", repSales: "Sales Report", repPurchases: "Purchase Report", repProfit: "Profit & Loss", repStock: "Stock Report", repExpenses: "Expense Report", repCustOut: "Customer Outstanding", repSupOut: "Supplier Outstanding", repCash: "Cash Flow", from: "From", to: "To", run: "Run Report", printPdf: "Print / PDF", salesInvoices: "Sales Invoices", purchaseRecords: "Purchase Records", shopBranding: "Shop Branding", shopName: "Shop Name", shopLogo: "Shop Logo", upload: "Upload", remove: "Remove", logoPosition: "Logo position (invoice)", shopNameSize: "Shop name size", address: "Address", phone: "Phone", email: "Email", currency: "Currency", footerMsg: "Invoice footer message", defaultInvoice: "Default invoice format", defaultUnit: "Default measurement unit", saveSettings: "Save Settings", usersRoles: "Users & Roles", rolesNote: "Every user has full access — there are no Admin/Staff roles.", backupRestore: "Backup & Restore", backupNote: "Download a full backup of all data, or restore from a backup file. Data is saved in this browser on this device.", downloadBackup: "Download Backup", restore: "Restore", language: "Language", searchPh: "Search…", more: "More" },
+  ur: { loginSub: "لوہے اور اسٹیل کی دکان کا نظام", username: "صارف نام", password: "پاس ورڈ", login: "لاگ ان", mainMenu: "مین مینو", parties: "پارٹیاں", manage: "انتظام", dashboard: "ڈیش بورڈ", products: "مصنوعات", inventory: "اسٹاک", inventoryShort: "اسٹاک", sales: "فروخت", purchases: "خریداری", customers: "گاہک", suppliers: "سپلائر", payments: "ادائیگیاں", expenses: "اخراجات", reports: "رپورٹس", invoices: "انوائسز", settings: "دکان کی ترتیبات", salesChart: "فروخت — پچھلے 14 دن", profitChart: "منافع — پچھلے 6 ماہ", topProducts: "زیادہ بکنے والی مصنوعات", lowStock: "کم اسٹاک الرٹ", recentTx: "حالیہ لین دین", quickActions: "فوری کام", newSale: "نئی فروخت", newPurchase: "نئی خریداری", addProduct: "مصنوعہ شامل کریں", addPayment: "ادائیگی شامل کریں", addExpense: "خرچ شامل کریں", add: "شامل کریں", stockBalances: "اسٹاک بیلنس", adjustStock: "اسٹاک شامل / ایڈجسٹ کریں", stockHistory: "اسٹاک کی تاریخ", customer: "گاہک", supplier: "سپلائر", date: "تاریخ", paymentMethod: "ادائیگی کا طریقہ", addItem: "آئٹم شامل کریں", note: "نوٹ", allowOversell: "کم اسٹاک کے باوجود فروخت کی اجازت", saveInvoice: "انوائس محفوظ کریں", savePurchase: "خریداری محفوظ کریں", recentSales: "حالیہ فروخت", recentPurchases: "حالیہ خریداری", supplierBill: "سپلائر بل نمبر", print: "پرنٹ", receiveFromCustomer: "گاہک سے وصولی", payToSupplier: "سپلائر کو ادائیگی", reportType: "رپورٹ کی قسم", repSales: "فروخت رپورٹ", repPurchases: "خریداری رپورٹ", repProfit: "نفع و نقصان", repStock: "اسٹاک رپورٹ", repExpenses: "اخراجات رپورٹ", repCustOut: "گاہکوں کے بقایا", repSupOut: "سپلائر کے بقایا", repCash: "کیش فلو", from: "سے", to: "تک", run: "رپورٹ چلائیں", printPdf: "پرنٹ / PDF", salesInvoices: "فروخت انوائسز", purchaseRecords: "خریداری ریکارڈ", shopBranding: "دکان کی برانڈنگ", shopName: "دکان کا نام", shopLogo: "دکان کا لوگو", upload: "اپ لوڈ", remove: "ہٹائیں", logoPosition: "لوگو کی جگہ (انوائس)", shopNameSize: "دکان کے نام کا سائز", address: "پتہ", phone: "فون", email: "ای میل", currency: "کرنسی", footerMsg: "انوائس فوٹر پیغام", defaultInvoice: "طے شدہ انوائس فارمیٹ", defaultUnit: "طے شدہ پیمائش یونٹ", saveSettings: "ترتیبات محفوظ کریں", usersRoles: "صارفین اور کردار", rolesNote: "ہر صارف کو مکمل رسائی ہے — ایڈمن/اسٹاف کا کوئی فرق نہیں۔", backupRestore: "بیک اپ اور بحالی", backupNote: "تمام ڈیٹا کا بیک اپ ڈاؤن لوڈ کریں یا بیک اپ فائل سے بحال کریں۔ ڈیٹا اسی براؤزر میں محفوظ ہوتا ہے۔", downloadBackup: "بیک اپ ڈاؤن لوڈ کریں", restore: "بحال کریں", language: "زبان", searchPh: "تلاش کریں…", more: "مزید" }
 };
 let LANG = "en";
 function t(k) { return (I18N[LANG] && I18N[LANG][k]) || I18N.en[k] || k; }
@@ -750,7 +750,7 @@ function doSignup() {
   if (pw.length < 4) return bad("Password must be at least 4 characters.");
   if (S.users.some((x) => x.username.toLowerCase() === un.toLowerCase())) return bad("That username is already taken — choose another.");
   err.style.display = "none";
-  const u = { id: uid(), name, username: un, pass: pw, role: "staff" };
+  const u = { id: uid(), name, username: un, pass: pw, role: "admin" };
   S.users.push(u); S.session = { userId: u.id }; save();
   toast("Account created — welcome, " + name + "!");
   enterApp();
@@ -920,7 +920,7 @@ const custById = (id) => S.customers.find((c) => c.id === id);
 const supById = (id) => S.suppliers.find((s) => s.id === id);
 const userById = (id) => S.users.find((u) => u.id === id);
 const me = () => (S.session ? userById(S.session.userId) : null);
-const isAdmin = () => { const u = me(); return !!u && u.role === "admin"; };
+const isAdmin = () => !!me(); // roles removed (user, 2026-11-13): every signed-in user has full access
 function prodLabel(p) { return [p.name, p.brand, p.size].filter(Boolean).join(" — ") || "Product"; }
 
 /* ---------------- units & stock ----------------
@@ -1077,7 +1077,7 @@ function enterApp() {
   const u = me(); if (!u) { showLogin(); return; }
   applyTheme();
   $("#login").classList.add("off"); $("#app").classList.add("on");
-  $("#su-name").textContent = u.name; $("#su-role").textContent = u.role;
+  $("#su-name").textContent = u.name; $("#su-role").textContent = "Full access";
   $("#su-avatar").textContent = (u.name || "U").slice(0, 1).toUpperCase();
   applyBranding(); applyI18n();
   $("#page-date").textContent = fmtDate(todayStr()) + " • " + (S.settings.shopName || "");
@@ -1413,10 +1413,23 @@ async function deleteParty(kind, id) {
   const isCust = kind === "customer";
   const p = isCust ? custById(id) : supById(id); if (!p) return;
   const bal = isCust ? customerBalance(id) : supplierBalance(id);
-  const hasTx = isCust ? S.sales.some((x) => x.customerId === id) : S.purchases.some((x) => x.supplierId === id);
-  const hasPay = S.payments.some((x) => x.partyId === id);
-  if (bal !== 0 || hasTx || hasPay) { toast("Cannot delete: this " + kind + " has invoices, payments or a balance."); return; }
-  if (!(await confirmDlg("Delete " + kind + "?", '"' + p.name + '" will be removed permanently.', true))) return;
+  const invs = (isCust ? S.sales : S.purchases).filter((x) => (isCust ? x.customerId : x.supplierId) === id);
+  const pays = S.payments.filter((x) => x.partyId === id && x.partyType === kind);
+  if (!invs.length && !pays.length && bal === 0) {
+    if (!(await confirmDlg("Delete " + kind + "?", '"' + p.name + '" will be removed permanently.', true))) return;
+  } else {
+    /* Delete-anyway (user, 2026-11-13): a party can be removed even with
+       invoices, payments or an outstanding balance. Their invoices and
+       payments are deleted with them and the stock of those invoices is
+       corrected (movements removed), after two clear confirmations. */
+    const detail = invs.length + " invoice(s) and " + pays.length + " payment(s) will ALSO be deleted, and the stock from those invoices will be corrected." +
+      (bal !== 0 ? " Outstanding balance of " + fmtRs(bal) + " will be written off with this " + kind + "." : "");
+    if (!(await confirmDlg("Delete " + kind + " with ALL its data?", '"' + p.name + '" has records in the shop. ' + detail + " This cannot be undone.", true))) return;
+    if (!(await confirmDlg("Are you sure?", "Delete " + p.name + " and all of their invoices and payments permanently?", true))) return;
+    for (const inv of invs) removeMovements(isCust ? "sale" : "purchase", inv.id);
+    if (isCust) S.sales = S.sales.filter((x) => x.customerId !== id); else S.purchases = S.purchases.filter((x) => x.supplierId !== id);
+    S.payments = S.payments.filter((x) => !(x.partyId === id && x.partyType === kind));
+  }
   if (isCust) S.customers = S.customers.filter((x) => x.id !== id); else S.suppliers = S.suppliers.filter((x) => x.id !== id);
   save(); renderAll(); toast("Deleted: " + p.name);
 }
@@ -2075,11 +2088,11 @@ function renderSettings() {
   $("#set-invformat").value = st.invoiceFormat || "a4"; $("#set-defunit").value = st.defaultUnit || "KG";
   $("#set-logopos").value = st.logoPos || "left"; $("#set-namesize").value = String(st.nameSize || 26);
   $("#set-logo-preview").innerHTML = st.logo ? '<img src="' + st.logo + '" style="width:100%; height:100%; object-fit:cover">' : '<i data-lucide="image" style="color:var(--muted)"></i>';
-  $("#user-table").innerHTML = "<thead><tr><th>Name</th><th>Username</th><th>Role</th><th></th></tr></thead><tbody>" +
-    S.users.map((u) => "<tr><td><b>" + esc(u.name) + "</b></td><td>" + esc(u.username) + "</td><td><span class='pill " + (u.role === "admin" ? "info" : "grey") + "'>" + esc(u.role) + "</span></td>" +
+  $("#user-table").innerHTML = "<thead><tr><th>Name</th><th>Username</th><th></th></tr></thead><tbody>" +
+    S.users.map((u) => "<tr><td><b>" + esc(u.name) + "</b></td><td>" + esc(u.username) + "</td>" +
       '<td class="num"><button class="iconbtn" data-edit-user="' + u.id + '"><i data-lucide="pencil"></i></button>' + (S.users.length > 1 && (!me() || me().id !== u.id) ? ' <button class="iconbtn" data-del-user="' + u.id + '"><i data-lucide="trash-2"></i></button>' : "") + "</td></tr>").join("") + "</tbody>";
   $$("#user-table [data-edit-user]").forEach((b) => b.onclick = () => userForm(userById(b.getAttribute("data-edit-user"))));
-  $$("#user-table [data-del-user]").forEach((b) => b.onclick = async () => { const target = S.users.find((u) => u.id === b.getAttribute("data-del-user")); if (target && target.role === "admin" && S.users.filter((x) => x.role === "admin").length <= 1) { toast("The last Admin cannot be deleted."); return; } if (await confirmDlg("Delete user?", "This login will be removed.", true)) { S.users = S.users.filter((u) => u.id !== b.getAttribute("data-del-user")); save(); renderSettings(); } });
+  $$("#user-table [data-del-user]").forEach((b) => b.onclick = async () => { if (await confirmDlg("Delete user?", "This login will be removed.", true)) { S.users = S.users.filter((u) => u.id !== b.getAttribute("data-del-user")); save(); renderSettings(); } });
   const adminOnly = !isAdmin();
   ["btn-save-settings", "btn-add-user", "set-logo-remove"].forEach((id) => { const el = document.getElementById(id); if (el) el.disabled = adminOnly; });
   icons();
@@ -2090,14 +2103,13 @@ function userForm(u) {
     '<label class="f">Full Name *</label><input type="text" id="uf-name" value="' + esc(u.name || "") + '">' +
     '<div class="mgrid"><div><label class="f">Username *</label><input type="text" id="uf-user" value="' + esc(u.username || "") + '"></div>' +
     '<div><label class="f">Password *</label><input type="text" id="uf-pass" value="' + esc(u.pass || "") + '"></div></div>' +
-    '<label class="f">Role</label><select id="uf-role"><option value="admin"' + (u.role === "admin" ? " selected" : "") + '>Admin</option><option value="staff"' + (u.role === "staff" ? " selected" : "") + ">Staff</option></select>" +
+    
     '<div class="mfoot"><button class="btn ghost" onclick="closeModal()">Cancel</button><button class="btn" id="uf-save">Save</button></div>');
   $("#uf-save", back).onclick = () => {
     const name = $("#uf-name", back).value.trim(), un = $("#uf-user", back).value.trim(), pw = $("#uf-pass", back).value;
     if (!name || !un || !pw) { toast("All fields are required."); return; }
     if (S.users.some((x) => x.username.toLowerCase() === un.toLowerCase() && x.id !== u.id)) { toast("That username already exists."); return; }
-    if (u.id && userById(u.id) && userById(u.id).role === "admin" && $("#uf-role", back).value !== "admin" && S.users.filter((x) => x.role === "admin").length <= 1) { toast("The last Admin cannot be made Staff."); return; }
-    const data = { name, username: un, pass: pw, role: $("#uf-role", back).value };
+    const data = { name, username: un, pass: pw, role: "admin" };
     if (u.id) Object.assign(userById(u.id), data); else S.users.push(Object.assign({ id: uid() }, data));
     save(); closeModal(); renderSettings(); toast("User saved.");
   };
