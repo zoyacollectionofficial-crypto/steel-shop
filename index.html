@@ -672,6 +672,12 @@ canvas{max-width:100%;}
             </div>
             <p class="small muted" id="set-ver" style="text-align:center; margin-top:1rem"></p>
           </div>
+          <div class="glass card">
+            <h3><i data-lucide="cloud"></i>Cloud Sync</h3>
+            <p class="small muted">All shop data syncs automatically to the cloud. Open SteelDesk on any device — phone, APK or computer — and you see the same data. It also works offline; changes upload when the internet returns.</p>
+            <p class="small">Status: <b id="set-cloud-status">Starting…</b></p>
+            <p class="small muted">Shop code: <span id="set-cloud-code">—</span></p>
+          </div>
         </div>
       </div>
     </section>
@@ -693,7 +699,10 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.10-17";
+const APP_VER = "2026.11.13-18";
+/* Cloud sync (Supabase) — baked defaults so every device of this shop
+   connects with zero setup. Anon key is public by design. */
+const CLOUD_DEFAULTS = { url: "https://bhvpajfcnefarnwbvfgb.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJodnBhamZjbmVmYXJud2J2ZmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1NjE1MTMsImV4cCI6MjExMDEzNzUxM30.ltTS3aVFNattdlAv7F8LrDUYWxUG-MgE1v0GOjJ3Gzk", code: "abu-hassan-bbizh1" };
 const $ = (s, r) => (r || document).querySelector(s);
 const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
@@ -754,6 +763,8 @@ const EXP_CATS = ["Shop Rent", "Electricity", "Transportation", "Labour", "Loadi
 const METHODS = ["Cash", "Easypaisa", "JazzCash", "Bank Transfer", "Online Transfer", "Cheque", "Other"];
 function defaultState() {
   return {
+    _rev: 0,
+    cloud: { url: CLOUD_DEFAULTS.url, key: CLOUD_DEFAULTS.key, code: CLOUD_DEFAULTS.code },
     settings: { shopName: "ABU HASSAN IRON & STEEL TRADERS", logo: null, address: "", phone: "", email: "", ntn: "", footerMsg: "Thank you for your business!", currency: "PKR", invoiceFormat: "a4", defaultUnit: "KG", logoPos: "left", nameSize: 26, lang: "en", theme: "dark" },
     users: [{ id: uid(), name: "Owner", username: "admin", pass: "admin123", role: "admin" }],
     categories: CATEGORIES.slice(),
@@ -765,6 +776,8 @@ function defaultState() {
 }
 let S = loadState();
 function normalizeState(s) {
+  if (typeof s._rev !== "number" || !(s._rev >= 0)) s._rev = 0;
+  if (!s.cloud || !s.cloud.url || !s.cloud.key || !s.cloud.code) s.cloud = { url: CLOUD_DEFAULTS.url, key: CLOUD_DEFAULTS.key, code: CLOUD_DEFAULTS.code };
   if (!Array.isArray(s.categories) || !s.categories.length) s.categories = CATEGORIES.slice();
   if (!s.settings.theme) s.settings.theme = "dark";
   if (s.settings.shopName === "SteelDesk Traders") s.settings.shopName = "ABU HASSAN IRON & STEEL TRADERS";
@@ -779,7 +792,126 @@ function loadState() {
   try { const raw = localStorage.getItem(LS_KEY); if (raw) { const s = JSON.parse(raw); if (s && s.settings && s.users) return normalizeState(s); } } catch (e) { console.warn("state load failed", e); }
   return defaultState();
 }
-function save() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { toast("Storage full — logo image may be too large."); } }
+function persistOnly() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { toast("Storage full — logo image may be too large."); } }
+function save() { S._rev = (S._rev || 0) + 1; persistOnly(); schedulePush(); }
+
+/* ---------------- cloud sync (Supabase) ----------------
+   Same hardened pattern as the Clinic Token fix (2026-11-10):
+   - a push first READS the cloud row and refuses to overwrite a NEWER
+     cloud state (it adopts that state instead) — a fresh or stale
+     device can never wipe the shop's live data;
+   - a device never adopts an EMPTY cloud state over its own real data
+     while it is still on its first saves (upgrade migration guard);
+   - Restore / Clear-All set cloudForceNext so an intentional replace
+     or wipe still wins over the cloud copy;
+   - the login session is per-device and is never synced;
+   - incoming state is applied only when no form/modal is open, so a
+     sync can never wipe something the user is typing. */
+var cloudReady = false, cloudPushTimer = null, cloudPushing = false, cloudDirty = false, cloudForceNext = false, pendingRemote = null;
+function cloudConfigured() { return !!(S && S.cloud && S.cloud.url && S.cloud.key && S.cloud.code && typeof fetch === "function"); }
+function setCloudStatus(txt) {
+  window.__cloudStatus = txt;
+  const el = document.querySelector("#set-cloud-status"); if (el) el.textContent = txt;
+}
+function cloudHeaders() { return { apikey: S.cloud.key, Authorization: "Bearer " + S.cloud.key, "Content-Type": "application/json" }; }
+function cloudUrl() { return S.cloud.url + "/rest/v1/steeldesk_state?shop_code=eq." + encodeURIComponent(S.cloud.code); }
+async function cloudGetState() {
+  const r = await fetch(cloudUrl() + "&select=state", { headers: cloudHeaders() });
+  if (!r.ok) throw new Error("cloud read " + r.status);
+  const rows = await r.json();
+  return rows && rows.length ? rows[0].state : null;
+}
+function cloudPayload() { const p = Object.assign({}, S); delete p.session; return p; }
+function schedulePush() {
+  if (!cloudConfigured()) return;
+  cloudDirty = true;
+  if (!cloudReady) return;
+  clearTimeout(cloudPushTimer);
+  cloudPushTimer = setTimeout(pushCloud, 600);
+}
+async function pushCloud() {
+  if (!cloudConfigured() || cloudPushing || !cloudReady) return;
+  cloudPushing = true;
+  try {
+    setCloudStatus("Syncing…");
+    const remote = await cloudGetState();
+    if (remote && (remote._rev || 0) > (S._rev || 0)) {
+      const remoteEmpty = !(remote.products && remote.products.length) && !(remote.sales && remote.sales.length);
+      const localHasData = !!(S.products && S.products.length);
+      const migrationPush = remoteEmpty && localHasData && (S._rev || 0) <= 1;
+      if (!cloudForceNext && !migrationPush) {
+        cloudPushing = false;
+        considerRemote(remote); // cloud is newer — adopt it, do not overwrite
+        return;
+      }
+      // Intentional overwrite of a newer cloud row (Restore / Clear-All /
+      // first-upgrade migration): jump our revision past the cloud row so
+      // every other device accepts this state as the newest.
+      S._rev = (remote._rev || 0) + 1; persistOnly();
+    }
+    const r = await fetch(S.cloud.url + "/rest/v1/steeldesk_state", {
+      method: "POST",
+      headers: Object.assign(cloudHeaders(), { Prefer: "resolution=merge-duplicates" }),
+      body: JSON.stringify({ shop_code: S.cloud.code, state: cloudPayload(), updated_at: new Date().toISOString() })
+    });
+    if (!r.ok) throw new Error("cloud write " + r.status);
+    cloudForceNext = false;
+    cloudDirty = false;
+    setCloudStatus("● Synced " + new Date().toLocaleTimeString());
+  } catch (e) {
+    setCloudStatus("Offline — changes saved on this device, will sync later");
+  }
+  cloudPushing = false;
+  if (cloudDirty && cloudReady) { clearTimeout(cloudPushTimer); cloudPushTimer = setTimeout(pushCloud, 1200); }
+}
+function uiBusy() {
+  const mr = document.querySelector("#modal-root");
+  if (mr && mr.children.length) return true;
+  const a = document.activeElement;
+  return !!(a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.tagName === "SELECT"));
+}
+function considerRemote(remote) {
+  if (!remote || typeof remote !== "object") return;
+  if ((remote._rev || 0) <= (S._rev || 0)) return;
+  const remoteEmpty = !(remote.products && remote.products.length) && !(remote.sales && remote.sales.length);
+  if (remoteEmpty && S.products && S.products.length && (S._rev || 0) <= 1) { schedulePush(); return; }
+  if (uiBusy()) { pendingRemote = remote; return; }
+  applyRemote(remote);
+}
+function applyRemote(remote) {
+  const keepSession = S.session, keepCloud = S.cloud;
+  S = normalizeState(remote);
+  S.session = keepSession;
+  if (keepCloud) S.cloud = keepCloud;
+  LANG = (S.settings && S.settings.lang) || "en";
+  persistOnly();
+  applyTheme(); applyI18n();
+  if (S.session && me()) enterApp(); else showLogin();
+  setCloudStatus("● Synced " + new Date().toLocaleTimeString());
+}
+async function pullCloud(initial) {
+  if (!cloudConfigured()) { setCloudStatus("Not available in this browser"); return; }
+  try {
+    const remote = await cloudGetState();
+    cloudReady = true;
+    if (remote === null) { pushCloud(); return; } // first device ever: create the cloud row from local data
+    considerRemote(remote);
+    if (cloudDirty) schedulePush();
+    if (window.__cloudStatus !== "Offline — changes saved on this device, will sync later" && !pendingRemote) setCloudStatus("● Synced " + new Date().toLocaleTimeString());
+  } catch (e) {
+    if (initial) cloudReady = false;
+    setCloudStatus("Offline — changes saved on this device, will sync later");
+  }
+}
+function cloudBoot() {
+  if (!cloudConfigured()) { setCloudStatus("Not available in this browser"); return; }
+  setCloudStatus("Connecting…");
+  pullCloud(true);
+  setInterval(() => pullCloud(false), 3000);
+  setInterval(() => {
+    if (pendingRemote && !uiBusy()) { const r = pendingRemote; pendingRemote = null; if ((r._rev || 0) > (S._rev || 0)) applyRemote(r); }
+  }, 1000);
+}
 LANG = (S.settings && S.settings.lang) || "en";
 
 /* ---------------- lookups ---------------- */
@@ -1933,6 +2065,8 @@ function download(name, content, type) {
 /* ---------------- settings ---------------- */
 function renderSettings() {
   const sv = $("#set-ver"); if (sv) sv.textContent = "SteelDesk • Version " + APP_VER;
+  const cc = $("#set-cloud-code"); if (cc) cc.textContent = (S.cloud && S.cloud.code) || "—";
+  const cs = $("#set-cloud-status"); if (cs && window.__cloudStatus) cs.textContent = window.__cloudStatus;
   const st = S.settings;
   $("#set-shopname").value = st.shopName || "";
   $("#set-address").value = st.address || ""; $("#set-phone").value = st.phone || "";
@@ -2002,6 +2136,7 @@ async function clearAllData() {
   if (!(await confirmDlg("Clear ALL data?", "Products, customers, suppliers, sales, purchases, payments, expenses and stock history will ALL be deleted. Login accounts and shop name/logo will stay.", true))) return;
   if (!(await confirmDlg("Are you sure?", "This cannot be undone. If you need the old data later, download a Backup first.", true))) return;
   const keep = { settings: S.settings, users: S.users, session: S.session };
+  cloudForceNext = true;
   S = Object.assign(defaultState(), keep);
   save(); enterApp(); toast("All data cleared — fresh start.");
 }
@@ -2086,6 +2221,7 @@ function wire() {
       try {
         const data = JSON.parse(reader.result);
         if (!data.settings || !data.products) throw new Error("bad file");
+        cloudForceNext = true;
         S = normalizeState(data); save(); toast("Backup restored."); enterApp();
       } catch (err) { toast("That file is not a valid SteelDesk backup."); }
     };
@@ -2100,6 +2236,7 @@ document.addEventListener("DOMContentLoaded", () => {
   wire();
   if (S.session && me()) enterApp(); else showLogin();
   icons();
+  cloudBoot();
 });
 </script>
 </body>
