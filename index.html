@@ -753,7 +753,7 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.13-24";
+const APP_VER = "2026.11.13-25";
 /* Cloud sync (Supabase) — baked defaults so every device of this shop
    connects with zero setup. Anon key is public by design. */
 const CLOUD_DEFAULTS = { url: "https://bhvpajfcnefarnwbvfgb.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJodnBhamZjbmVmYXJud2J2ZmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1NjE1MTMsImV4cCI6MjExMDEzNzUxM30.ltTS3aVFNattdlAv7F8LrDUYWxUG-MgE1v0GOjJ3Gzk", code: "abu-hassan-bbizh1" };
@@ -852,7 +852,7 @@ function loadState() {
   return defaultState();
 }
 function persistOnly() { try { localStorage.setItem(LS_KEY, JSON.stringify(S)); } catch (e) { toast("Storage full — logo image may be too large."); } }
-function save() { S._rev = (S._rev || 0) + 1; persistOnly(); schedulePush(); }
+function save() { S._rev = (S._rev || 0) + 1; S.updatedAt = Date.now(); persistOnly(); schedulePush(); }
 
 /* ---------------- cloud sync (Supabase) ----------------
    Same hardened pattern as the Clinic Token fix (2026-11-10):
@@ -875,10 +875,13 @@ function setCloudStatus(txt) {
 function cloudHeaders() { return { apikey: S.cloud.key, Authorization: "Bearer " + S.cloud.key, "Content-Type": "application/json" }; }
 function cloudUrl() { return S.cloud.url + "/rest/v1/steeldesk_state?shop_code=eq." + encodeURIComponent(S.cloud.code); }
 async function cloudGetState() {
-  const r = await fetch(cloudUrl() + "&select=state", { headers: cloudHeaders() });
+  const r = await fetch(cloudUrl() + "&select=state,updated_at", { headers: cloudHeaders() });
   if (!r.ok) throw new Error("cloud read " + r.status);
   const rows = await r.json();
-  return rows && rows.length ? rows[0].state : null;
+  if (!rows || !rows.length) return null;
+  const st = rows[0].state;
+  if (st && !st.updatedAt && rows[0].updated_at) st.updatedAt = Date.parse(rows[0].updated_at) || 0;
+  return st;
 }
 function cloudPayload() { const p = Object.assign({}, S); delete p.session; return p; }
 function schedulePush() {
@@ -908,6 +911,11 @@ async function pushCloud() {
       // every other device accepts this state as the newest.
       S._rev = (remote._rev || 0) + 1; persistOnly();
     }
+    if (remote && !cloudForceNext && (remote.updatedAt || 0) > (S.updatedAt || 0) + 30000 && cloudRecordCount(remote) > cloudRecordCount(S)) {
+      cloudPushing = false;
+      considerRemote(remote); // stale device: adopt the real data, never overwrite it
+      return;
+    }
     const r = await fetch(S.cloud.url + "/rest/v1/steeldesk_state", {
       method: "POST",
       headers: Object.assign(cloudHeaders(), { Prefer: "resolution=merge-duplicates" }),
@@ -929,9 +937,18 @@ function uiBusy() {
   const a = document.activeElement;
   return !!(a && (a.tagName === "INPUT" || a.tagName === "TEXTAREA" || a.tagName === "SELECT"));
 }
+function cloudRecordCount(x) { return ["products", "customers", "suppliers", "sales", "purchases", "payments"].reduce((a, k) => a + ((x && x[k] || []).length), 0); }
 function considerRemote(remote) {
   if (!remote || typeof remote !== "object") return;
-  if ((remote._rev || 0) <= (S._rev || 0)) return;
+  if ((remote._rev || 0) <= (S._rev || 0)) {
+    /* Diverged-device rescue (2026-11-13): _rev is per-device, so a browser
+       that was used on its own can hold a HIGHER rev with OLDER, emptier
+       data and would never adopt the shop's real data — the user's
+       "new sale yaha show nahi ho raha" bug. If the cloud state is clearly
+       fresher AND holds more records, it is the real data: adopt it. */
+    const fresher = (remote.updatedAt || 0) > (S.updatedAt || 0) + 30000;
+    if (!(fresher && cloudRecordCount(remote) > cloudRecordCount(S))) return;
+  }
   const remoteEmpty = !(remote.products && remote.products.length) && !(remote.sales && remote.sales.length);
   if (remoteEmpty && S.products && S.products.length && (S._rev || 0) <= 1) { schedulePush(); return; }
   if (uiBusy()) { pendingRemote = remote; return; }
@@ -962,6 +979,17 @@ async function pullCloud(initial) {
     setCloudStatus("Offline — changes saved on this device, will sync later");
   }
 }
+window.addEventListener("storage", (e) => {
+  /* Another tab of the app just saved — follow it, so two open tabs can
+     never hide each other's sales (the user's two-tab browser case). */
+  if (e.key !== LS_KEY || !e.newValue) return;
+  try {
+    const parsed = JSON.parse(e.newValue);
+    if (!parsed || (parsed._rev || 0) <= (S._rev || 0)) return;
+    if (uiBusy()) { pendingRemote = parsed; return; }
+    applyRemote(parsed);
+  } catch (err) {}
+});
 function cloudBoot() {
   if (!cloudConfigured()) { setCloudStatus("Not available in this browser"); return; }
   setCloudStatus("Connecting…");
@@ -2134,12 +2162,19 @@ function paymentForm(dir, presetPartyId, refType, refId) {
   };
 }
 function renderPayments() {
-  const list = S.payments.slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  /* Invoice-paid amounts belong in the money record too (user, 2026-11-13):
+     a sale/purchase saved with a Paid amount shows here as a derived row.
+     Display only — balances already count it through the invoice itself,
+     and S.payments is not touched. */
+  const derived = [];
+  for (const x of S.sales) if (x.status === "active" && (Number(x.paid) || 0) > 0) derived.push({ derived: true, id: "invpay-" + x.id, no: x.no, date: x.date, dir: "in", partyType: "customer", partyId: x.customerId, method: x.method, amount: Number(x.paid), note: "Sale invoice ke saath wasool" });
+  for (const x of S.purchases) if (x.status === "active" && (Number(x.paid) || 0) > 0) derived.push({ derived: true, id: "invpay-" + x.id, no: x.no, date: x.date, dir: "out", partyType: "supplier", partyId: x.supplierId, method: x.method, amount: Number(x.paid), note: "Purchase invoice ke saath ada" });
+  const list = S.payments.concat(derived).sort((a, b) => (b.date || "").localeCompare(a.date || ""));
   $("#pay-table").innerHTML = "<thead><tr><th>No.</th><th>Date</th><th>Type</th><th>Party</th><th>Method</th><th class='num'>Amount</th><th></th></tr></thead><tbody>" +
     (list.length ? list.map((p) => {
       const party = p.partyType === "customer" ? custById(p.partyId) : supById(p.partyId);
-      return "<tr><td><b>" + esc(p.no || "") + "</b></td><td>" + fmtDate(p.date) + "</td><td>" + (p.dir === "in" ? '<span class="pill ok">Received</span>' : '<span class="pill info">Paid Out</span>') + "</td><td>" + esc(party ? party.name : "—") + (p.note ? '<div class="small muted">' + esc(p.note) + "</div>" : "") + "</td><td>" + esc(p.method || "Cash") + "</td><td class='num'><b>" + fmtRs(p.amount) + "</b></td>" +
-        '<td class="num"><button class="iconbtn" title="Receipt" data-receipt="' + p.id + '"><i data-lucide="printer"></i></button>' + (isAdmin() ? ' <button class="iconbtn" title="Delete" data-del-pay="' + p.id + '"><i data-lucide="trash-2"></i></button>' : "") + "</td></tr>";
+      return "<tr><td><b>" + esc(p.no || "") + "</b></td><td>" + fmtDate(p.date) + "</td><td>" + (p.dir === "in" ? '<span class="pill ok">Received</span>' : '<span class="pill info">Paid Out</span>') + "</td><td>" + esc(party ? party.name : (p.derived && p.partyType === "customer" ? "Walk-in Customer" : "—")) + (p.note ? '<div class="small muted">' + esc(p.note) + "</div>" : "") + "</td><td>" + esc(p.method || "Cash") + "</td><td class='num'><b>" + fmtRs(p.amount) + "</b></td>" +
+        (p.derived ? '<td class="num"><span class="pill grey">Invoice se</span></td></tr>' : '<td class="num"><button class="iconbtn" title="Receipt" data-receipt="' + p.id + '"><i data-lucide="printer"></i></button>' + (isAdmin() ? ' <button class="iconbtn" title="Delete" data-del-pay="' + p.id + '"><i data-lucide="trash-2"></i></button>' : "") + "</td></tr>");
     }).join("") : '<tr><td colspan="7"><div class="empty"><i data-lucide="wallet"></i><div class="et">No payments yet</div><div class="small">Use the buttons above to record a payment.</div></div></td></tr>') + "</tbody>";
   $$("#pay-table [data-del-pay]").forEach((b) => b.onclick = async () => {
     if (await confirmDlg("Delete payment?", "Party balances will be recalculated without this payment.", true)) {
