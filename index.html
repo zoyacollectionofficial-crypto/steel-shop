@@ -752,7 +752,7 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.13-26";
+const APP_VER = "2026.11.15-27";
 /* Cloud sync (Supabase) — baked defaults so every device of this shop
    connects with zero setup. Anon key is public by design. */
 const CLOUD_DEFAULTS = { url: "https://bhvpajfcnefarnwbvfgb.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJodnBhamZjbmVmYXJud2J2ZmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1NjE1MTMsImV4cCI6MjExMDEzNzUxM30.ltTS3aVFNattdlAv7F8LrDUYWxUG-MgE1v0GOjJ3Gzk", code: "abu-hassan-bbizh1" };
@@ -1016,16 +1016,19 @@ function convertQty(qty, from, to, product) {
   qty = Number(qty) || 0;
   if (from === to) return qty;
   const wpp = product && product.weightPerPiece ? Number(product.weightPerPiece) : null;
+  const wpf = product && product.weightPerFoot ? Number(product.weightPerFoot) : null;
   const toKg = (q, u) => {
     if (u === "KG") return q;
     if (u === "Ton") return q * 1000;
     if (u === "Piece") return wpp ? q * wpp : null;
+    if (u === "Foot") return wpf ? q * wpf : null;
     return null;
   };
   const fromKg = (kg, u) => {
     if (u === "KG") return kg;
     if (u === "Ton") return kg / 1000;
     if (u === "Piece") return wpp ? kg / wpp : null;
+    if (u === "Foot") return wpf ? kg / wpf : null;
     return null;
   };
   const kg = toKg(qty, from);
@@ -1039,6 +1042,7 @@ function lineWeightKg(qty, unit, product) {
   if (unit === "KG") return qty;
   if (unit === "Ton") return qty * 1000;
   if (unit === "Piece") { const w = product ? Number(product.weightPerPiece) : 0; return w ? qty * w : 0; }
+  if (unit === "Foot") { const w = product ? Number(product.weightPerFoot) : 0; return w ? qty * w : 0; }
   return 0;
 }
 function rateInUnit(ratePerFrom, from, to, product) {
@@ -1299,6 +1303,7 @@ function productForm(p) {
     '<div><label class="f">Size</label><input type="text" id="pf-size" value="' + esc(p.size || "") + '" placeholder="12mm"></div>' +
     '<div><label class="f">Unit of Measurement</label><select id="pf-unit">' + UNITS.map((u) => '<option ' + ((p.unit || S.settings.defaultUnit) === u ? "selected" : "") + ">" + u + "</option>").join("") + "</select></div>" +
     '<div><label class="f">Weight per Piece (KG, optional)</label><input type="number" id="pf-wpp" step="any" min="0" value="' + (p.weightPerPiece || "") + '" placeholder="e.g. 10.67"></div>' +
+    '<div><label class="f">Weight per Foot (KG, optional)</label><input type="number" id="pf-wpf" step="any" min="0" value="' + (p.weightPerFoot || "") + '" placeholder="e.g. 1.2"></div>' +
     '<div><label class="f">Labour Rate (Rs per KG)</label><input type="number" id="pf-labour" step="any" min="0" value="' + (p.labourRate || "") + '" placeholder="e.g. 0.7"></div>' +
     '<div><label class="f">Purchase Rate (per unit)</label><input type="number" id="pf-prate" step="any" min="0" value="' + (p.purchaseRate || "") + '"></div>' +
     '<div><label class="f">Sale Rate (per unit)</label><input type="number" id="pf-srate" step="any" min="0" value="' + (p.saleRate || "") + '"></div>' +
@@ -1312,7 +1317,7 @@ function productForm(p) {
     if (!name) { toast("Product name is required."); return; }
     const newCat = $("#pf-newcat", back).value.trim();
     if (newCat && !S.categories.includes(newCat)) S.categories.push(newCat);
-    const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: p.dia || "", length: p.length || "", unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, labourRate: Number($("#pf-labour", back).value) || 0, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: p.desc || "", image: p.image || "", service: $("#pf-service", back).checked };
+    const data = { name, category: newCat || $("#pf-cat", back).value, brand: $("#pf-brand", back).value.trim(), size: $("#pf-size", back).value.trim(), dia: p.dia || "", length: p.length || "", unit: $("#pf-unit", back).value, weightPerPiece: Number($("#pf-wpp", back).value) || null, weightPerFoot: Number($("#pf-wpf", back).value) || null, labourRate: Number($("#pf-labour", back).value) || 0, purchaseRate: Number($("#pf-prate", back).value) || 0, saleRate: Number($("#pf-srate", back).value) || 0, minStock: Number($("#pf-min", back).value) || 0, desc: p.desc || "", image: p.image || "", service: $("#pf-service", back).checked };
     if (p.id) {
       const before = prodById(p.id);
       const rateChanged = (Number(before.purchaseRate) || 0) !== data.purchaseRate || (Number(before.saleRate) || 0) !== data.saleRate;
