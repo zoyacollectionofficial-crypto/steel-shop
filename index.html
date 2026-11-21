@@ -752,7 +752,7 @@ canvas{max-width:100%;}
    Single-file app. Data persists in localStorage (this device).
    ================================================================ */
 const LS_KEY = "steeldesk_state_v1";
-const APP_VER = "2026.11.15-27";
+const APP_VER = "2026.11.21-28";
 /* Cloud sync (Supabase) — baked defaults so every device of this shop
    connects with zero setup. Anon key is public by design. */
 const CLOUD_DEFAULTS = { url: "https://bhvpajfcnefarnwbvfgb.supabase.co", key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJodnBhamZjbmVmYXJud2J2ZmdiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTQ1NjE1MTMsImV4cCI6MjExMDEzNzUxM30.ltTS3aVFNattdlAv7F8LrDUYWxUG-MgE1v0GOjJ3Gzk", code: "abu-hassan-bbizh1" };
@@ -1131,7 +1131,7 @@ window.closeModal = closeModal;
 /* ---------------- auth ---------------- */
 function forgotForm() {
   const back = openModal(modalHead("Forgot Password", "key-round") +
-    '<p class="muted" style="margin:.4rem 0 0">This app runs on your own device, so there is no email reset. Recovery works like this: the <b>Admin password will be reset to <span style="color:var(--cyan)">admin123</span></b>. Your shop data will NOT be touched — only the password changes. After logging in, set a new password in Settings → Users.</p>' +
+    '<p class="muted" style="margin:.4rem 0 0">This app runs on your own device, so there is no email reset. Recovery works like this: the <b>Admin password will be reset to the app default</b>. Your shop data will NOT be touched — only the password changes. After logging in, set a new password in Settings → Users.</p>' +
     '<div class="mfoot"><button class="btn ghost" id="fp-no">Cancel</button><button class="btn danger" id="fp-yes">Reset Admin Password</button></div>');
   $("#fp-no", back).onclick = () => closeModal();
   $("#fp-yes", back).onclick = () => {
@@ -1140,7 +1140,7 @@ function forgotForm() {
     adm.pass = "admin123"; adm.role = "admin";
     save(); closeModal();
     $("#li-user").value = adm.username; $("#li-pass").value = "";
-    toast("Password reset — login with " + adm.username + " / admin123");
+    toast("Password reset — log in with the admin account and set a new password.");
   };
 }
 function showLogin() {
@@ -1149,8 +1149,7 @@ function showLogin() {
   $("#login-shop").textContent = S.settings.shopName || "SteelDesk";
   const lg = $("#login-logo");
   lg.innerHTML = S.settings.logo ? '<img src="' + S.settings.logo + '" alt="">' : '<i data-lucide="flame"></i>';
-  const anyCustom = S.users.some((u) => u.pass !== "admin123");
-  $("#login-hint").textContent = anyCustom ? "" : "Default login: admin / admin123 — change it in Shop Settings after login.";
+  $("#login-hint").textContent = "";
   $("#login-ver").textContent = "SteelDesk • Version " + APP_VER;
   icons();
 }
